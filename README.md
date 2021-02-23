@@ -1,46 +1,27 @@
-# Getting Started with Create React App
+# AIPER3D
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+사용자가 업로드한 3D 모델과 모션 영상을 사용해서, 모션 캡쳐 기술로 애니메이션 데이터를 생성하는 프로그램
 
-## Available Scripts
+## 명령어
 
-In the project directory, you can run:
+### `npm install`
 
-### `yarn start`
+node_modules 폴더는 ignore 처리 되어있으므로 pull 받은 후에 명령어를 수행해서 모듈 설치 완료 해야 함
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+### `yarn react-start`
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+**React 시작**
 
-### `yarn test`
+명령어 실행 후에 [http://localhost:3000](http://localhost:3000) 에서 페이지 정상 동작 여부를 확인할 수 있음
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### `yarn electron-start`
 
-### `yarn build`
+**Electron 시작**
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+명령어 실행 후에 React 페이지를 Electron 데스크톱 어플리케이션을 통해 확인할 수 있음
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### `yarn electron-pack`
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+**Electron 패키징**
 
-### `yarn eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+명령어 실행 후에 dist 폴더에 .exe 형태의 실행 파일이 생성됨

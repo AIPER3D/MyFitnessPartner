@@ -2,6 +2,8 @@
   "name": "aiper3d",
   "version": "0.1.0",
   "private": true,
+  "main": "public/main.js",
+  "homepage": "./",
   "dependencies": {
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
@@ -20,7 +22,10 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "react-start": "set BROWSER=none && yarn start",
+    "electron-start": "set ELECTRON_START_URL=http://localhost:3000 && electron .",
+    "electron-pack": "yarn build && electron-builder build -c.extraMetadata.main=build/main.js"
   },
   "eslintConfig": {
     "extends": [
@@ -39,5 +44,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "electron": "^11.3.0",
+    "electron-builder": "^22.9.1"
   }
 }
