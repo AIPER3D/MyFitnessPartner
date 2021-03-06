@@ -21,7 +21,7 @@ function App() {
           Learn React.
         </a>
       </header>
-      <Board type={ "gallery" }></Board>
+      {/* <Board type={ 'gallery' }></Board> */}
     </div>
   );
 }
