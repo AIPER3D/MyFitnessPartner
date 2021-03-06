@@ -3,7 +3,7 @@
         "ecmaVersion": 6,
         "sourceType": "module",
         "ecmaFeatures": {
-            "jsx":true
+            "jsx": true
         }
     },
     "parser": "@typescript-eslint/parser",
@@ -12,13 +12,17 @@
         "node": true,
         "mocha": true
     },
-    "rules": {
-        "max-length": 0 // 0으로 설정하면 에러 검출 X
-    },
-    "extends": ["plugin:@typescript-eslint/eslint-recommended"],
     "plugins": [
-        "import","@typescript-eslint"
+        "import",
+        "@typescript-eslint"
     ],
+    "extends": [
+        "eslint:recommended",
+        "google"
+    ],
+    "rules": {
+        "max-length": 0 // 0으로 설정하면 에러 검출 X,
+    },
     "globals": {
         "jQuery": true,
         "$": true
@@ -29,7 +33,12 @@
                 "paths": [
                     "src"
                 ],
-                "extensions": [".js", ".jsx", ".ts", ".tsx"]
+                "extensions": [
+                    ".js",
+                    ".jsx",
+                    ".ts",
+                    ".tsx"
+                ]
             }
         }
     }
