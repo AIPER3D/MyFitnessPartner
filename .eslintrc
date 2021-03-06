@@ -1,20 +1,36 @@
 {
     "parserOptions": {
-      "ecmaVersion": 6,
-      "sourceType": "module"
+        "ecmaVersion": 6,
+        "sourceType": "module",
+        "ecmaFeatures": {
+            "jsx":true
+        }
     },
-    "extends": "airbnb-base",
+    "parser": "@typescript-eslint/parser",
     "env": {
-      "browser": true,
-      "node": true,
-      "mocha": true
+        "browser": true,
+        "node": true,
+        "mocha": true
     },
-      "rules": {
-      "max-length": 0 // 0으로 설정하면 에러 검출 X
+    "rules": {
+        "max-length": 0 // 0으로 설정하면 에러 검출 X
     },
-    "plugins": ["import"],
+    "extends": ["plugin:@typescript-eslint/eslint-recommended"],
+    "plugins": [
+        "import","@typescript-eslint"
+    ],
     "globals": {
-      "jQuery": true,
-      "$": true
+        "jQuery": true,
+        "$": true
+    },
+    "settings": {
+        "import/resolver": {
+            "node": {
+                "paths": [
+                    "src"
+                ],
+                "extensions": [".js", ".jsx", ".ts", ".tsx"]
+            }
+        }
     }
-  }
+}
