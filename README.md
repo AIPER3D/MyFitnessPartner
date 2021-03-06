@@ -2,6 +2,10 @@
 
 사용자가 업로드한 3D 모델과 모션 영상을 사용해서, 모션 캡쳐 기술로 애니메이션 데이터를 생성하는 프로그램
 
+## Requirements
+
+npm install -g eslint eslint-config-airbnb eslint-plugin-import
+
 ## 명령어
 
 ### `npm install`
