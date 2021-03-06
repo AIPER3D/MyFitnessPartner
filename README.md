@@ -14,7 +14,7 @@ node_modules 폴더는 ignore 처리 되어있으므로 pull 받은 후에 명�
 
 **Node 시작**
 
-### `node start`
+### `npm start`
 
 ### `yarn react-start`
 
