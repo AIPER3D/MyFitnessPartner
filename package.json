@@ -47,6 +47,8 @@
   },
   "devDependencies": {
     "electron": "^11.3.0",
-    "electron-builder": "^22.9.1"
+    "electron-builder": "^22.9.1",
+    "webpack": "^4.44.2",
+    "webpack-cli": "^4.5.0"
   }
 }
