@@ -1,23 +1,26 @@
-const {app, BrowserWindow} = require('electron');
+const {BrowserView, BrowserWindow, app} = require('electron');
+const { exit } = require('node:process');
 const path = require('path');
-const url = require('url');
 
 function createWindow() {
-    const win = new BrowserWindow({
-        width:1600,
-        height:900
-    });
+	const win = new BrowserWindow({
+		width: 1200,
+		height: 800,
+		backgroundColor: 'white',
+		webPreferences: {
+			nodeIntegration: false,
+			worldSafeExecuteJavaScript: true,
+			contextIsolation: true,
+		},
+	});
 
-    // 파일 경로
-    const startUrl = process.env.ELECTRON_START_URL || url.format({
-        pathname: path.join(__dirname, '/../build/index.html'),
-        protocol: 'file:',
-        slashes: true
-    });
-
-    // 윈도우 실행
-    win.loadURL(startUrl);
-
+	win.webContents.openDevTools();
+	win.loadFile('index.html');
 }
 
-app.on('ready', createWindow);
+// require('electron-reload')(__dirname, {
+// 	electron: path.join(__dirname, 'node_modules', '.bin', 'electron'),
+// 	// hardResetMethod: 'exit',
+// });
+
+app.whenReady().then(createWindow);
