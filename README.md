@@ -12,6 +12,10 @@ npm install -g eslint eslint-config-airbnb eslint-plugin-import
 
 node_modules 폴더는 ignore 처리 되어있으므로 pull 받은 후에 명령어를 수행해서 모듈 설치 완료 해야 함
 
+**Node 시작**
+
+### `npm start`
+
 ### `yarn react-start`
 
 **React 시작**
