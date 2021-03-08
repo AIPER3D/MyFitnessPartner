@@ -31,7 +31,8 @@
     "electron-start": "set ELECTRON_START_URL=http://localhost:3000 && electron .",
     "electron-pack": "yarn build && electron-builder build -c.extraMetadata.main=build/main.js",
     "lint": "eslint src/**/*.ts",
-    "lint:fix": "eslint --fix src/**/*.ts"
+    "lint:fix": "eslint --fix src/**/*.ts",
+    "watch": "webpack --config webpack.config.js"
   },
   "eslintConfig": {
     "extends": [
