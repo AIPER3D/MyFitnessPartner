@@ -1,4 +1,4 @@
 /node_modules/**
 webpack.*.js
-/dist/**
+/public/bundle.js
 src/react-app-env.d.ts
