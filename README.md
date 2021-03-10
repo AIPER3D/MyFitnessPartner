@@ -2,34 +2,56 @@
 
 사용자가 업로드한 3D 모델과 모션 영상을 사용해서, 모션 캡쳐 기술로 애니메이션 데이터를 생성하는 프로그램
 
-## Requirements
 
-npm install -g eslint eslint-config-airbnb eslint-plugin-import
+## Development Stack
 
-## 명령어
+- Github
+- Notion
+- React : ^17.0.0
+- Babel : ^17.0.0
+- ESLint : ^7.20.0
+- Typescript : ^4.1.2
+- Tensorflow : ^2.x
+- Webpack : ^4.44.2
+- Styled-Component : ^5.2.1
+- Electron : ^11.3.0
+
+## VSCODE Extention
+
+### for web development
+
+- ESLint
+- Auto Close Tag
+- Auto Raname Tag
+- Highlight Matching Tag
+- vscode-styled-components
+- HTML CSS Support
+
+### util
+
+- CodeSnap
+- Live Server
+
+## Usage
 
 ### `npm install`
 
-node_modules 폴더는 ignore 처리 되어있으므로 pull 받은 후에 명령어를 수행해서 모듈 설치 완료 해야 함
+### `npm run watch`
 
-**Node 시작**
+run wepback auto updater
 
 ### `npm start`
 
-### `yarn react-start`
+run react web application
 
-**React 시작**
+### `npm run electron-start`
 
-명령어 실행 후에 [http://localhost:3000](http://localhost:3000) 에서 페이지 정상 동작 여부를 확인할 수 있음
+run react & electron application
 
-### `yarn electron-start`
+### `npm run lint`
 
-**Electron 시작**
+run eslint for check coding style guide
 
-명령어 실행 후에 React 페이지를 Electron 데스크톱 어플리케이션을 통해 확인할 수 있음
+### `npm run lint:fix`
 
-### `yarn electron-pack`
-
-**Electron 패키징**
-
-명령어 실행 후에 dist 폴더에 .exe 형태의 실행 파일이 생성됨
+run eslint -fix
