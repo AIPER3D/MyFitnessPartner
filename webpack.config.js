@@ -56,9 +56,8 @@ module.exports = {
 	},
 	plugins: [
 		new HtmlWebpackPlugin({
-			template: path.resolve(__dirname, 'public/template.html'),
+			template:path.resolve(__dirname,'public/index.template.ejs'),
 			filename: path.resolve(__dirname, 'public/index.html'),
-			// template: path.resolve(__dirname, 'public/index.html'),
 			templateParameters(compilation, assets, options) {
 				return {
 					compilation: compilation,
@@ -79,13 +78,8 @@ module.exports = {
 			nodeModules: process.env.NODE_ENV !== 'production' ? path.resolve(__dirname, '../node_modules') : false,
 			// isBrowser: false,
       		isDevelopment: process.env.NODE_ENV !== 'production',
-		}),
-		new webpack.DefinePlugin({
-			'process.env.NODE_ENV': JSON.stringify('development')
-		}),
-		new webpack.ProvidePlugin({
-			process: 'process/browser',
-		}),
+			
+		})
 	],
 	resolve: {
 		extensions: [".js", ".json", ".jsx", ".ts", ".tsx", ".css"],
