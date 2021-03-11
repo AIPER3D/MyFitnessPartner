@@ -2,3 +2,5 @@
 webpack.*.js
 /public/bundle.js
 src/react-app-env.d.ts
+build/**
+dist/**
