@@ -3,24 +3,21 @@ import styled from 'styled-components';
 
 import { Content } from './content';
 
-type GalleryProps = {
+type ListProps = {
 	content: Content;
 };
 
 const Box = styled.div`
 	float: left;
 	
-	width: 300px;
-	height: 255px;
-	margin: 25px 5px 5px 5px;
+	width: calc(100% - 10px);
+	height: 100px;
+	margin: 10px 5px 0px 5px;
 	
 	border: 1px solid #dddddd;
 	background: #eeeeee;
 	
 	&:hover {
-		transform: scale(1.025);
-		transition: transform 0.1s;
-		//filter: brightness(70%);
 		cursor: pointer;
 	}
 	
@@ -40,50 +37,49 @@ const Alert = styled.div`
 `;
 
 const Image = styled.img`
-	width: 300px;
-	height: 200px;
-	
-	border-bottom: 1px solid #dddddd;
+	float: left;
+	width: 150px;
+	height: 100px;
 `;
 
 const Title = styled.div`
-	display: block;
-	width: 290px;
+	float: left;
+	width: calc(100% - 200px);
 	height: 20px;
-	padding: 3px 0px 0px 10px;
+	padding: 10px 0px 10px 15px;
 	margin: 0px 0px 0px 0px;
 	
 	color: #000000;
-	font-size: 10pt;
+	font-size: 12pt;
 	font-weight: bold;
 	text-align: left;
 `;
 
-const Text = styled.div`
-	display: block;
-	width: 290px;
-	height: 20px;
-	padding: 2px 0px 0px 10px;
+const Text = styled.p`
+	float: left;
+	width: calc(100% - 180px);
+	height: calc(100% - 45px);
+	padding: 5px 0px 0px 15px;
 	margin: 0px 0px 0px 0px;
 	
 	color: #000000;
-	font-size: 9pt;
+	font-size: 10pt;
 	text-align: left;
+	overflow-y: scroll;
 `;
 
-function Gallery({ content }: GalleryProps) {
+function List({ content }: ListProps) {
 	return (
 		<Box>
-			<Alert> 1일차 </Alert>
 			<Image src={'http://127.0.0.1:3000/assets/images/dummy.png'}></Image>
 			<Title> { content.title } </Title>
-			<Text> 1일차 진행중입니다. </Text>
+			<Text> The test of a first-rate intelligence is the ability to hold two opposed ideas in mind at the same time and still retain the ability to function. The test of a first-rate intelligence is the ability to hold two opposed ideas in mind at the same time and still retain the ability to function. Read more at https://www.brainyquote.com/topics/test-quotes </Text>
 		</Box>
 	);
 }
 
-Gallery.defaultProps = {
+List.defaultProps = {
 
 };
 
-export default Gallery;
+export default List;
