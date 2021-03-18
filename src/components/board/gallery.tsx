@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { Content } from './content';
+import dummy from './images/dummy.png';
 
 type GalleryProps = {
 	content: Content;
@@ -75,7 +76,7 @@ function Gallery({ content }: GalleryProps) {
 	return (
 		<Box>
 			<Alert> 1일차 </Alert>
-			<Image src={'http://127.0.0.1:3000/assets/images/dummy.png'}></Image>
+			<img src= { dummy } ></img>
 			<Title> { content.title } </Title>
 			<Text> 1일차 진행중입니다. </Text>
 		</Box>

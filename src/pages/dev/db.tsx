@@ -9,15 +9,12 @@ import {
 	UserSchema,
 } from '../../schema';
 
-function Routines() {
+function Routines({ db } : any) {
 	useEffect(() => {
-		(async () => {
-			addRxPlugin(require('pouchdb-adapter-idb'));
+		if (!db) return;
 
-			const db = await createRxDatabase({
-				name: 'data',
-				adapter: 'idb',
-			});
+		(async () => {
+			await db.remove();
 
 			await db.addCollections({
 				exercises: {

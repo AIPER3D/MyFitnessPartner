@@ -42,9 +42,14 @@ module.exports = {
 			},
 			{
 				test: /\.(png|jpg|gif)$/,
-				use: [{
-					loader: 'file-loader'
-				}]
+				use: {
+					loader: 'url-loader',
+					options: {
+						name: '[name].[ext]?[hash]',
+						publicPath: './dist/',
+						limit: 10000
+					}
+				}
 			},
 			{
 				test: /\.(ttf|eot|svg|woff|woff2)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
@@ -88,6 +93,6 @@ module.exports = {
 	output: {
 		filename: 'bundle.js',
 		path: path.resolve(__dirname, 'public'),
-		// publicPath : '/dist'
+		publicPath : '/'
 	}
 }
