@@ -1,21 +1,25 @@
-import React, {useEffect, useState} from 'react';
-import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import styled from 'styled-components';
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { createRxDatabase, addRxPlugin, RxDatabase } from 'rxdb';
 
-import { Routines, Videos, DB } from './pages';
-import {VideoSchema, RoutineSchema} from './schema';
+import { Menu } from './components/common';
+import { Main, Videos, Routines, DB } from './pages';
+import { VideoSchema, RoutineSchema } from './schema';
 
-// context API - provider
-// 하위 컴포넌트에 넘겨줄수 있는 방법
-// 이게 해결방법이 될 것 같음
+
+const Root = styled.div`
+	height: calc(100vh - 40px);
+	padding: 20px 0px 20px 0px;
+`;
 
 function App() {
 	const [db, setDB] = useState<RxDatabase>();
+	addRxPlugin(require('pouchdb-adapter-idb'));
+
 
 	useEffect(() => {
 		(async () => {
-			addRxPlugin(require('pouchdb-adapter-idb'));
-
 			const tdb = await createRxDatabase({
 				name: 'data',
 				adapter: 'idb',
@@ -33,45 +37,43 @@ function App() {
 
 			setDB(tdb);
 		})();
+
+		return () => {
+			setDB(undefined);
+		};
 	}, []);
 
-
 	return (
-		<Router>
-			<div>
-				<nav>
-					<ul>
-						<li>
-							<Link to="/">메인 화면</Link>
-						</li>
-						<li>
-							<Link to="/videos">영상 관리</Link>
-						</li>
-						<li>
-							<Link to="/routines">루틴 관리</Link>
-						</li>
-						<li>
-							<Link to="/db">DB 생성</Link>
-						</li>
-					</ul>
-				</nav>
-
+		<div>
+			<Router>
 				<Switch>
 					<Route path="/videos">
-						<Videos db={ db }/>
+						<Menu selected={ 'videos' } />
+						<Root>
+							<Videos db={ db }/>
+						</Root>
 					</Route>
 					<Route path="/routines">
-						<Routines db={ db } />
+						<Menu selected={ 'routines' } />
+						<Root>
+							<Routines db={ db } />
+						</Root>
 					</Route>
 					<Route path="/db">
-						<DB db={ db }/>
+						<Menu selected={ 'db' } />
+						<Root>
+							<DB db={ db }/>
+						</Root>
 					</Route>
 					<Route path="/">
-						<h2>Home</h2>
+						<Menu selected={ 'main' } />
+						<Root>
+							<Main />
+						</Root>
 					</Route>
 				</Switch>
-			</div>
-		</Router>
+			</Router>
+		</div>
 	);
 }
 

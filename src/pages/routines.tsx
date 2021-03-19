@@ -5,6 +5,7 @@ function Routines({ db } : any) {
 	const [content, setContent] = useState<Content[]>([]);
 
 	useEffect(() => {
+		console.log(db);
 		if (!db) return;
 		(async () => {
 			await select();
@@ -12,6 +13,8 @@ function Routines({ db } : any) {
 	}, [db]);
 
 	async function select() {
+		console.log(db);
+		if (!db) return;
 		if (!db.collections.routines) {
 			setContent([]);
 			return;
@@ -19,6 +22,7 @@ function Routines({ db } : any) {
 
 		const doc = await db.collections.routines
 			.find()
+			.limit(5)
 			.exec();
 
 		const con : Content[] = [];
@@ -33,6 +37,8 @@ function Routines({ db } : any) {
 	}
 
 	async function insert() {
+		console.log(db);
+		if (!db) return;
 		if (!db.collections.routines) {
 			return;
 		}
@@ -45,6 +51,8 @@ function Routines({ db } : any) {
 	}
 
 	async function clear() {
+		console.log(db);
+		if (!db) return;
 		if (!db.collections.routines) {
 			return;
 		}
@@ -58,7 +66,9 @@ function Routines({ db } : any) {
 		<div className="App">
 			<Board title='루틴 관리' type='list' content={ content }/>
 			<input type='button' onClick={ insert } value='데이터 추가' />
-			<input type='button' onClick={ clear } value='컬렉션 삭제' />
+			<input type='button' onClick={ () => {
+				console.log('...');
+			} } value='컬렉션 삭제' />
 		</div>
 	);
 }
