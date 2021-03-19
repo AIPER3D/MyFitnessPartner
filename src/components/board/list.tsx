@@ -23,6 +23,7 @@ const Box = styled.div`
 	
 `;
 
+/*
 const Alert = styled.div`
 	position: relative;
 	display: block;
@@ -30,11 +31,12 @@ const Alert = styled.div`
 	height: 20px;
 	padding: 0px 5px 0px 0px;
 	margin: -20px 0px 0px 0px;
-	
+
 	color: #000000;
 	font-size: 9pt;
 	text-align: right;
 `;
+*/
 
 const Image = styled.img`
 	float: left;
