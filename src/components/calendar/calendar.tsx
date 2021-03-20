@@ -1,13 +1,21 @@
-import React from 'react';
+import React, {useState} from 'react';
 import './Calendar.scss';
 import { MdChevronLeft, MdChevronRight } from 'react-icons/md';
 import moment, { Moment as MomentTypes } from 'moment';
 
+
 function Calendar() {
+	const [date, setDate] = useState<MomentTypes>(moment());
+	function handleMonthInc() {
+		setDate(date.clone().add(1, 'month'));
+	}
+	function handleMonthDec() {
+		setDate(date.clone().subtract(1, 'month'));
+	}
 	function generate() {
 		const today = moment();
-		const startWeek = today.clone().startOf('month').week();
-		let endWeek = today.clone().endOf('month').week();
+		const startWeek = date.clone().startOf('month').week();
+		let endWeek = date.clone().endOf('month').week();
 		if (endWeek === 1) {
 			endWeek = 53;
 		}
@@ -17,14 +25,17 @@ function Calendar() {
 				<div className="row" key={week}>
 					{
 						Array(7).fill(0).map((n, i) => {
-							let current = today.clone().week(week);
+							let current = date.clone().startOf('year').week(week);
 							current = current.startOf('week').add(n + i, 'day');
 							let isSelected = '';
-							if (today.format('YYYYMMDD') === current.format('YYYYMMDD')) {
+							if (date.format('YYYYMMDD') === current.format('YYYYMMDD') 
+							&& date.format('YYYYMMDD') === today.format('YYYYMMDD')) {
+								console.log(date.format('YYYYMMDD'));
+								console.log(current.format('YYYYMMDD'));
 								isSelected = 'selected';
 							}
 							let isGrayed = 'grayed';
-							if (current.format('MM') === today.format('MM')) {
+							if (current.format('MM') === date.format('MM')) {
 								isGrayed = '';
 							}
 							return (
@@ -42,9 +53,13 @@ function Calendar() {
 	return (
 		<div className="Calendar">
 			<div className="head">
-				<button><MdChevronLeft /></button>
-				<span className="title">{moment().format('MMMM YYYY')}</span>
-				<button><MdChevronRight /></button>
+				<button onClick = {() => setDate(date.clone().subtract(1, 'month'))}>
+					<MdChevronLeft />
+				</button>
+				<span className="title">{date.format('MMMM YYYY')}</span>
+				<button onClick = {() => setDate(date.clone().add(1, 'month'))}>
+					<MdChevronRight />
+				</button>
 			</div>
 			<div className="body">
 				<div className="row">

@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 import { createRxDatabase, addRxPlugin, RxDatabase } from 'rxdb';
+import Calendar from './components/calendar/Calendar';
 
 import { Routines, Videos, DB } from './pages';
 import {VideoSchema, RoutineSchema} from './schema';
@@ -55,7 +56,9 @@ function App() {
 						</li>
 					</ul>
 				</nav>
-
+				<div>
+					<Calendar />
+				</div>
 				<Switch>
 					<Route path="/videos">
 						<Videos db={ db }/>
