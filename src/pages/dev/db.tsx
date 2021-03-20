@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 
-import { createRxDatabase, addRxPlugin } from 'rxdb';
 import {
 	ExerciseSchema,
 	VideoSchema,

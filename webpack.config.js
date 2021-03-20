@@ -24,7 +24,8 @@ module.exports = {
 						],
 						plugins: [
 							'@babel/proposal-class-properties',
-							'@babel/proposal-object-rest-spread'
+							'@babel/proposal-object-rest-spread',
+							'babel-plugin-styled-components'
 						]
 					}
 				}
@@ -43,11 +44,9 @@ module.exports = {
 			{
 				test: /\.(png|jpg|gif)$/,
 				use: {
-					loader: 'url-loader',
+					loader: 'file-loader',
 					options: {
-						name: '[name].[ext]?[hash]',
-						publicPath: './dist/',
-						limit: 10000
+						esModule : false
 					}
 				}
 			},
@@ -61,8 +60,8 @@ module.exports = {
 	},
 	plugins: [
 		new HtmlWebpackPlugin({
-			template:path.resolve(__dirname,'public/index.template.ejs'),
-			filename: path.resolve(__dirname, 'public/index.html'),
+			template:path.resolve(__dirname,'public/index.html'),
+			filename: path.resolve(__dirname, 'build/index.html'),
 			templateParameters(compilation, assets, options) {
 				return {
 					compilation: compilation,
@@ -92,7 +91,7 @@ module.exports = {
 	},
 	output: {
 		filename: 'bundle.js',
-		path: path.resolve(__dirname, 'public'),
-		publicPath : '/'
+		path: path.resolve(__dirname, 'build'),
+		publicPath : '.'
 	}
 }
