@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Board, Content } from '../components/board';
+import { Header } from '../components/common';
 
 function Videos({ db } : any) {
 	const [content, setContent] = useState<Content[]>([]);
@@ -56,9 +58,11 @@ function Videos({ db } : any) {
 
 	return (
 		<div className="App">
-			<Board title='영상 관리' type='gallery' content={ content }/>
+			<Header text='영상 관리' />
+			<Board type='gallery' content={ content }/>
 			<input type='button' onClick={ insert } value='데이터 추가' />
 			<input type='button' onClick={ clear } value='컬렉션 삭제' />
+			<Link to='/videos/new'>영상 추가</Link>
 		</div>
 	);
 }

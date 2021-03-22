@@ -9,7 +9,6 @@ import { Content } from './content';
 import { Header } from '../common';
 
 type BoardProps = {
-	title: string;
 	type: string;
     content: Content[];
 };
@@ -21,7 +20,7 @@ const Box = styled.div`
 	overflow: auto; 
 `;
 
-function Board({ title, type, content }: BoardProps) {
+function Board({ type, content }: BoardProps) {
 	const item = [];
 
 	if (type == 'gallery') {
@@ -36,7 +35,6 @@ function Board({ title, type, content }: BoardProps) {
 
 	return (
 		<div>
-			<Header text={ title }></Header>
 			<Box> {item} </Box>
 			<Pagination count={ 0 }></Pagination>
 		</div>

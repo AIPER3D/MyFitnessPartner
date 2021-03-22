@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Board, Content } from '../components/board';
+import { Header } from '../components/common';
 
 function Routines({ db } : any) {
 	const [content, setContent] = useState<Content[]>([]);
@@ -63,12 +65,15 @@ function Routines({ db } : any) {
 
 
 	return (
-		<div className="App">
-			<Board title='루틴 관리' type='list' content={ content }/>
+		<div>
+			<Header text='루틴 관리' />
+			<Board type='gallery' content={ content }/>
 			<input type='button' onClick={ insert } value='데이터 추가' />
-			<input type='button' onClick={ () => {
+			<input type='button' onClick={ (e) => {
+				e.preventDefault();
 				console.log('...');
 			} } value='컬렉션 삭제' />
+			<Link to='/routines/new'>루틴 추가</Link>
 		</div>
 	);
 }
