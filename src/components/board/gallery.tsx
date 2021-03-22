@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { Content } from './content';
-import dummy from './images/dummy.png';
+import dummy from './images/dummy.jpg';
 
 type GalleryProps = {
 	content: Content;
@@ -45,6 +45,7 @@ const Image = styled.img`
 	height: 200px;
 	
 	border-bottom: 1px solid #dddddd;
+	object-fit: cover;
 `;
 
 const Title = styled.div`
@@ -73,10 +74,11 @@ const Text = styled.div`
 `;
 
 function Gallery({ content }: GalleryProps) {
+	console.log(dummy);
 	return (
 		<Box>
 			<Alert> 1일차 </Alert>
-			<Image src={ dummy } ></Image>
+			<Image src={ dummy }/>
 			<Title> { content.title } </Title>
 			<Text> 1일차 진행중입니다. </Text>
 		</Box>

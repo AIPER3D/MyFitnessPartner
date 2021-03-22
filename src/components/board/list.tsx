@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { Content } from './content';
+import dummy from './images/dummy.jpg';
 
 type ListProps = {
 	content: Content;
@@ -42,6 +43,8 @@ const Image = styled.img`
 	float: left;
 	width: 150px;
 	height: 100px;
+	
+	object-fit: cover;
 `;
 
 const Title = styled.div`
@@ -73,7 +76,7 @@ const Text = styled.p`
 function List({ content }: ListProps) {
 	return (
 		<Box>
-			<Image src={'http://127.0.0.1:3000/assets/images/dummy.png'}></Image>
+			<Image src={ dummy }></Image>
 			<Title> { content.title } </Title>
 			<Text> The test of a first-rate intelligence is the ability to hold two opposed ideas in mind at the same time and still retain the ability to function. The test of a first-rate intelligence is the ability to hold two opposed ideas in mind at the same time and still retain the ability to function. Read more at https://www.brainyquote.com/topics/test-quotes </Text>
 		</Box>
