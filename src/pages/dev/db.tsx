@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-
 import {
 	ExerciseSchema,
 	VideoSchema,
@@ -8,7 +7,7 @@ import {
 	UserSchema,
 } from '../../schema';
 
-function Routines({ db } : any) {
+function DB({ db } : any) {
 	useEffect(() => {
 		if (!db) return;
 
@@ -44,4 +43,4 @@ function Routines({ db } : any) {
 	);
 }
 
-export default Routines;
+export default DB;
