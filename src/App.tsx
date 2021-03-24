@@ -1,21 +1,31 @@
 import React, {useEffect, useState} from 'react';
+import styled from 'styled-components';
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 import { createRxDatabase, addRxPlugin, RxDatabase } from 'rxdb';
-import Calendar from './components/calendar/Calendar';
 
-import { Routines, Videos, DB } from './pages';
-import {VideoSchema, RoutineSchema} from './schema';
+import { Menu } from './components/common';
+import { VideoSchema, RoutineSchema } from './schema';
+import {
+	Main,
+	Routines,
+	RoutineCreate,
+	Videos,
+	VideoCreate,
+	DB,
+} from './pages';
 
-// context API - provider
-// 하위 컴포넌트에 넘겨줄수 있는 방법
-// 이게 해결방법이 될 것 같음
+const Root = styled.div`
+	margin: 0px 0px 0px 0px;
+	padding: 20px 0px 0px 0px;
+`;
 
 function App() {
 	const [db, setDB] = useState<RxDatabase>();
+	addRxPlugin(require('pouchdb-adapter-idb'));
 
 	useEffect(() => {
 		(async () => {
-			addRxPlugin(require('pouchdb-adapter-idb'));
+			if (db) return;
 
 			const tdb = await createRxDatabase({
 				name: 'data',
@@ -34,46 +44,47 @@ function App() {
 
 			setDB(tdb);
 		})();
+
+		return () => {
+			if (db && !db.destoryed) {
+				(async () => {
+					// @ts-ignore
+					// await db.destory();
+				})();
+			}
+		};
 	}, []);
 
 
 	return (
 		<Router>
-			<div>
-				<nav>
-					<ul>
-						<li>
-							<Link to="/">메인 화면</Link>
-						</li>
-						<li>
-							<Link to="/videos">영상 관리</Link>
-						</li>
-						<li>
-							<Link to="/routines">루틴 관리</Link>
-						</li>
-						<li>
-							<Link to="/db">DB 생성</Link>
-						</li>
-					</ul>
-				</nav>
-				<div>
-					<Calendar />
-				</div>
-				<Switch>
-					<Route path="/videos">
-						<Videos db={ db }/>
-					</Route>
-					<Route path="/routines">
-						<Routines db={ db } />
-					</Route>
-					<Route path="/db">
-						<DB db={ db }/>
-					</Route>
-					<Route path="/">
-						<h2>Home</h2>
-					</Route>
-				</Switch>
-			</div>
+			<Switch>
+				<Route exact path="/videos/new">
+					<Menu selected='videos' />
+					<Root><VideoCreate /></Root>
+
+				</Route>
+				<Route exact path="/videos">
+					<Menu selected='videos' />
+					<Root><Videos db={ db } /></Root>
+				</Route>
+				<Route exact path="/routines/new">
+					<Menu selected='routines' />
+					<Root><RoutineCreate /></Root>
+				</Route>
+				<Route path="/routines">
+					<Menu selected='routines' />
+					<Root><Routines db={ db } /></Root>
+				</Route>
+				<Route path="/db">
+					<Menu selected='main' />
+					<Root><DB db={ db } /></Root>
+				</Route>
+				<Route path="/">
+					<Menu selected='main' />
+					<Root><Main /></Root>
+				</Route>
+			</Switch>
 		</Router>
 	);
 }
