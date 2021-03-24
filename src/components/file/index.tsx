@@ -1,3 +1,5 @@
-import Upload from './upload';
+import Uploader from './uploader';
+import Queue from './queue';
+import Data from './data';
 
-export { Upload };
+export { Uploader, Queue, Data };
