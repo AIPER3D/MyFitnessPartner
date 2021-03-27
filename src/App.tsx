@@ -15,12 +15,28 @@ import {
 } from './pages';
 
 const Root = styled.div`
-	margin: 0px 0px 0px 0px;
+	position: fixed;
+	left: 250px; 
+	width: calc(100vw - 250px - 20px);
+	height: calc(100vh - 20px);
+	margin: 0px auto 0px auto;
+	padding: 20px 0px 0px 20px;
+	
+	overflow: auto;
+`;
+
+const Body = styled.div`
+	width: 1000px;
+	margin: 0px auto 0px auto;
 	padding: 20px 0px 0px 0px;
+	
+	overflow: scroll;
 `;
 
 function App() {
 	const [db, setDB] = useState<RxDatabase>();
+	const [page, setPage] = useState<string>('');
+
 	addRxPlugin(require('pouchdb-adapter-idb'));
 
 	useEffect(() => {
@@ -55,38 +71,48 @@ function App() {
 		};
 	}, []);
 
-
-	return (
-		<Router>
-			<Switch>
-				<Route exact path="/videos/new">
-					<Menu selected='videos' />
-					<Root><VideoCreate /></Root>
-
-				</Route>
-				<Route exact path="/videos">
-					<Menu selected='videos' />
-					<Root><Videos db={ db } /></Root>
-				</Route>
-				<Route exact path="/routines/new">
-					<Menu selected='routines' />
-					<Root><RoutineCreate /></Root>
-				</Route>
-				<Route path="/routines">
-					<Menu selected='routines' />
-					<Root><Routines db={ db } /></Root>
-				</Route>
-				<Route path="/db">
-					<Menu selected='main' />
-					<Root><DB db={ db } /></Root>
-				</Route>
-				<Route path="/">
-					<Menu selected='main' />
-					<Root><Main /></Root>
-				</Route>
-			</Switch>
-		</Router>
-	);
+	if (db) {
+		return (
+			<Router>
+				<Menu selected={ page } />
+				<Root>
+					<Body>
+						<Switch>
+							<Route exact path="/videos/new">
+								<VideoCreate db={ db } setPage={ setPage } />
+							</Route>
+							<Route exact path="/videos">
+								<Videos db={ db } setPage={ setPage } />
+							</Route>
+							<Route exact path="/routines/new">
+								<RoutineCreate db={ db } setPage={ setPage } />
+							</Route>
+							<Route path="/routines">
+								<Routines db={ db } setPage={ setPage } />
+							</Route>
+							<Route path="/db">
+								<DB db={ db } setPage={ setPage } />
+							</Route>
+							<Route path="/">
+								<Main db={ db } setPage={ setPage } />
+							</Route>
+						</Switch>
+					</Body>
+				</Root>
+			</Router>
+		);
+	} else {
+		return (
+			<Router>
+				<Menu selected={ page } />
+				<Root>
+					<Body>
+						<p>...</p>
+					</Body>
+				</Root>
+			</Router>
+		);
+	}
 }
 
 export default App;

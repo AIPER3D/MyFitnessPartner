@@ -3,8 +3,19 @@ import { Link } from 'react-router-dom';
 import { Board, Content } from '../components/board';
 import { Header } from '../components/common';
 
-function Videos({ db } : any) {
+import { RxDatabase } from 'rxdb';
+
+type PageProps = {
+	db: RxDatabase;
+	setPage: (page : string) => void;
+};
+
+function Videos({ db, setPage } : PageProps) {
 	const [content, setContent] = useState<Content[]>([]);
+
+	useEffect(() => {
+		setPage('videos');
+	}, []);
 
 	useEffect(() => {
 		if (!db) return;

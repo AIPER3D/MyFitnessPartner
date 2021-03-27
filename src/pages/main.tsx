@@ -1,7 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Board, Content } from '../components/board';
+import { RxDatabase } from 'rxdb';
 
-function Main({ db } : any) {
+type PageProps = {
+	db: RxDatabase;
+	setPage: (page : string) => void;
+};
+
+function Main({ db, setPage } : PageProps) {
+	useEffect(() => {
+		setPage('main');
+	}, []);
+
 	return (
 		<div className="App">
 			<p>Home</p>

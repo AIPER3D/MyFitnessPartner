@@ -3,11 +3,19 @@ import { Link } from 'react-router-dom';
 import { Board, Content } from '../components/board';
 import { Header } from '../components/common';
 
-function Routines({ db } : any) {
+import { RxDatabase } from 'rxdb';
+
+type PageProps = {
+	db: RxDatabase;
+	setPage: (page : string) => void;
+};
+
+function Routines({ db, setPage } : PageProps) {
 	const [content, setContent] = useState<Content[]>([]);
 
 	useEffect(() => {
-		console.log(db);
+		setPage('routines');
+
 		if (!db) return;
 		(async () => {
 			await select();
@@ -15,7 +23,6 @@ function Routines({ db } : any) {
 	}, [db]);
 
 	async function select() {
-		console.log(db);
 		if (!db) return;
 		if (!db.collections.routines) {
 			setContent([]);
@@ -39,7 +46,6 @@ function Routines({ db } : any) {
 	}
 
 	async function insert() {
-		console.log(db);
 		if (!db) return;
 		if (!db.collections.routines) {
 			return;
@@ -53,7 +59,6 @@ function Routines({ db } : any) {
 	}
 
 	async function clear() {
-		console.log(db);
 		if (!db) return;
 		if (!db.collections.routines) {
 			return;
