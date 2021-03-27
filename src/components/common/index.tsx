@@ -1,4 +1,5 @@
 import Header from './header';
 import Menu from './menu';
+import Button from './button';
 
-export { Header, Menu };
+export { Header, Menu, Button };
