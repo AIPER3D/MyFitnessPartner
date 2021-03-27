@@ -1,5 +1,9 @@
 import Uploader from './uploader';
 import Queue from './queue';
-import Data from './data';
+import Item from './item';
 
-export { Uploader, Queue, Data };
+import type { Data } from './data';
+
+export { Uploader, Queue, Item };
+export type { Data };
+

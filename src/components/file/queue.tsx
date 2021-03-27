@@ -1,12 +1,11 @@
-import React from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
 
-import Data from './data';
+import { Item, Data } from './';
 
 type QueueProps = {
-    queue: File[];
+	data: Data[];
 };
-
 
 const Group = styled.div`
 	padding: 20px 20px 20px 20px;
@@ -16,20 +15,17 @@ const Group = styled.div`
 	overflow: auto;
 `;
 
-const Title = styled.div`
-
-`;
-
-function Queue({ queue } : QueueProps) {
+function Queue({ data } : QueueProps) {
 	const arr = [];
-	console.log(queue);
-	for (let i = 0; i < queue.length; i++) {
-		arr.push(<Data key={ queue[i].size } data={ queue[i] } />);
+	for (let i = 0; i < data.length; i++) {
+		arr.push(
+			<Item data={ data[i] } key={ i } />
+		);
 	}
 
 	return (
 		<div>
-			<p> { queue.length } 개 등록중</p>
+			<p> { data.length } 개 등록중</p>
 			<Group>
 				{ arr }
 			</Group>
