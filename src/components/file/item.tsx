@@ -1,9 +1,14 @@
 import React, {useState} from 'react';
 import styled from 'styled-components';
+import { RxDatabase } from 'rxdb';
 
 import { Data } from './data';
+import progress from './images/progress.gif';
+import progress16 from './images/progress16.gif';
+import check16 from './images/check16.png';
 
 type ItemProps = {
+	db: RxDatabase;
     data: Data;
 };
 
@@ -15,12 +20,7 @@ const Root = styled.div`
 	margin: 10px 5px 0px 5px;
 	
 	border: 1px solid #dddddd;
-	background: #eeeeee;
-	
-	&:hover {
-		cursor: pointer;
-	}
-	
+	background: #eeeeee;	
 `;
 
 const Thumbnail = styled.img`
@@ -28,64 +28,225 @@ const Thumbnail = styled.img`
 	width: 150px;
 	height: 100px;
 	
-	object-fit: cover;
+	background-color: #000000;
+	object-fit: contain;
 `;
 
 const Title = styled.div`
 	float: left;
 	width: calc(100% - 200px);
 	height: 20px;
-	padding: 10px 0px 10px 15px;
+	padding: 20px 0px 20px 20px;
 	margin: 0px 0px 0px 0px;
 	
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap; 
+	
 	color: #000000;
-	font-size: 12pt;
+	font-size: 11pt;
 	font-weight: bold;
 	text-align: left;
 `;
 
-const Text = styled.p`
+const Line = styled.div`
 	float: left;
-	width: calc(100% - 180px);
-	height: calc(100% - 45px);
-	padding: 5px 0px 0px 15px;
+	width: 200px;
+	height: 16px;
+	padding: 2px 0px 5px 20px;
 	margin: 0px 0px 0px 0px;
 	
 	color: #000000;
 	font-size: 10pt;
 	text-align: left;
-	overflow-y: scroll;
 `;
 
+const Image = styled.img`
+	width: 16px;
+	height: 16px;
+	
+	padding: 2px 0px 0px 0px;
+`;
 
-function Item({ data } : ItemProps) {
-	const [thumb, setThumb] = useState<string>('');
+const Text = styled.p`
+	display: inline;
+	margin: 0px 0px 0px 5px;
+	vertical-align: top;
+`;
+
+function Item({ db, data } : ItemProps) {
+	const [thumb, setThumb] = useState<string>(progress);
 	const [current, setCurrent] = useState<number>(0);
 	const [total, setTotal] = useState<number>(0);
+	const [status, setStatus] = useState<number>(0);
 
+	// 운동 영상 업로드
 	data.reader.onload = (e) => {
 		if (e.target == null || e.target.result == null) return;
 		const blob = new Blob([e.target.result], {type: data.file.type});
 		const url = URL.createObjectURL(blob);
 
-		console.log(blob);
-		console.log(url);
-	};
+		const video = document.createElement('video');
+		const snapImage = () => {
+			const canvas : HTMLCanvasElement = document.createElement('canvas');
+			canvas.width = video.videoWidth;
+			canvas.height = video.videoHeight;
 
+			canvas.getContext('2d')?.drawImage(
+				video,
+				0,
+				0,
+				canvas.width,
+				canvas.height
+			);
+
+			const image = canvas.toDataURL();
+			const success = image.length > 100000;
+
+			if (success) {
+				setThumb(image);
+				analysis(blob, image);
+			}
+			return success;
+		};
+		const timeupdate = () => {
+			if (snapImage()) {
+				video.removeEventListener('timeupdate', timeupdate);
+				video.pause();
+			}
+		};
+
+		video.addEventListener('loadeddata', function() {
+			if (snapImage()) {
+				video.removeEventListener('timeupdate', timeupdate);
+			}
+		});
+		video.addEventListener('timeupdate', timeupdate);
+		video.preload = 'metadata';
+		video.src = url;
+
+		video.muted = true;
+		video.playsInline = true;
+		video.play()
+			.then(() => {
+
+			})
+			.catch(() => {
+				console.error('썸네일 생성 오류');
+			});
+	};
 	data.reader.onprogress = (e) => {
 		if (e.lengthComputable) {
 			setCurrent(e.loaded);
 			setTotal(e.total);
+			setStatus(1);
 		}
 	};
 
-	return (
-		<Root>
-			<Thumbnail src={ thumb }/>
-			<Title> { data.file.name } </Title>
-			<Text> { current + '/' + total } </Text>
-		</Root>
-	);
+	// 운동 영상 분석
+	function analysis(video : Blob, thumbnail : string) {
+		setStatus(2);
+
+		setTimeout(() => {
+			submit(video, thumbnail).then(() => { });
+		}, 3000);
+	}
+
+	// 운동 영상 등록
+	async function submit(video : Blob, thumbnail : string) {
+		setStatus(3);
+
+		if (!db.collections.videos) {
+			console.error('에러');
+			return;
+		}
+
+		await db.collections.videos.insert({
+			video_id: 0,
+			video_name: data.file.name,
+			video_thumbnail: thumbnail,
+		}).then(() => {
+			setStatus(4);
+		});
+	}
+
+	if (status == 1) {
+		return (
+			<Root>
+				<div></div>
+				<Thumbnail src={ thumb }/>
+				<Title> { data.file.name } </Title>
+				<Line>
+					<Image src={ progress16 } />
+					<Text>업로드 중 ({ Math.round(100 * current / total).toFixed(0) }%)</Text>
+				</Line>
+			</Root>
+		);
+	} else if (status == 2) {
+		return (
+			<Root>
+				<div></div>
+				<Thumbnail src={ thumb }/>
+				<Title> { data.file.name } </Title>
+				<Line>
+					<Image src={ check16 } />
+					<Text>업로드 완료</Text>
+				</Line>
+				<Line>
+					<Image src={ progress16 } />
+					<Text>분석 중</Text>
+				</Line>
+			</Root>
+		);
+	} else if (status == 3) {
+		return (
+			<Root>
+				<div></div>
+				<Thumbnail src={ thumb }/>
+				<Title> { data.file.name } </Title>
+				<Line>
+					<Image src={ check16 } />
+					<Text>업로드 완료</Text>
+				</Line>
+				<Line>
+					<Image src={ check16 } />
+					<Text>분석 완료</Text>
+				</Line>
+				<Line>
+					<Image src={ progress16 } />
+					<Text>등록 중</Text>
+				</Line>
+			</Root>
+		);
+	} else if (status == 4) {
+		return (
+			<Root>
+				<div></div>
+				<Thumbnail src={ thumb }/>
+				<Title> { data.file.name } </Title>
+				<Line>
+					<Image src={ check16 } />
+					<Text>업로드 완료</Text>
+				</Line>
+				<Line>
+					<Image src={ check16 } />
+					<Text>분석 완료</Text>
+				</Line>
+				<Line>
+					<Image src={ check16 } />
+					<Text>등록 완료</Text>
+				</Line>
+			</Root>
+		);
+	} else {
+		return (
+			<Root>
+				<div></div>
+				<Thumbnail src={ thumb }/>
+				<Title> { data.file.name } </Title>
+			</Root>
+		);
+	}
 }
 
 Item.defaultProps = {
