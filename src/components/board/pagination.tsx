@@ -5,11 +5,17 @@ type PaginationProps = {
     count: number;
 };
 
+const color = {
+	'd': '#2C363F',
+	'p': '#E75A7C',
+	'w': '#F2F5EA',
+	'b': '#48ACF0',
+};
+
 const Box = styled.ul`
 	display: block;
-	border: 5px solid #eeeeee;
-	padding: 20px 20px 20px 20px;
-	margin: 20px 20px 10px 20px;
+	padding: 0px 0px 0px 0px;
+	margin: 0px 0px 00px 0px;
 	
 	font-size: 12pt;
 	text-align: center;
@@ -22,8 +28,8 @@ const Page = styled.li`
 	padding: 10px 0px 10px 0px;
 	margin: 0px 0px 0px 0px;
 	border: 1px solid #dddddd;
-	border-right: ${(props) => props.value == 'r' ? 1 : 0 || 0 }px solid #dddddd;
-	background: ${(props) => props.color == 'b' ? '#598baf' : '#fff' || '#fff' };
+	border-right: ${(props) => props.value == 'r' ? 1 : 0 || 0 }px solid #ddd;
+	background: ${(props) => props.color == 'b' ? color['b'] : '#fff' || '#fff' };
 	
 	list-style: none;
 	text-align: center;
