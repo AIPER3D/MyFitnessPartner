@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import styled, { css } from 'styled-components';
 
 const colorCode = {
@@ -12,16 +13,18 @@ type ButtonProps = {
     text?: string;
     href?: string;
     color?: string;
+    width?: string;
 };
 
 const style = css`
 	display: block;
-	width: 960px;
+	width: ${ (props: ButtonProps) => props.width || '960px' };
     padding: 10px 0px 10px 0px;
-    margin: 20px 20px 20px 20px;
+    margin: 10px 20px 10px 20px;
     
     overflow: hidden;
     
+    border-radius: 5px;
     background-color: ${ (props: ButtonProps) => props.color || '#2C363F' };
     text-decoration: none;
     text-align: center;
@@ -40,12 +43,11 @@ const Submit = styled.input`
 	${ style }
 `;
 
-const Link = styled.a`
+const Go = styled(Link)`
 	${ style }
 `;
 
-
-function Button({ text, href, color }: ButtonProps) {
+function Button({ text, href, color, width }: ButtonProps) {
 	if (color && Object.keys(colorCode).includes(color)) {
 		color = (colorCode as any)[color];
 	} else {
@@ -54,11 +56,21 @@ function Button({ text, href, color }: ButtonProps) {
 
 	if (href) {
 		return (
-			<Link href={ href } color={ color }>{ text ? text : '' }</Link>
+			<Go
+				to={ href }
+				width={ width ? width : '960px' }
+			>
+				{ text ? text : '' }
+			</Go>
 		);
 	} else {
 		return (
-			<Submit type='submit' color={ color } value={ text ? text : '' }></Submit>
+			<Submit
+				type='submit'
+				color={ color }
+				value={ text ? text : '' }
+				width={ width ? width : '960px' }
+			/>
 		);
 	}
 }
