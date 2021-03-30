@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Header } from '../components/common';
+import { Header, Button } from '../components/common';
 import { Uploader, Queue, Data } from '../components/file';
 
 import { RxDatabase } from 'rxdb';
@@ -28,7 +28,7 @@ function VideoCreate({ db, setPage } : PageProps) {
 				};
 
 				data.push(d);
-				d.reader.readAsBinaryString(d.file);
+				d.reader.readAsArrayBuffer(d.file);
 			}
 		}
 
@@ -37,9 +37,10 @@ function VideoCreate({ db, setPage } : PageProps) {
 
 	return (
 		<div>
-			<Header text='영상 등록' />
+			<Header text='영상 등록' >
+			</Header>
 			<Uploader method={ addFile } />
-			<Queue data={ data } />
+			<Queue db= { db } data={ data } />
 		</div>
 	);
 }

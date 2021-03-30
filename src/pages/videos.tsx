@@ -1,9 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Board, Content } from '../components/board';
-import { Header } from '../components/common';
-
 import { RxDatabase } from 'rxdb';
+import styled from 'styled-components';
+import { Board, Content } from '../components/board';
+import { Header, Button } from '../components/common';
+
+const Btn = styled.div`
+	padding: 0px 0px 0px 0px;
+	margin: 0px 0px 0px 0px;
+		
+	overflow: hidden;
+	
+	& > * {
+		padding: 5px 5px 5px 5px;
+		font-size: 10pt;
+		width: 100px;
+	}
+`;
 
 type PageProps = {
 	db: RxDatabase;
@@ -39,6 +51,7 @@ function Videos({ db, setPage } : PageProps) {
 			con.push({
 				id: doc[i].get('video_id'),
 				title: doc[i].get('video_name'),
+				thumbnail: doc[i].get('video_thumbnail'),
 			});
 		}
 
@@ -69,11 +82,12 @@ function Videos({ db, setPage } : PageProps) {
 
 	return (
 		<div className="App">
-			<Header text='영상 관리' />
+			<Header text='영상 관리' >
+				<Btn>
+					<Button href={ '/videos/new' } text={ '영상 등록' } />
+				</Btn>
+			</Header>
 			<Board type='gallery' content={ content }/>
-			<input type='button' onClick={ insert } value='데이터 추가' />
-			<input type='button' onClick={ clear } value='컬렉션 삭제' />
-			<Link to='/videos/new'>영상 추가</Link>
 		</div>
 	);
 }

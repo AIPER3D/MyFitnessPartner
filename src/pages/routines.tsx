@@ -1,9 +1,23 @@
 import React, { useEffect, useState } from 'react';
+import styled from 'styled-components';
+import { RxDatabase } from 'rxdb';
+
 import { Link } from 'react-router-dom';
 import { Board, Content } from '../components/board';
-import { Header } from '../components/common';
+import {Button, Header} from '../components/common';
 
-import { RxDatabase } from 'rxdb';
+const Btn = styled.div`
+	padding: 0px 0px 0px 0px;
+	margin: 0px 0px 0px 0px;
+		
+	overflow: hidden;
+	
+	& > * {
+		padding: 5px 5px 5px 5px;
+		font-size: 10pt;
+		width: 100px;
+	}
+`;
 
 type PageProps = {
 	db: RxDatabase;
@@ -39,6 +53,7 @@ function Routines({ db, setPage } : PageProps) {
 			con.push({
 				id: doc[i].get('routine_id'),
 				title: doc[i].get('routine_name'),
+				thumbnail: '',
 			});
 		}
 
@@ -71,14 +86,12 @@ function Routines({ db, setPage } : PageProps) {
 
 	return (
 		<div>
-			<Header text='루틴 관리' />
+			<Header text='루틴 관리' >
+				<Btn>
+					<Button href={ '/routines/new' } text={ '루틴 만들기' } />
+				</Btn>
+			</Header>
 			<Board type='gallery' content={ content }/>
-			<input type='button' onClick={ insert } value='데이터 추가' />
-			<input type='button' onClick={ (e) => {
-				e.preventDefault();
-				console.log('...');
-			} } value='컬렉션 삭제' />
-			<Link to='/routines/new'>루틴 추가</Link>
 		</div>
 	);
 }

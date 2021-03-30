@@ -1,4 +1,6 @@
 import React, { useEffect } from 'react';
+import { createRxDatabase } from 'rxdb';
+
 import {
 	ExerciseSchema,
 	VideoSchema,
@@ -14,25 +16,32 @@ function DB({ db } : any) {
 		(async () => {
 			await db.remove();
 
-			await db.addCollections({
-				exercises: {
-					schema: ExerciseSchema,
-				},
-				videos: {
-					schema: VideoSchema,
-				},
-				routines: {
-					schema: RoutineSchema,
-				},
-				records: {
-					schema: RecordSchema,
-				},
-				users: {
-					schema: UserSchema,
-				},
-			});
+			setTimeout(async () => {
+				db = await createRxDatabase({
+					name: 'data',
+					adapter: 'idb',
+				});
 
-			console.log(db);
+				await db.addCollections({
+					exercises: {
+						schema: ExerciseSchema,
+					},
+					videos: {
+						schema: VideoSchema,
+					},
+					routines: {
+						schema: RoutineSchema,
+					},
+					records: {
+						schema: RecordSchema,
+					},
+					users: {
+						schema: UserSchema,
+					},
+				});
+
+				console.log(db);
+			}, 3000);
 		})();
 	}, []);
 
