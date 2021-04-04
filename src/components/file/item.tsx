@@ -1,6 +1,9 @@
 import React, {useState} from 'react';
 import styled from 'styled-components';
+
 import { RxDatabase } from 'rxdb';
+import { VideoDTO } from '../../db/DTO';
+import { VideoDAO } from '../../db/DAO';
 
 import { Data } from './data';
 import progress from './images/progress.gif';
@@ -75,10 +78,13 @@ const Text = styled.p`
 `;
 
 function Item({ db, data } : ItemProps) {
+	const videoDTO = new VideoDTO();
 	const [thumb, setThumb] = useState<string>(progress);
 	const [current, setCurrent] = useState<number>(0);
 	const [total, setTotal] = useState<number>(0);
 	const [status, setStatus] = useState<number>(0);
+
+	videoDTO.setDB(db);
 
 	// 운동 영상 업로드
 	data.reader.onload = (e) => {
@@ -156,18 +162,16 @@ function Item({ db, data } : ItemProps) {
 	async function submit(video : Blob, thumbnail : string) {
 		setStatus(3);
 
-		if (!db.collections.videos) {
-			console.error('에러');
-			return;
-		}
+		const videoDAO : VideoDAO = {
+			videoId: await videoDTO.getCount() + 1,
+			videoName: data.file.name,
+			thumbnail: thumbnail,
+		};
 
-		await db.collections.videos.insert({
-			video_id: 0,
-			video_name: data.file.name,
-			video_thumbnail: thumbnail,
-		}).then(() => {
-			setStatus(4);
-		});
+		const result = await videoDTO.addVideo(videoDAO);
+		console.log(result);
+
+		setStatus(4);
 	}
 
 	if (status == 1) {
