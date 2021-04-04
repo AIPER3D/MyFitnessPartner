@@ -7,7 +7,7 @@ import {
 	RoutineSchema,
 	RecordSchema,
 	UserSchema,
-} from '../../schema';
+} from '../../db/schema';
 
 function DB({ db } : any) {
 	useEffect(() => {
