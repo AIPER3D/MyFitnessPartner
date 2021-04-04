@@ -4,7 +4,6 @@ import { RxDatabase } from 'rxdb';
 import { GroupOptions, ReactSortable } from 'react-sortablejs';
 
 import { Header, Button } from '../components/common';
-import dummy from './images/dummy.jpg';
 
 interface ItemType {
 	id: number;
@@ -116,6 +115,17 @@ function RoutineCreate({ db, setPage } : PageProps) {
 		setPage('routines');
 	}, []);
 
+	useEffect(() => {
+		if (!db) return;
+		(async () => {
+			await select();
+		})();
+	}, [db]);
+
+	async function select() {
+
+	}
+
 	const groupOptionA : GroupOptions = {
 		name: 'routine',
 		pull: 'clone',
@@ -152,7 +162,7 @@ function RoutineCreate({ db, setPage } : PageProps) {
 				>
 					{ video.map((item: ItemType) => (
 						<Item key={item.id}>
-							<Thumbnail src={ dummy }/>
+							<Thumbnail src=''/>
 							<Name> { item.name } </Name>
 							<Text> { '내용' } </Text>
 						</Item>
@@ -168,7 +178,7 @@ function RoutineCreate({ db, setPage } : PageProps) {
 				>
 					{ selected.map((item: ItemType) => (
 						<Item key={item.id * 999}>
-							<Thumbnail src={ dummy }/>
+							<Thumbnail src=''/>
 							<Name> { item.name } </Name>
 							<Text> { '내용' } </Text>
 						</Item>

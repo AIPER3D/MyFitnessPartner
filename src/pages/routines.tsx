@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { RxDatabase } from 'rxdb';
 
-import { Link } from 'react-router-dom';
+import { RxDatabase } from 'rxdb';
+import { Button, Header } from '../components/common';
 import { Board, Content } from '../components/board';
-import {Button, Header} from '../components/common';
+import { RoutineDTO } from '../db/DTO';
+import { RoutineDAO } from '../db/DAO';
 
 const Btn = styled.div`
 	padding: 0px 0px 0px 0px;
@@ -25,64 +26,31 @@ type PageProps = {
 };
 
 function Routines({ db, setPage } : PageProps) {
+	const routineDTO = new RoutineDTO();
 	const [content, setContent] = useState<Content[]>([]);
 
 	useEffect(() => {
 		setPage('routines');
 
-		if (!db) return;
-		(async () => {
-			await select();
-		})();
+		routineDTO.setDB(db);
+		select();
 	}, [db]);
 
 	async function select() {
-		if (!db) return;
-		if (!db.collections.routines) {
-			setContent([]);
-			return;
-		}
+		const routine : {[key: string] : RoutineDAO} = await routineDTO.getAllRoutines();
+		const key : string[] = Object.keys(routine);
 
-		const doc = await db.collections.routines
-			.find()
-			.limit(5)
-			.exec();
-
-		const con : Content[] = [];
-		for (let i = 0; i < doc.length; i++) {
-			con.push({
-				id: doc[i].get('routine_id'),
-				title: doc[i].get('routine_name'),
+		const arr : Content[] = [];
+		for (let i = 0; i < key.length; i++) {
+			arr.push({
+				id: routine[key[i]]['routineId'],
+				title: routine[key[i]]['routineName'],
 				thumbnail: '',
 			});
 		}
 
-		setContent(con);
+		setContent(arr);
 	}
-
-	async function insert() {
-		if (!db) return;
-		if (!db.collections.routines) {
-			return;
-		}
-
-		await db.collections.routines.insert({
-			routine_id: 0,
-			routine_name: 'asdfasdfsdafsdaf',
-		});
-		await select();
-	}
-
-	async function clear() {
-		if (!db) return;
-		if (!db.collections.routines) {
-			return;
-		}
-
-		await db.collections.routines.remove();
-		await select();
-	}
-
 
 	return (
 		<div>
@@ -91,7 +59,7 @@ function Routines({ db, setPage } : PageProps) {
 					<Button href={ '/routines/new' } text={ '루틴 만들기' } />
 				</Btn>
 			</Header>
-			<Board type='gallery' content={ content }/>
+			<Board type='list' content={ content }/>
 		</div>
 	);
 }

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Header, Button } from '../components/common';
-import { Uploader, Queue, Data } from '../components/file';
 
 import { RxDatabase } from 'rxdb';
+import { Header, Button } from '../components/common';
+import { Uploader, Queue, Data } from '../components/file';
 
 type PageProps = {
 	db: RxDatabase;
@@ -15,7 +15,7 @@ function VideoCreate({ db, setPage } : PageProps) {
 
 	useEffect(() => {
 		setPage('videos');
-	}, []);
+	}, [db]);
 
 	function addFile(fileList : FileList) {
 		if (fileList.length <= 0) return;
@@ -40,7 +40,7 @@ function VideoCreate({ db, setPage } : PageProps) {
 			<Header text='영상 등록' >
 			</Header>
 			<Uploader method={ addFile } />
-			<Queue db= { db } data={ data } />
+			<Queue db={ db } data={ data } />
 		</div>
 	);
 }

@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { RxDatabase } from 'rxdb';
 import styled from 'styled-components';
+
+import { RxDatabase } from 'rxdb';
 import { Board, Content } from '../components/board';
 import { Header, Button } from '../components/common';
+import { VideoDTO } from '../db/DTO';
+import { VideoDAO } from '../db/DAO';
 
 const Btn = styled.div`
 	padding: 0px 0px 0px 0px;
@@ -23,62 +26,31 @@ type PageProps = {
 };
 
 function Videos({ db, setPage } : PageProps) {
+	const videoDTO = new VideoDTO();
 	const [content, setContent] = useState<Content[]>([]);
 
 	useEffect(() => {
 		setPage('videos');
-	}, []);
 
-	useEffect(() => {
-		if (!db) return;
-		(async () => {
-			await select();
-		})();
+		videoDTO.setDB(db);
+		select();
 	}, [db]);
 
 	async function select() {
-		if (!db.collections.videos) {
-			setContent([]);
-			return;
-		}
+		const video : {[key: string] : VideoDAO} = await videoDTO.getAllVideos();
+		const key : string[] = Object.keys(video);
 
-		const doc = await db.collections.videos
-			.find()
-			.exec();
-
-		const con : Content[] = [];
-		for (let i = 0; i < doc.length; i++) {
-			con.push({
-				id: doc[i].get('video_id'),
-				title: doc[i].get('video_name'),
-				thumbnail: doc[i].get('video_thumbnail'),
+		const arr : Content[] = [];
+		for (let i = 0; i < key.length; i++) {
+			arr.push({
+				id: video[key[i]]['videoId'],
+				title: video[key[i]]['videoName'],
+				thumbnail: video[key[i]]['thumbnail'],
 			});
 		}
 
-		setContent(con);
+		setContent(arr);
 	}
-
-	async function insert() {
-		if (!db.collections.videos) {
-			return;
-		}
-
-		await db.collections.videos.insert({
-			video_id: 0,
-			video_name: 'asdfasdfsdafsdaf',
-		});
-		await select();
-	}
-
-	async function clear() {
-		if (!db.collections.videos) {
-			return;
-		}
-
-		await db.collections.videos.remove();
-		await select();
-	}
-
 
 	return (
 		<div className="App">
