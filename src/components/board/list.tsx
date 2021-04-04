@@ -78,7 +78,7 @@ function List({ content }: ListProps) {
 		<Box>
 			<Image src={ dummy }></Image>
 			<Title> { content.title } </Title>
-			<Text> The test of a first-rate intelligence is the ability to hold two opposed ideas in mind at the same time and still retain the ability to function. The test of a first-rate intelligence is the ability to hold two opposed ideas in mind at the same time and still retain the ability to function. Read more at https://www.brainyquote.com/topics/test-quotes </Text>
+			<Text>text</Text>
 		</Box>
 	);
 }
