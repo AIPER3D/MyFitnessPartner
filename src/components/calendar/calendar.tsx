@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import './Calendar.scss';
+import './calendar.scss';
 import { MdChevronLeft, MdChevronRight } from 'react-icons/md';
 import moment, { Moment as MomentTypes } from 'moment';
 
@@ -28,8 +28,8 @@ function Calendar() {
 							let current = date.clone().startOf('year').week(week);
 							current = current.startOf('week').add(n + i, 'day');
 							let isSelected = '';
-							if (date.format('YYYYMMDD') === current.format('YYYYMMDD') 
-							&& date.format('YYYYMMDD') === today.format('YYYYMMDD')) {
+							if (date.format('YYYYMMDD') === current.format('YYYYMMDD') &&
+							date.format('YYYYMMDD') === today.format('YYYYMMDD')) {
 								console.log(date.format('YYYYMMDD'));
 								console.log(current.format('YYYYMMDD'));
 								isSelected = 'selected';
