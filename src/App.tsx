@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 import { createRxDatabase, addRxPlugin, RxDatabase } from 'rxdb';
 
 import { Menu } from './components/common';
-import { VideoSchema, RoutineSchema } from './schema';
+import { VideoSchema, RoutineSchema } from './db/schema';
 import {
 	Main,
 	Routines,
