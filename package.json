@@ -30,6 +30,8 @@
     "react-sortablejs": "^6.0.0",
     "rxdb": "^9.15.0",
     "rxjs": "^6.6.6",
+    "sass": "^1.32.8",
+    "scss": "^0.2.4",
     "sortablejs": "^1.13.0",
     "styled-components": "^5.2.1",
     "typescript": "^4.1.2",
