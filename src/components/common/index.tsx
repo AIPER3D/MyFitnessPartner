@@ -1,5 +1,5 @@
 import Header from './header';
 import Menu from './menu';
-import Modal from './modal';
+import Button from './button';
 
-export { Header, Menu, Modal };
+export { Header, Menu, Button };

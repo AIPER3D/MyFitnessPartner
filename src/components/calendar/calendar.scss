@@ -1,10 +1,10 @@
 .Calendar{
     user-select: none;
-    width: 1000px;
+    width: 998px;
     height: 830px;
     border: 1px solid rgba(gray,0.3);
     border-radius: 3px;
-    margin-left: 300px;
+    margin: 0px;
     .head{
       display: flex;
       justify-content: space-between;

@@ -17,8 +17,7 @@ type MenuProps = {
 };
 
 const NAV = styled.nav`
-	float: left;
-	
+	position: fixed;
 	width: 250px;
 	height: calc(100vh - 20px);
 	padding: 10px 0px 10px 0px;

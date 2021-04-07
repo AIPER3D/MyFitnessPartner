@@ -13,11 +13,26 @@ type BoardProps = {
     content: Content[];
 };
 
+const Root = styled.div`
+	overflow: hidden;
+`;
+
 const Box = styled.div`
-	padding: 10px 10px 10px 10px;
-	margin: 10px 10px 1px 10px;
+	display: block;
+	border: 5px solid #eeeeee;
+	padding: 20px 20px 20px 20px;
+	margin: 20px 20px 10px 20px;
 	
-	overflow: auto; 
+	font-size: 12pt;
+	text-align: center;
+	overflow: hidden;
+`;
+
+const Item = styled.div`
+	padding: 0px 0px 0px 0px;
+	margin: 0px 0px 0px 0px;
+	
+	overflow: hidden; 
 `;
 
 function Board({ type, content }: BoardProps) {
@@ -34,10 +49,13 @@ function Board({ type, content }: BoardProps) {
 	}
 
 	return (
-		<div>
-			<Box> {item} </Box>
+		<Root>
+			<Box>
+				<Item> {item} </Item>
+			</Box>
 			<Pagination count={ 0 }></Pagination>
-		</div>
+		</Root>
+
 	);
 }
 

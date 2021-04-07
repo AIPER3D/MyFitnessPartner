@@ -11,9 +11,9 @@ type GalleryProps = {
 const Box = styled.div`
 	float: left;
 	
-	width: 300px;
+	width: 288px;
 	height: 255px;
-	margin: 25px 5px 5px 5px;
+	margin: 5px 5px 5px 6px;
 	
 	border: 1px solid #dddddd;
 	background: #eeeeee;
@@ -30,7 +30,7 @@ const Box = styled.div`
 const Alert = styled.div`
 	position: relative;
 	display: block;
-	width: 300px;
+	width: 256px;
 	height: 20px;
 	padding: 0px 5px 0px 0px;
 	margin: -20px 0px 0px 0px;
@@ -41,16 +41,17 @@ const Alert = styled.div`
 `;
 
 const Image = styled.img`
-	width: 300px;
-	height: 200px;
+	width: 288px;
+	height: 162px;
 	
+	background-color: #000000;
 	border-bottom: 1px solid #dddddd;
-	object-fit: cover;
+	object-fit: contain;
 `;
 
 const Title = styled.div`
 	display: block;
-	width: 290px;
+	width: 270px;
 	height: 20px;
 	padding: 3px 0px 0px 10px;
 	margin: 0px 0px 0px 0px;
@@ -59,6 +60,10 @@ const Title = styled.div`
 	font-size: 10pt;
 	font-weight: bold;
 	text-align: left;
+	
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap; 
 `;
 
 const Text = styled.div`
@@ -77,10 +82,9 @@ function Gallery({ content }: GalleryProps) {
 	console.log(dummy);
 	return (
 		<Box>
-			<Alert> 1일차 </Alert>
-			<Image src={ dummy }/>
+			<Image src={ content.thumbnail }/>
 			<Title> { content.title } </Title>
-			<Text> 1일차 진행중입니다. </Text>
+			<Text> { content.desc } </Text>
 		</Box>
 	);
 }

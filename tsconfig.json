@@ -22,6 +22,7 @@
     "outDir": "/dist"
   },
   "include": [
-    "src"
-, "public/electron.js"  ]
+    "src",
+    "public/electron.js"
+  ]
 }
