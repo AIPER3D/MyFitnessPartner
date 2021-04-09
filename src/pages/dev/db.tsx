@@ -7,6 +7,7 @@ import {
 	RoutineSchema,
 	RecordSchema,
 	UserSchema,
+	MemoSchema,
 } from '../../db/schema';
 
 function DB({ db } : any) {
@@ -37,6 +38,9 @@ function DB({ db } : any) {
 					},
 					users: {
 						schema: UserSchema,
+					},
+					memos: {
+						schema: MemoSchema,
 					},
 				});
 

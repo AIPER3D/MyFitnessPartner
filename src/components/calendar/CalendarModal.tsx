@@ -16,6 +16,7 @@ function CalendarModal({open, close, header, children}: Props) {
                 <section>
                     <header>
                         {header}
+                        <button className="add"> &plus; </button>
                         <button className="close" onClick={close}> &times; </button>
                     </header>
                     <main>
