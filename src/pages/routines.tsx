@@ -37,15 +37,20 @@ function Routines({ db, setPage } : PageProps) {
 	}, [db]);
 
 	async function select() {
-		const routine : {[key: string] : RoutineDAO} = await routineDTO.getAllRoutines();
-		const key : string[] = Object.keys(routine);
+		const routine : RoutineDAO[] = await routineDTO.getAllRoutinesAsArray();
 
 		const arr : Content[] = [];
-		for (let i = 0; i < key.length; i++) {
+		for (let i = 0; i < routine.length; i++) {
+			let thumbnail = '';
+
+			if (routine[i]['videos'].length > 0) {
+				thumbnail = routine[i]['videos'][0]['thumbnail'];
+			}
+
 			arr.push({
-				id: routine[key[i]]['routineId'],
-				title: routine[key[i]]['routineName'],
-				thumbnail: '',
+				id: routine[i]['id'],
+				title: routine[i]['name'],
+				thumbnail: thumbnail,
 			});
 		}
 

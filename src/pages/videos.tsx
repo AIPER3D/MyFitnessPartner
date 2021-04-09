@@ -37,15 +37,14 @@ function Videos({ db, setPage } : PageProps) {
 	}, [db]);
 
 	async function select() {
-		const video : {[key: string] : VideoDAO} = await videoDTO.getAllVideos();
-		const key : string[] = Object.keys(video);
+		const video : VideoDAO[] = await videoDTO.getAllVideosAsArray();
 
 		const arr : Content[] = [];
-		for (let i = 0; i < key.length; i++) {
+		for (let i = 0; i < video.length; i++) {
 			arr.push({
-				id: video[key[i]]['videoId'],
-				title: video[key[i]]['videoName'],
-				thumbnail: video[key[i]]['thumbnail'],
+				id: video[i]['id'],
+				title: video[i]['name'],
+				thumbnail: video[i]['thumbnail'],
 			});
 		}
 
