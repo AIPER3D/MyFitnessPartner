@@ -1,9 +1,9 @@
 import { VideoDAO } from './';
 
 interface RoutineDAO {
-    routineId: number;
-    routineName: string;
-    videos: Array<VideoDAO | null>;
+    id: number;
+    name: string;
+    videos: Array<VideoDAO>;
 }
 
 export type { RoutineDAO };

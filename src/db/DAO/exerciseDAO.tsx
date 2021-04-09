@@ -1,6 +1,6 @@
 interface ExerciseDAO {
-    exerciseId: number;
-    exerciseName: string;
+    id: number;
+    name: string;
 }
 
 export type { ExerciseDAO };
