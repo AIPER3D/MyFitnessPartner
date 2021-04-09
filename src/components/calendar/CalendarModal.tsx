@@ -10,26 +10,26 @@ type Props = {
 }
 
 function CalendarModal({open, close, header, children}: Props) {
-    return(
-        <div className={ open ? 'openModal modal' : 'modal' }>
-            { open ? (  
-                <section>
-                    <header>
-                        {header}
-                        <button className="add"> &plus; </button>
-                        <button className="close" onClick={close}> &times; </button>
-                    </header>
-                    <main>
-                        {children}
-                        <CalendarEditableBox init='hello'/>
-                    </main>
-                    <footer>
-                        <button className="close" onClick={close}> close </button>
-                    </footer>
-                </section>
-            ) : null }
-        </div>
-    );
+	return (
+		<div className={ open ? 'openModal modal' : 'modal' }>
+			{ open ? (
+				<section>
+					<header>
+						{header}
+						<button className="add"> &#43; </button>
+						<button className="close" onClick={close}> &times; </button>
+					</header>
+					<main>
+						{children}
+						<CalendarEditableBox init='hello'/>
+					</main>
+					<footer>
+						<button className="close" onClick={close}> close </button>
+					</footer>
+				</section>
+			) : null }
+		</div>
+	);
 }
 
 export default CalendarModal;

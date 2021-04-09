@@ -2,7 +2,6 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { Content } from './content';
-import dummy from './images/dummy.jpg';
 
 type GalleryProps = {
 	content: Content;
@@ -79,7 +78,6 @@ const Text = styled.div`
 `;
 
 function Gallery({ content }: GalleryProps) {
-	console.log(dummy);
 	return (
 		<Box>
 			<Image src={ content.thumbnail }/>

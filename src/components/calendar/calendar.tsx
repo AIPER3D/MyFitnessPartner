@@ -1,11 +1,15 @@
 import React, {useState} from 'react';
-import './Calendar.scss';
+import './calendar.scss';
 import { MdChevronLeft, MdChevronRight } from 'react-icons/md';
 import moment, { Moment as MomentTypes } from 'moment';
 import CalendarModal from './CalendarModal';
+import { RxDatabase } from 'rxdb';
 
+type CalendarProps = {
+	db : RxDatabase;
+}
 
-function Calendar() {
+function Calendar({db} : CalendarProps) {
 	const [date, setDate] = useState<MomentTypes>(moment());
 	const [modalOpen, setModalOpen] = useState(false);
 	const [present, setPresent] = useState<string>('');
@@ -13,13 +17,13 @@ function Calendar() {
 		setModalOpen(true);
 		setPresent(day);
 		console.log(modalOpen);
-	}
+	};
 	const closeModal= ()=> {
 		setModalOpen(false);
 		setPresent('');
 		console.log(modalOpen);
-	}
- 	function handleMonthInc() {
+	};
+	function handleMonthInc() {
 		setDate(date.clone().add(1, 'month'));
 	}
 	function handleMonthDec() {
@@ -41,8 +45,8 @@ function Calendar() {
 							let current = date.clone().startOf('year').week(week);
 							current = current.startOf('week').add(n + i, 'day');
 							let isSelected = '';
-							if (date.format('YYYYMMDD') === current.format('YYYYMMDD') 
-							&& date.format('YYYYMMDD') === today.format('YYYYMMDD')) {
+							if (date.format('YYYYMMDD') === current.format('YYYYMMDD') &&
+							date.format('YYYYMMDD') === today.format('YYYYMMDD')) {
 								isSelected = 'selected';
 							}
 							let isGrayed = 'grayed';
@@ -51,7 +55,10 @@ function Calendar() {
 							}
 							return (
 								<div className={`box  ${isSelected} ${isGrayed}`} key={i}>
-									<span className={`text`} onClick={()=>openModal(current.format('YYYYMMDD'))}>{current.format('D')}</span>
+									<span className={`text`} onClick={
+										()=>openModal(current.format('YYYYMMDD'))}>
+										{current.format('D')}
+									</span>
 								</div>
 							);
 						})

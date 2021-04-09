@@ -25,15 +25,28 @@
 }
 .modal > section > header {
     position: relative;
+    text-align: center;
     padding: 16px 64px 16px 16px;
     background-color: #f1f1f1;
     font-weight: 700;
 }
-.modal > section > header button {
+.modal > section > header button.close {
     position: absolute;
     top: 15px;
     right: 15px;
     width: 30px;
+    font-size: 21px;
+    font-weight: 700;
+    text-align: center;
+    color: rgba(0, 0, 0, 0.705);
+    background-color: transparent;
+}
+.modal > section > header button.add {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 30px;
+    padding-right: 50px;
     font-size: 21px;
     font-weight: 700;
     text-align: center;
