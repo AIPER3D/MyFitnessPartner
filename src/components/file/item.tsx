@@ -162,10 +162,11 @@ function Item({ db, data } : ItemProps) {
 	async function submit(video : Blob, thumbnail : string) {
 		setStatus(3);
 
+		const id = videoDTO.getNewId();
 		const videoDAO : VideoDAO = {
-			videoId: await videoDTO.getCount() + 1,
-			videoName: data.file.name,
-			thumbnail: thumbnail,
+			id: id,
+			name: data.file.name,
+			thumbnail: '',
 		};
 
 		const result = await videoDTO.addVideo(videoDAO);
