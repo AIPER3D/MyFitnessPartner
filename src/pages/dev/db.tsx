@@ -7,6 +7,7 @@ import {
 	RoutineSchema,
 	RecordSchema,
 	UserSchema,
+	MemoSchema,
 } from '../../db/schema';
 
 
@@ -47,6 +48,9 @@ function DB({ setPage } : PageProps) {
 					},
 					users: {
 						schema: UserSchema,
+					},
+					memos: {
+						schema: MemoSchema,
 					},
 				});
 

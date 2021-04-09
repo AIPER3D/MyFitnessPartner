@@ -14,7 +14,7 @@ function Main({ db, setPage } : PageProps) {
 
 	return (
 		<div className="App">
-			<Calendar />
+			<Calendar db={ db }/>
 		</div>
 	);
 }

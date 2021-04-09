@@ -3,6 +3,7 @@ import { VideoSchema } from './video';
 import { RoutineSchema } from './routine';
 import { RecordSchema } from './record';
 import { UserSchema } from './user';
+import { MemoSchema } from './memo';
 
 export {
 	ExerciseSchema,
@@ -10,4 +11,5 @@ export {
 	RoutineSchema,
 	RecordSchema,
 	UserSchema,
+	MemoSchema,
 };
