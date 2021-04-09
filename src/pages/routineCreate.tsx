@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import styled, { css } from 'styled-components';
-import { RxDatabase } from 'rxdb';
+import { Redirect } from 'react-router-dom';
 import { GroupOptions, ReactSortable } from 'react-sortablejs';
 
-import { Header, Button } from '../components/common';
+import { RxDatabase } from 'rxdb';
+import { VideoDTO, RoutineDTO } from '../db/DTO';
+import { VideoDAO, RoutineDAO } from '../db/DAO';
 
-interface ItemType {
-	id: number;
-	name: string;
-}
+import { Header, Button } from '../components/common';
 
 const Root = styled.form`
 	overflow: auto;
@@ -63,9 +62,13 @@ const Thumbnail = styled.img`
 
 const Name = styled.div`
 	float: left;
-	width: 100px;
+	width: 250px;
 	padding: 10px 10px 0px 10px;
 	margin: 0px 0px 0px 0px;
+	
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 	
 	color: #000000;
 	font-size: 10pt;
@@ -73,7 +76,7 @@ const Name = styled.div`
 	text-align: left;
 `;
 
-const Text = styled.p`
+const Right = css`
 	float: right;
 	padding: 10px 10px 0px 10px;
 	margin: 0px 0px 0px 0px;
@@ -84,46 +87,42 @@ const Text = styled.p`
 	overflow-y: scroll;
 `;
 
+const Text = styled.p`
+	${ Right }
+`;
+
+const Delete = styled.p`
+	${ Right }
+	
+	cursor: pointer;
+`;
+
 type PageProps = {
 	db: RxDatabase;
 	setPage: (page : string) => void;
 };
 
-function RoutineCreate({ db, setPage } : PageProps) {
-	const [video, setVideo] = useState<ItemType[]>([
-		{
-			id: 0,
-			name: 'A',
-		},
-		{
-			id: 1,
-			name: 'B',
-		},
-	]);
-	const [selected, setSelected] = useState<ItemType[]>([
-		{
-			id: 2,
-			name: 'C',
-		},
-		{
-			id: 3,
-			name: 'D',
-		},
-	]);
+function RoutineCreate(this: any, { db, setPage } : PageProps) {
+	const [title, setTitle] = useState<string>('새 루틴');
+	const [videoDTO, setVideoDTO] = useState<VideoDTO>(new VideoDTO());
+	const [routineDTO, setRoutineDTO] = useState<RoutineDTO>(new RoutineDTO());
+	const [video, setVideo] = useState<VideoDAO[]>([]);
+	const [selected, setSelected] = useState<VideoDAO[]>([]);
+	const [redirect, setRedirect] = useState<boolean>(false);
 
 	useEffect(() => {
 		setPage('routines');
-	}, []);
 
-	useEffect(() => {
-		if (!db) return;
-		(async () => {
-			await select();
-		})();
+		routineDTO.setDB(db);
+		videoDTO.setDB(db);
+
+		select();
 	}, [db]);
 
 	async function select() {
+		const video : VideoDAO[] = await videoDTO.getAllVideosAsArray();
 
+		setVideo(video);
 	}
 
 	const groupOptionA : GroupOptions = {
@@ -136,22 +135,45 @@ function RoutineCreate({ db, setPage } : PageProps) {
 		name: 'routine',
 	};
 
-	function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+	function onSetTitle(e: React.ChangeEvent<HTMLInputElement>) {
+		setTitle(e.target.value);
+	}
+
+	function onDelete(index: number) {
+		const arr = selected.slice();
+		arr.splice(index, 1);
+
+		setSelected(arr);
+	}
+
+	async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
 
-		const arr = [];
-		for (let i = 0; i < selected.length; i++) {
-			arr.push(selected[i].name);
+		const routineDAO : RoutineDAO = {
+			id: routineDTO.getNewId(),
+			name: title,
+			videos: selected,
+		};
+
+		const result = await routineDTO.addRoutine(routineDAO);
+		if (result) {
+			alert(`등록됨`);
+			setRedirect(true);
+		} else {
+			alert(`등록 실패`);
 		}
-		alert(`선택 : ${ arr }`);
+	}
+
+	if (redirect) {
+		return (<Redirect to='/routines' />);
 	}
 
 	return (
 		<Root onSubmit={ onSubmit }>
 			<Header text='나만의 루틴 만들기' />
-			<RoutineName placeholder='루틴 명' />
-			<Title>영상 목록</Title>
-			<Title>루틴</Title>
+			<RoutineName placeholder='루틴 명' onChange={ onSetTitle } value={ title }/>
+			<Title>영상 목록 ({ video.length })</Title>
+			<Title>선택한 영상 ({ selected.length })</Title>
 			<List>
 				<ReactSortable
 					group = { groupOptionA }
@@ -160,11 +182,11 @@ function RoutineCreate({ db, setPage } : PageProps) {
 					setList={ setVideo }
 					sort={ false }
 				>
-					{ video.map((item: ItemType) => (
-						<Item key={item.id}>
-							<Thumbnail src=''/>
+					{ video.map((item: VideoDAO, index) => (
+						<Item key={ index }>
+							<Thumbnail src={ item.thumbnail }/>
 							<Name> { item.name } </Name>
-							<Text> { '내용' } </Text>
+							<Text> { index } </Text>
 						</Item>
 					))}
 				</ReactSortable>
@@ -176,11 +198,13 @@ function RoutineCreate({ db, setPage } : PageProps) {
 					list={ selected }
 					setList={ setSelected }
 				>
-					{ selected.map((item: ItemType) => (
-						<Item key={item.id * 999}>
-							<Thumbnail src=''/>
+					{ selected.map((item: VideoDAO, index) => (
+						<Item key={ index }>
+							<Thumbnail src={ item.thumbnail }/>
 							<Name> { item.name } </Name>
-							<Text> { '내용' } </Text>
+							<Delete onClick={ () => {
+								onDelete(index);
+							} }> { '삭제' } </Delete>
 						</Item>
 					))}
 				</ReactSortable>
