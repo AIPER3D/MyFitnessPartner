@@ -82,7 +82,7 @@ function Gallery({ content }: GalleryProps) {
 	console.log(dummy);
 	return (
 		<Box>
-			<Image src={ content.thumbnail }/>
+			<Image src={ content.thumbnail ? content.thumbnail : dummy }/>
 			<Title> { content.title } </Title>
 			<Text> { content.desc } </Text>
 		</Box>

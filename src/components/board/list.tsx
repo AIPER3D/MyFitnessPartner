@@ -76,7 +76,7 @@ const Text = styled.p`
 function List({ content }: ListProps) {
 	return (
 		<Box>
-			<Image src={ dummy }></Image>
+			<Image src={ content.thumbnail ? content.thumbnail : dummy }></Image>
 			<Title> { content.title } </Title>
 			<Text>text</Text>
 		</Box>
