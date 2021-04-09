@@ -14,15 +14,7 @@ const RoutineSchema = {
 		'videos': {
 			'type': 'array',
 			'items': {
-				'type': 'object',
-				'properties': {
-					'video_id': {
-						'type': 'number',
-					},
-					'video_count': {
-						'type': 'number',
-					},
-				},
+				'type': 'number',
 			},
 		},
 	},
