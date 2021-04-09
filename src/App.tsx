@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
-import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { createRxDatabase, addRxPlugin, RxDatabase } from 'rxdb';
 
 import { Menu } from './components/common';
@@ -34,6 +34,7 @@ const Body = styled.div`
 `;
 
 function App() {
+	const devMode = false;
 	const [db, setDB] = useState<RxDatabase>();
 	const [page, setPage] = useState<string>('');
 
@@ -41,6 +42,7 @@ function App() {
 
 	useEffect(() => {
 		(async () => {
+			if (devMode) return;
 			if (db) return;
 
 			const tdb = await createRxDatabase({
@@ -71,10 +73,25 @@ function App() {
 		};
 	}, []);
 
-	if (db) {
+	if (devMode) {
 		return (
 			<Router>
-				<Menu selected={ page } />
+				<Menu devMode={ devMode } selected={ page } />
+				<Root>
+					<Body>
+						<Switch>
+							<Route path="/db">
+								<DB setPage={ setPage } />
+							</Route>
+						</Switch>
+					</Body>
+				</Root>
+			</Router>
+		);
+	} else if (db) {
+		return (
+			<Router>
+				<Menu devMode={ devMode } selected={ page } />
 				<Root>
 					<Body>
 						<Switch>
@@ -90,9 +107,6 @@ function App() {
 							<Route path="/routines">
 								<Routines db={ db } setPage={ setPage } />
 							</Route>
-							<Route path="/db">
-								<DB db={ db } setPage={ setPage } />
-							</Route>
 							<Route path="/">
 								<Main db={ db } setPage={ setPage } />
 							</Route>
@@ -104,10 +118,10 @@ function App() {
 	} else {
 		return (
 			<Router>
-				<Menu selected={ page } />
+				<Menu devMode = { true } selected={ page } />
 				<Root>
 					<Body>
-						<p>...</p>
+						<p>DB 접속 오류</p>
 					</Body>
 				</Root>
 			</Router>

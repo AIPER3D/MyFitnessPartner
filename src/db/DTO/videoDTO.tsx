@@ -14,16 +14,12 @@ class VideoDTO {
 		this.db = db;
 	}
 
-	async addVideo(data : VideoDAO) {
-		if (!this.db) return false;
-		if (!this.db.collections.videos) return false;
+	getDB() {
+		return this.db;
+	}
 
-		await this. db.collections.videos.insert({
-			video_id: data['videoId'],
-			video_name: data['videoName'],
-		});
-
-		return true;
+	getNewId() {
+		return new Date().getTime();
 	}
 
 	async getCount() {
@@ -37,11 +33,44 @@ class VideoDTO {
 		return doc.length;
 	}
 
+	async addVideo(data : VideoDAO) {
+		if (!this.db) return false;
+		if (!this.db.collections.videos) return false;
+
+		await this. db.collections.videos.insert({
+			video_id: data['id'],
+			video_name: data['name'],
+			thumbnail: data['thumbnail'],
+		});
+
+		return true;
+	}
+
 	getVideo(id : number) {
     	return { };
 	}
 
-	async getAllVideos() {
+	async getAllVideosAsArray() {
+		if (!this.db) return [];
+		if (!this.db.collections.videos) return [];
+
+		const doc = await this.db.collections.videos
+			.find()
+			.exec();
+
+		const result : VideoDAO[] = [];
+		for (let i = 0; i < doc.length; i++) {
+			result.push({
+				id: doc[i].get('video_id'),
+				name: doc[i].get('video_name'),
+				thumbnail: doc[i].get('video_thumbnail'),
+			});
+		}
+
+		return result;
+	}
+
+	async getAllVideosAsObject() {
 		if (!this.db) return { };
 		if (!this.db.collections.videos) return { };
 
@@ -52,8 +81,8 @@ class VideoDTO {
     	const result : {[key: string] : VideoDAO} = { };
     	for (let i = 0; i < doc.length; i++) {
     		result[doc[i].get('video_id')] = {
-    			videoId: doc[i].get('video_id'),
-    			videoName: doc[i].get('video_name'),
+    			id: doc[i].get('video_id'),
+    			name: doc[i].get('video_name'),
     			thumbnail: doc[i].get('video_thumbnail'),
     		};
     	}

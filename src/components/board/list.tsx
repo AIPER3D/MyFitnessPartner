@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { Content } from './content';
+import dummy from './images/dummy.jpg';
 
 type ListProps = {
 	content: Content;
@@ -75,6 +76,7 @@ const Text = styled.p`
 function List({ content }: ListProps) {
 	return (
 		<Box>
+			<Image src={ content.thumbnail ? content.thumbnail : dummy }></Image>
 			<Title> { content.title } </Title>
 			<Text>text</Text>
 		</Box>
