@@ -14,16 +14,12 @@ class RoutineDTO {
 		this.db = db;
 	}
 
-	async addRoutine(data : RoutineDAO) {
-		if (!this.db) return false;
-		if (!this.db.collections.routines) return false;
+	getDB() {
+		return this.db;
+	}
 
-		await this. db.collections.routines.insert({
-			routine_id: data['routineId'],
-			routine_name: data['routineName'],
-		});
-
-		return true;
+	getNewId() {
+		return new Date().getTime();
 	}
 
 	async getCount() {
@@ -37,11 +33,45 @@ class RoutineDTO {
 		return doc.length;
 	}
 
-	async getRoutineWithVideo() {
-    	return { };
+	async addRoutine(data : RoutineDAO) {
+		if (!this.db) return false;
+		if (!this.db.collections.routines) return false;
+
+		const arr : number[] = [];
+		for (let i = 0; i<data['videos'].length; i++) {
+			arr.push(data['videos'][i]['id']);
+		}
+
+		await this. db.collections.routines.insert({
+			routine_id: data['id'],
+			routine_name: data['name'],
+			videos: arr,
+		});
+
+		return true;
 	}
 
-	async getAllRoutines() {
+	async getAllRoutinesAsArray() {
+		if (!this.db) return [];
+		if (!this.db.collections.routines) return [];
+
+		const doc = await this.db.collections.routines
+			.find()
+			.exec();
+
+		const result : RoutineDAO[] = [];
+		for (let i = 0; i < doc.length; i++) {
+			result.push({
+				id: doc[i].get('routine_id'),
+				name: doc[i].get('routine_name'),
+				videos: [],
+			});
+		}
+
+		return result;
+	}
+
+	async getAllRoutinesAsObject() {
 		if (!this.db) return { };
     	if (!this.db.collections.routines) return { };
 
@@ -52,8 +82,8 @@ class RoutineDTO {
     	const result : {[key: number] : RoutineDAO} = { };
     	for (let i = 0; i < doc.length; i++) {
     		result[doc[i].get('routine_id')] = {
-    			routineId: doc[i].get('routine_id'),
-    			routineName: doc[i].get('routine_name'),
+    			id: doc[i].get('routine_id'),
+    			name: doc[i].get('routine_name'),
     			videos: [],
     		};
     	}

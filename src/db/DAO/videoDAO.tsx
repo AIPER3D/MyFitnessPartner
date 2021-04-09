@@ -1,6 +1,6 @@
 interface VideoDAO {
-    videoId: number;
-    videoName: string;
+    id: number;
+    name: string;
     thumbnail: string;
 }
 
