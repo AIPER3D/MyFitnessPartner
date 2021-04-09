@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { createRxDatabase } from 'rxdb';
+import {createRxDatabase, RxDatabase} from 'rxdb';
 
 import {
 	ExerciseSchema,
@@ -9,20 +9,30 @@ import {
 	UserSchema,
 } from '../../db/schema';
 
-function DB({ db } : any) {
+
+type PageProps = {
+	setPage: (page : string) => void;
+};
+
+function DB({ setPage } : PageProps) {
 	useEffect(() => {
-		if (!db) return;
+		setPage('db');
 
 		(async () => {
-			await db.remove();
+			const tdb = await createRxDatabase({
+				name: 'data',
+				adapter: 'idb',
+			});
+
+			await tdb.remove();
 
 			setTimeout(async () => {
-				db = await createRxDatabase({
+				const tdb = await createRxDatabase({
 					name: 'data',
 					adapter: 'idb',
 				});
 
-				await db.addCollections({
+				await tdb.addCollections({
 					exercises: {
 						schema: ExerciseSchema,
 					},
@@ -40,7 +50,7 @@ function DB({ db } : any) {
 					},
 				});
 
-				console.log(db);
+				console.log(tdb);
 			}, 3000);
 		})();
 	}, []);
