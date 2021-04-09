@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { Content } from './content';
+import dummy from './images/dummy.jpg';
 
 type GalleryProps = {
 	content: Content;
