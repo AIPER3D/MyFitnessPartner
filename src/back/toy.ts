@@ -1,0 +1,7 @@
+class Toy
+{
+    
+
+}
+
+export { Toy };
