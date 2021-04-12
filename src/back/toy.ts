@@ -8,8 +8,7 @@ class Toy
 
     function extract_poses(heatmaps:any[][],pafs:any[][] , upsample_ratio:number): any
     {
-        var nj = require('numjs');
-        heatmaps = nj.transpose();
+        
     }
 
 
