@@ -1,3 +1,5 @@
+import { Tensor, InferenceSession } from "onnxjs";
+
 class Toy
 {
     private AVG_PERSON_HEIGHT : number = 100;
@@ -6,10 +8,10 @@ class Toy
     private previous_poses_2d : any[] = [];
     
 
-    function extract_poses(heatmaps:any[][],pafs:any[][] , upsample_ratio:number): any
-    {
+    // function extract_poses(heatmaps:any[][],pafs:any[][] , upsample_ratio:number): any
+    // {
         
-    }
+    // }
 
 
     // function get_root_relative_poses(features:any[][],heatmaps:any[][],pafs:any[][]) : any
