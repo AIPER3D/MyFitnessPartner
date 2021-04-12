@@ -1,3 +1,4 @@
+import isElectron from 'is-electron';
 import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
@@ -30,7 +31,7 @@ const Body = styled.div`
 	margin: 0px auto 0px auto;
 	padding: 20px 0px 0px 0px;
 	
-	overflow: scroll;
+	overflow: hidden;
 `;
 
 function App() {
@@ -41,6 +42,7 @@ function App() {
 	addRxPlugin(require('pouchdb-adapter-idb'));
 
 	useEffect(() => {
+		console.log(isElectron());
 		(async () => {
 			if (devMode) return;
 			if (db) return;
