@@ -15,6 +15,12 @@ import {
 	DB,
 } from './pages';
 
+declare global {
+	interface Window {
+		api: any;
+	}
+}
+
 const Root = styled.div`
 	position: fixed;
 	left: 250px; 
@@ -42,7 +48,6 @@ function App() {
 	addRxPlugin(require('pouchdb-adapter-idb'));
 
 	useEffect(() => {
-		console.log(isElectron());
 		(async () => {
 			if (devMode) return;
 			if (db) return;
@@ -120,7 +125,7 @@ function App() {
 	} else {
 		return (
 			<Router>
-				<Menu devMode = { true } selected={ page } />
+				<Menu devMode = { false } selected={ page } />
 				<Root>
 					<Body>
 						<p>DB 접속 오류</p>
