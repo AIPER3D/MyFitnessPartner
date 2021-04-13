@@ -28,37 +28,65 @@ class MemoDTO {
 		return true;
 	}
 
-	async getCount() {
+	async getCount(data: string) {
 		if (!this.db) return 0;
 		if (!this.db.collections.memos) return 0;
 
 		const doc = await this.db.collections.memos
 			.find()
+			.where('memo_date')
+			.gt(data)
 			.exec();
 
 		return doc.length;
 	}
 
-	async getMemo(data: MemoDAO) {
+	async getMemo(data: string) {
 		if (!this.db) return { };
 		if (!this.db.collections.memos) return { };
 
 		const doc = await this.db.collections.memos
 			.find()
 			.where('memo_date')
-			.gt(data['memoDate'])
+			.gt(data)
 			.exec();
 
-		const result : {[key:number] : MemoDAO} = { };
+		const result : MemoDAO[] = [];
 		for (let i =0; i < doc.length; i++) {
-			result[i] = {
+			result.push({
 				memoId: doc[i].get('memo_id'),
 				memoDate: doc[i].get('memo_date'),
 				memoType: doc[i].get('memo_type'),
 				memoValue: doc[i].get('memo_value'),
-			};
+			});
 		}
 		return result;
+	}
+
+	async updateMemo(data: MemoDAO) {
+		if (!this.db) return false;
+		if (!this.db.collections.memos) return false;
+
+		const doc = await this.db.collections.memos
+			.find()
+			.where('memo_id')
+			.gt(data['memoId'])
+			.update({ memo_id: data['memoValue']});
+
+		return true;
+	}
+
+	async deleteMemo(data: number) {
+		if (!this.db) return false;
+		if (!this.db.collections.memos) return false;
+
+		const doc = await this.db.collections.memos
+			.find()
+			.where('memo_id')
+			.gt(data)
+			.remove();
+
+		return true;
 	}
 }
 
