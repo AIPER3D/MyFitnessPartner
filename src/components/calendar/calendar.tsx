@@ -105,7 +105,8 @@ function Calendar({db} : CalendarProps) {
 				</div>
 				{generate()}
 				<div>
-					<CalendarModal open={ modalOpen } close={ closeModal } header={ present }>
+					<CalendarModal open={ modalOpen } close={ closeModal }
+						header={ present } db={db}>
 						abcd
 					</CalendarModal>
 				</div>

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { RxDatabase } from 'rxdb';
 import { MemoDAO } from '../../db/DAO/memoDAO';
 import { MemoDTO } from '../../db/DTO/memoDTO';
@@ -15,18 +15,19 @@ type Props = {
 }
 
 function CalendarModal({open, close, header, db, children}: Props) {
-	const memoDTO = new MemoDTO();
+	const [memoDTO, setMemoDTO] = useState<MemoDTO>(new MemoDTO());
 	useEffect(()=>{
 		memoDTO.setDB(db);
-	});
-	function handleAdd() {
-		const memo = new MemoDAO({
+	}, [db]);
+	async function handleAdd() {
+		const memo : MemoDAO =
+		{
 			memoId: new Date().getTime(),
 			memoDate: header,
-			memoType: 'm',
-			memoValue: '',
-		});
-		memoDTO.addMemo(memo);
+			memoType: 'memo',
+			memoValue: 'test',
+		};
+		await memoDTO.addMemo(memo);
 	}
 	return (
 		<div className={ open ? 'openModal modal' : 'modal' }>
@@ -34,7 +35,7 @@ function CalendarModal({open, close, header, db, children}: Props) {
 				<section>
 					<header>
 						{header}
-						<button className="add"> &#43; </button>
+						<button className="add" onClick={handleAdd}> &#43; </button>
 						<button className="close" onClick={close}> &times; </button>
 					</header>
 					<main>

@@ -5,7 +5,7 @@ import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { createRxDatabase, addRxPlugin, RxDatabase } from 'rxdb';
 
 import { Menu } from './components/common';
-import { VideoSchema, RoutineSchema } from './db/schema';
+import { VideoSchema, RoutineSchema, MemoSchema } from './db/schema';
 import {
 	Main,
 	Routines,
@@ -65,6 +65,11 @@ function App() {
 			await tdb.collection({
 				name: 'videos',
 				schema: VideoSchema,
+			});
+
+			await tdb.collection({
+				name: 'memos',
+				schema: MemoSchema,
 			});
 
 			setDB(tdb);

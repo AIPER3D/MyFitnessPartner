@@ -14,16 +14,19 @@ class MemoDTO {
 		this.db = db;
 	}
 
+	getDB() {
+		return this.db;
+	}
+
 	async addMemo(data: MemoDAO) {
 		if (!this.db) return false;
 		if (!this.db.collections.memos) return false;
-
-		await this. db.collections.memos.insert({
+		console.log(await this.db.collections.memos.insert({
 			memo_id: data['memoId'],
 			memo_date: data['memoDate'],
 			memo_type: data['memoType'],
 			memo_value: data['memoValue'],
-		});
+		}));
 
 		return true;
 	}
@@ -42,13 +45,11 @@ class MemoDTO {
 	}
 
 	async getMemo(data: string) {
-		if (!this.db) return { };
-		if (!this.db.collections.memos) return { };
+		if (!this.db) return [];
+		if (!this.db.collections.memos) return [];
 
 		const doc = await this.db.collections.memos
 			.find()
-			.where('memo_date')
-			.gt(data)
 			.exec();
 
 		const result : MemoDAO[] = [];

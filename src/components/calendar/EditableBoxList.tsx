@@ -10,25 +10,32 @@ type Props = {
     db: RxDatabase;
 }
 function EditableBoxList({date, db} : Props) {
-	const memoDTO = new MemoDTO();
+	const [memoDTO, setMemoDTO] = useState<MemoDTO>(new MemoDTO());
+	const [memo, setMemo] = useState<any>([]);
 	useEffect(()=>{
+		console.log(db);
 		memoDTO.setDB(db);
+		(async () => {
+			await generate();
+		})();
 	}, [db]);
 
 
 	async function generate() {
-		const editableBox = [];
-		const memo : MemoDAO[] = await memoDTO.getMemo(date);
-
-		for (let i=0; i <= memo.length; i++) {
-			editableBox.push(<CalendarEditableBox init={memo[i]['memoValue']}/>);
-		}
-
-		return editableBox;
+		setMemo(await memoDTO.getMemo(date));
 	}
+	const editableBox = [];
+	if (memo) {
+		console.log(memo);
+		for (let i=0; i < memo.length; i++) {
+			editableBox.push(<CalendarEditableBox init={memo[i]['memoValue']}
+				key={memo[i]['memoId']}/>);
+		}
+	}
+
 	return (
 		<div>
-			{generate()}
+			{editableBox}
 		</div>
 
 	);
