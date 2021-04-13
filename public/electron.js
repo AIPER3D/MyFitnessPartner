@@ -1,4 +1,4 @@
-const { BrowserView, BrowserWindow, app } = require('electron');
+const { BrowserView, BrowserWindow, app, ipcMain } = require('electron');
 const path = require('path');
 const isDev = require('electron-is-dev');
 
@@ -12,12 +12,13 @@ function createWindow() {
 		center: true,
 		// fullscreen: true,
 		webPreferences: {
-			nodeIntegration: true,
-			enableRemoteModule: true,
+			nodeIntegration: false,
+			nodeIntegrationInWorker: false,
+			enableRemoteModule: false,
 			worldSafeExecuteJavaScript: true,
 			contextIsolation: true,
 			devTools: true,
-			nodeIntegrationInWorker: true,
+			preload: path.join(__dirname, 'preload.js'),
 		},
 	});
 
@@ -31,15 +32,22 @@ function createWindow() {
 	}
 }
 
+/*
 require('electron-reload')(__dirname, {
 	electron: require(
 		path.join(__dirname, '../node_modules', '.bin', 'electron')
 	),
 	// hardResetMethod: 'exit',
 });
+*/
 
 app.whenReady().then(createWindow);
 
 app.on('window-all-closed', () => {
 	app.quit();
+});
+
+ipcMain.handle('ping', (event, arg) => {
+	const result = arg + ' -> arg_pong';
+	return result;
 });

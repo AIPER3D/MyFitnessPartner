@@ -1,3 +1,4 @@
+import isElectron from 'is-electron';
 import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
@@ -13,6 +14,12 @@ import {
 	VideoCreate,
 	DB,
 } from './pages';
+
+declare global {
+	interface Window {
+		api: any;
+	}
+}
 
 const Root = styled.div`
 	position: fixed;
@@ -30,7 +37,7 @@ const Body = styled.div`
 	margin: 0px auto 0px auto;
 	padding: 20px 0px 0px 0px;
 	
-	overflow: scroll;
+	overflow: hidden;
 `;
 
 function App() {
@@ -118,7 +125,7 @@ function App() {
 	} else {
 		return (
 			<Router>
-				<Menu devMode = { true } selected={ page } />
+				<Menu devMode = { false } selected={ page } />
 				<Root>
 					<Body>
 						<p>DB 접속 오류</p>
