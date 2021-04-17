@@ -1,9 +1,11 @@
 const onnx = require('onnxjs');
 const ndarray = require('ndarray');
 const ops = require('ndarray-ops');
+const np = require('numpy-matrix-js');
+const cv = require('opencv4nodejs');
 
-import image from '1.png';
-
+const image = cv.imread('./public/images/test.png');
+cv.imshowWait('Image', image);
 class Toy {
 	private aa :number;
     private AVG_PERSON_HEIGHT : number;
@@ -13,7 +15,8 @@ class Toy {
 		Array<number[]>;
 	private previousPoses2d : any[] = [];
 
-	constructor() {
+	constructor() 
+	{
 		this.aa = 1;
 		this.AVG_PERSON_HEIGHT = 100;
 		this.mapIdToPanoptic = [1, 0, 9, 10, 11, 3, 4, 5, 12, 13, 14, 6, 7, 8, 15, 16, 17, 18];
@@ -29,8 +32,9 @@ class Toy {
 
 	// function extract_poses(heatmaps:any,pafs:any,upsample_ratio:number): any
 	// {
+	//     heatmaps = np.transpose(heatmaps,[1,2,0]); // 기존에서는 (1,2,0) 으로 해야되는대 계속 빨간중 떠서 일단 괄호를 바꿈 아마 문제있을듯 
+	// 	pafs = np.transpose(pafs,[1,2,0]); 
 
-	//     heatmaps =
 	// }
 
 
