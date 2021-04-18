@@ -6,30 +6,24 @@ import { MemoDTO } from '../../db/DTO/memoDTO';
 import CalendarEditableBox from './CalendarEditableBox';
 
 type Props = {
-    date: string;
+    memos: any[];
+	onRefresh: () => void;
     db: RxDatabase;
 }
-function EditableBoxList({date, db} : Props) {
+function EditableBoxList({memos, onRefresh, db} : Props) {
 	const [memoDTO, setMemoDTO] = useState<MemoDTO>(new MemoDTO());
-	const [memo, setMemo] = useState<any>([]);
 	useEffect(()=>{
 		memoDTO.setDB(db);
-		(async () => {
-			await generate();
-		})();
 	}, [db]);
 
-
-	async function generate() {
-		setMemo(await memoDTO.getMemo(date));
-	}
 	const editableBox = [];
-	if (memo) {
-		for (let i=0; i < memo.length; i++) {
-			editableBox.push(<CalendarEditableBox init={memo[i]['memoValue']}
-				key={memo[i]['memoId']}/>);
+	if (memos) {
+		for (let i=0; i < memos.length; i++) {
+			editableBox.push(<CalendarEditableBox memo={memos[i]}
+				onRefresh={ onRefresh } db={db} key={memos[i]['memoId']}/>);
 		}
 	}
+
 
 	return (
 		<div>
