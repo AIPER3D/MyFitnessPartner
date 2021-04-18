@@ -50,6 +50,8 @@ class MemoDTO {
 
 		const doc = await this.db.collections.memos
 			.find()
+			.where('memo_date')
+			.gt(data)
 			.exec();
 
 		const result : MemoDAO[] = [];

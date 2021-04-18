@@ -31,6 +31,7 @@ function EditableBoxList({date, db} : Props) {
 			editableBox.push(<CalendarEditableBox init={memo[i]['memoValue']}
 				key={memo[i]['memoId']}/>);
 		}
+		console.log(memoDTO.getCount(date));
 	}
 
 	return (
