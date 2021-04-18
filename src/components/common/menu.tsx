@@ -156,7 +156,7 @@ function Menu({ devMode, selected }: MenuProps) {
 					</User>
 				</DIV>
 				<DIV>
-					<Button href={'#'}>운동하기</Button>
+					<Button href={'/exercise'}>운동하기</Button>
 				</DIV>
 				<UL>
 					<LI value={selected == 'main' ? 'selected' : ''}>
