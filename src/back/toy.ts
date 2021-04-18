@@ -15,7 +15,7 @@
 // 		Array<number[]>;
 // 	private previousPoses2d : any[] = [];
 
-// 	constructor() 
+// 	constructor()
 // 	{
 // 		this.aa = 1;
 // 		this.AVG_PERSON_HEIGHT = 100;
@@ -32,8 +32,9 @@
 
 // 	// function extract_poses(heatmaps:any,pafs:any,upsample_ratio:number): any
 // 	// {
-// 	//     heatmaps = np.transpose(heatmaps,[1,2,0]); // 기존에서는 (1,2,0) 으로 해야되는대 계속 빨간중 떠서 일단 괄호를 바꿈 아마 문제있을듯 
-// 	// 	pafs = np.transpose(pafs,[1,2,0]); 
+// 	//     heatmaps = np.transpose(heatmaps,[1,2,0]);
+// 기존에서는 (1,2,0) 으로 해야되는대 계속 빨간중 떠서 일단 괄호를 바꿈 아마 문제있을듯
+// 	// 	pafs = np.transpose(pafs,[1,2,0]);
 
 // 	// }
 
@@ -82,3 +83,4 @@
 
 // export { Toy, preprocess, loadOnnx };
 
+export {};
