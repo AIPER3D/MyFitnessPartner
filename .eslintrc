@@ -28,7 +28,8 @@
         "indent" : ["error","tab"],
         "object-curly-spacing":["off"],
         "no-tabs":"off",
-        "linebreak-style" :"off"
+        "linebreak-style" :"off",
+        "no-var":"off"
     },
     "globals": {
         "jQuery": true,
