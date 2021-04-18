@@ -41,6 +41,7 @@ class VideoDTO {
 			video_id: data['id'],
 			video_name: data['name'],
 			thumbnail: data['thumbnail'],
+			timeline: [],
 		});
 
 		return true;

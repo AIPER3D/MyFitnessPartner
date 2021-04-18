@@ -79,10 +79,15 @@ const Text = styled.p`
 
 function Item({ db, data } : ItemProps) {
 	const videoDTO = new VideoDTO();
+	const [id, setId] = useState<number>(videoDTO.getNewId());
 	const [thumb, setThumb] = useState<string>(progress);
+
 	const [current, setCurrent] = useState<number>(0);
 	const [total, setTotal] = useState<number>(0);
-	const [status, setStatus] = useState<number>(0);
+
+	const [uploadStatus, setUploadStatus] = useState<number>(0);
+	const [analysisStatus, setAnalysisStatus] = useState<number>(0);
+	const [submitStatus, setSubmitStatus] = useState<number>(0);
 
 	videoDTO.setDB(db);
 
@@ -110,7 +115,20 @@ function Item({ db, data } : ItemProps) {
 			const success = image.length > 100000;
 
 			if (success) {
+				if (e.target == null || e.target.result == null) {
+					setUploadStatus(-1);
+					return;
+				}
+
+				const thumbName = id + '.im';
+				window.api.fs.writeFileSync('./files/thumbnails/' + thumbName, image);
 				setThumb(image);
+				setUploadStatus(2);
+
+				const vidName = id + '.vd';
+				const vidValue = e.target.result.toString();
+				window.api.fs.writeFileSync('./files/videos/' + vidName, vidValue);
+				setUploadStatus(3);
 				analysis(blob, image);
 			}
 			return success;
@@ -138,31 +156,31 @@ function Item({ db, data } : ItemProps) {
 
 			})
 			.catch(() => {
-				console.error('썸네일 생성 오류');
+				setUploadStatus(-1);
 			});
 	};
 	data.reader.onprogress = (e) => {
 		if (e.lengthComputable) {
 			setCurrent(e.loaded);
 			setTotal(e.total);
-			setStatus(1);
+			setUploadStatus(1);
 		}
 	};
 
 	// 운동 영상 분석
 	function analysis(video : Blob, thumbnail : string) {
-		setStatus(2);
+		setAnalysisStatus(1);
 
 		setTimeout(() => {
+			setAnalysisStatus(2);
 			submit(video, thumbnail).then(() => { });
 		}, 3000);
 	}
 
 	// 운동 영상 등록
 	async function submit(video : Blob, thumbnail : string) {
-		setStatus(3);
+		setSubmitStatus(1);
 
-		const id = videoDTO.getNewId();
 		const videoDAO : VideoDAO = {
 			id: id,
 			name: data.file.name,
@@ -170,88 +188,88 @@ function Item({ db, data } : ItemProps) {
 		};
 
 		const result = await videoDTO.addVideo(videoDAO);
-		console.log(result);
-
-		setStatus(4);
+		if (!result) {
+			setSubmitStatus(-1);
+			return;
+		}
+		setSubmitStatus(2);
 	}
 
-	if (status == 1) {
-		return (
-			<Root>
-				<div></div>
-				<Thumbnail src={ thumb }/>
-				<Title> { data.file.name } </Title>
-				<Line>
-					<Image src={ progress16 } />
-					<Text>업로드 중 ({ Math.round(100 * current / total).toFixed(0) }%)</Text>
-				</Line>
-			</Root>
-		);
-	} else if (status == 2) {
-		return (
-			<Root>
-				<div></div>
-				<Thumbnail src={ thumb }/>
-				<Title> { data.file.name } </Title>
-				<Line>
-					<Image src={ check16 } />
-					<Text>업로드 완료</Text>
-				</Line>
-				<Line>
-					<Image src={ progress16 } />
-					<Text>분석 중</Text>
-				</Line>
-			</Root>
-		);
-	} else if (status == 3) {
-		return (
-			<Root>
-				<div></div>
-				<Thumbnail src={ thumb }/>
-				<Title> { data.file.name } </Title>
-				<Line>
-					<Image src={ check16 } />
-					<Text>업로드 완료</Text>
-				</Line>
-				<Line>
-					<Image src={ check16 } />
-					<Text>분석 완료</Text>
-				</Line>
-				<Line>
-					<Image src={ progress16 } />
-					<Text>등록 중</Text>
-				</Line>
-			</Root>
-		);
-	} else if (status == 4) {
-		return (
-			<Root>
-				<div></div>
-				<Thumbnail src={ thumb }/>
-				<Title> { data.file.name } </Title>
-				<Line>
-					<Image src={ check16 } />
-					<Text>업로드 완료</Text>
-				</Line>
-				<Line>
-					<Image src={ check16 } />
-					<Text>분석 완료</Text>
-				</Line>
-				<Line>
-					<Image src={ check16 } />
-					<Text>등록 완료</Text>
-				</Line>
-			</Root>
-		);
-	} else {
-		return (
-			<Root>
-				<div></div>
-				<Thumbnail src={ thumb }/>
-				<Title> { data.file.name } </Title>
-			</Root>
-		);
+	// 출력
+	const arr = [];
+
+	// 업로드
+	if (uploadStatus == 0) {
+		arr.push(<Line key={ 0 }>
+			<Image src={ progress16 } />
+			<Text>업로드 중 ({ Math.round(100 * current / total).toFixed(0) }%)</Text>
+		</Line>);
+	} else if (uploadStatus == 1) {
+		arr.push(<Line key={ 0 }>
+			<Image src={ progress16 } />
+			<Text>썸네일 저장중</Text>
+		</Line>);
+	} else if (uploadStatus == 2) {
+		arr.push(<Line key={ 0 }>
+			<Image src={ progress16 } />
+			<Text>영상 저장중</Text>
+		</Line>);
+	} else if (uploadStatus == 3) {
+		arr.push(<Line key={ 0 }>
+			<Image src={ check16 } />
+			<Text>업로드 완료</Text>
+		</Line>);
+	} else if (uploadStatus == -1) {
+		arr.push(<Line key={ 0 }>
+			<Image src={ check16 } />
+			<Text>업로드 오류</Text>
+		</Line>);
 	}
+
+	// 분석
+	if (analysisStatus == 1) {
+		arr.push(<Line key={ 1 }>
+			<Image src={ progress16 } />
+			<Text>분석 중</Text>
+		</Line>);
+	} else if (analysisStatus == 2) {
+		arr.push(<Line key={ 1 }>
+			<Image src={ check16 } />
+			<Text>분석 완료</Text>
+		</Line>);
+	} else if (analysisStatus == -1) {
+		arr.push(<Line key={ 1 }>
+			<Image src={ check16 } />
+			<Text>분석 실패</Text>
+		</Line>);
+	}
+
+	// 등록
+	if (submitStatus == 1) {
+		arr.push(<Line key={ 2 }>
+			<Image src={ progress16 } />
+			<Text>등록 중</Text>
+		</Line>);
+	} else if (submitStatus == 2) {
+		arr.push(<Line key={ 2 }>
+			<Image src={ check16 } />
+			<Text>등록 완료</Text>
+		</Line>);
+	} else if (submitStatus == -1) {
+		arr.push(<Line key={ 2 }>
+			<Image src={ check16 } />
+			<Text>등록 실패</Text>
+		</Line>);
+	}
+
+
+	return (
+		<Root>
+			<Thumbnail src={ thumb }/>
+			<Title> { data.file.name } </Title>
+			{ arr }
+		</Root>
+	);
 }
 
 Item.defaultProps = {

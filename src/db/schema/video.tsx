@@ -11,7 +11,7 @@ const VideoSchema = {
 		'video_name': {
 			'type': 'string',
 		},
-		'video_thumbnail': {
+		'thumbnail': {
 			'type': 'string',
 		},
 		'timeline': {
