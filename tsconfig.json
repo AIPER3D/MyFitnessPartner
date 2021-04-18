@@ -22,6 +22,12 @@
     "noEmit": true,
     "outDir": "/dist"
   },
+<<<<<<< Updated upstream
+=======
+  "files" : [
+    "src/back/toy.ts",
+  ],
+>>>>>>> Stashed changes
   "include": [
     "src",
     "public/electron.js"
