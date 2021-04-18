@@ -13,6 +13,7 @@ import {
 	Videos,
 	VideoCreate,
 	DB,
+	Exercise,
 } from './pages';
 
 declare global {
@@ -107,6 +108,9 @@ function App() {
 				<Root>
 					<Body>
 						<Switch>
+							<Route exact path="/exercise">
+								<Exercise db={ db }/>
+							</Route>
 							<Route exact path="/videos/new">
 								<VideoCreate db={ db } setPage={ setPage } />
 							</Route>
