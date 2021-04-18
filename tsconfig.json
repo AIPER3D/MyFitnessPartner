@@ -22,10 +22,6 @@
     "noEmit": true,
     "outDir": "/dist"
   },
-  "files": [
-    "src/back/toy.ts",
-    "src/back/test.ts"
-  ],
   "include": [
     "src",
     "public/electron.js"
