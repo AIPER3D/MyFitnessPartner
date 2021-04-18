@@ -4,7 +4,7 @@ const path = require('path');
 
 module.exports = {
 	entry: './src/index.tsx',
-	target: 'electron',
+	target: 'electron-main',
 	module: {
 		rules: [
 			// {
