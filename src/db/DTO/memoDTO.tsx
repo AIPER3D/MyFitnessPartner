@@ -38,7 +38,7 @@ class MemoDTO {
 		const doc = await this.db.collections.memos
 			.find()
 			.where('memo_date')
-			.gt(data)
+			.eq(data)
 			.exec();
 
 		return doc.length;
@@ -51,7 +51,7 @@ class MemoDTO {
 		const doc = await this.db.collections.memos
 			.find()
 			.where('memo_date')
-			.gt(data)
+			.eq(data)
 			.exec();
 
 		const result : MemoDAO[] = [];
@@ -73,7 +73,7 @@ class MemoDTO {
 		const doc = await this.db.collections.memos
 			.find()
 			.where('memo_id')
-			.gt(data['memoId'])
+			.eq(data['memoId'])
 			.update({ memo_id: data['memoValue']});
 
 		return true;
@@ -86,7 +86,7 @@ class MemoDTO {
 		const doc = await this.db.collections.memos
 			.find()
 			.where('memo_id')
-			.gt(data)
+			.eq(data)
 			.remove();
 
 		return true;
