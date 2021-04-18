@@ -79,9 +79,23 @@ const Text = styled.div`
 `;
 
 function Gallery({ content }: GalleryProps) {
+	const exist = window.api.fs.existsSync(content['thumbnail']);
+	if (exist) {
+		const source = window.api.fs.readFileSync(content['thumbnail']);
+		const thumbnail = new TextDecoder().decode(source);
+
+		return (
+			<Box>
+				<Image src={ thumbnail }/>
+				<Title> { content.title } </Title>
+				<Text> { content.desc } </Text>
+			</Box>
+		);
+	}
+
 	return (
 		<Box>
-			<Image src={ content.thumbnail ? content.thumbnail : dummy }/>
+			<Image src={ dummy }/>
 			<Title> { content.title } </Title>
 			<Text> { content.desc } </Text>
 		</Box>

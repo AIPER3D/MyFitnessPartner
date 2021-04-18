@@ -44,7 +44,7 @@ function Videos({ db, setPage } : PageProps) {
 			arr.push({
 				id: video[i]['id'],
 				title: video[i]['name'],
-				thumbnail: video[i]['thumbnail'],
+				thumbnail: './files/thumbnails/' + video[i]['id'] + '.im',
 			});
 		}
 
