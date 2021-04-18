@@ -18,11 +18,11 @@
     "noFallthroughCasesInSwitch": true,
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "isolatedModules": false,
+    "isolatedModules": true,
     "noEmit": true,
     "outDir": "/dist"
   },
-  "files" : [
+  "files": [
     "src/back/toy.ts",
     "src/back/test.ts"
   ],

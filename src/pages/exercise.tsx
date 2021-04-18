@@ -10,15 +10,16 @@ type props = {
 const Wrapper = styled.div``;
 
 function Exercise({ db }: props) {
+	const [isPlaying, setPlaying] = useState(false);
 
-    const [isPlaying, setPlaying] = useState(false);
+	const HEIGHT = 500;
+	const WIDTH = 500;
 
-    const HEIGHT = 500;
-    const WIDTH = 500;
-
-    return(
-        <Wrapper>
+	return (
+		<Wrapper>
             =
-        </Wrapper>
-    )
+		</Wrapper>
+	);
 }
+
+export default Exercise;

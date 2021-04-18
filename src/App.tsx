@@ -109,7 +109,7 @@ function App() {
 					<Body>
 						<Switch>
 							<Route exact path="/exercise">
-								<Exercise/>
+								<Exercise db={ db }/>
 							</Route>
 							<Route exact path="/videos/new">
 								<VideoCreate db={ db } setPage={ setPage } />
