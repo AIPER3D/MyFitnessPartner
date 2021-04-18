@@ -71,10 +71,9 @@ class MemoDTO {
 		if (!this.db.collections.memos) return false;
 
 		const doc = await this.db.collections.memos
-			.find()
-			.where('memo_id')
-			.eq(data['memoId'])
-			.update({ memo_id: data['memoValue']});
+			.findOne()
+			.where({memo_id: data['memoId']})
+			.update({ $set: {memo_value: data['memoValue']}});
 
 		return true;
 	}

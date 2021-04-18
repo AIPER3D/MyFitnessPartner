@@ -16,9 +16,14 @@ type Props = {
 
 function CalendarModal({open, close, header, db, children}: Props) {
 	const [memoDTO, setMemoDTO] = useState<MemoDTO>(new MemoDTO());
+	const [refresh, setRefresh] = useState(false);
+	const [memo, setMemo] = useState<any>([]);
 	useEffect(()=>{
 		memoDTO.setDB(db);
-	}, [db]);
+		(async () => {
+			await generate();
+		})();
+	}, [db, refresh, header]);
 	async function handleAdd() {
 		const memo : MemoDAO =
 		{
@@ -28,6 +33,13 @@ function CalendarModal({open, close, header, db, children}: Props) {
 			memoValue: 'test',
 		};
 		await memoDTO.addMemo(memo);
+		onRefresh();
+	}
+	const onRefresh = () => {
+		setRefresh(!refresh);
+	};
+	async function generate() {
+		setMemo(await memoDTO.getMemo(header));
 	}
 	return (
 		<div className={ open ? 'openModal modal' : 'modal' }>
@@ -40,7 +52,7 @@ function CalendarModal({open, close, header, db, children}: Props) {
 					</header>
 					<main>
 						{children}
-						<EditableBoxList date={header} db={db}/>
+						<EditableBoxList memos={memo} onRefresh={onRefresh} db={db}/>
 					</main>
 					<footer>
 						<button className="close" onClick={close}> close </button>
