@@ -13,7 +13,6 @@ function EditableBoxList({date, db} : Props) {
 	const [memoDTO, setMemoDTO] = useState<MemoDTO>(new MemoDTO());
 	const [memo, setMemo] = useState<any>([]);
 	useEffect(()=>{
-		console.log(db);
 		memoDTO.setDB(db);
 		(async () => {
 			await generate();
@@ -26,7 +25,6 @@ function EditableBoxList({date, db} : Props) {
 	}
 	const editableBox = [];
 	if (memo) {
-		console.log(memo);
 		for (let i=0; i < memo.length; i++) {
 			editableBox.push(<CalendarEditableBox init={memo[i]['memoValue']}
 				key={memo[i]['memoId']}/>);
