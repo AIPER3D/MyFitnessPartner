@@ -2,6 +2,7 @@
   "compilerOptions": {
     "target": "es5",
     "module": "esnext",
+    "sourceMap": true,
     "allowJs": true,
     "jsx": "react-jsx",
     "strict": true,
@@ -17,10 +18,14 @@
     "noFallthroughCasesInSwitch": true,
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "isolatedModules": true,
+    "isolatedModules": false,
     "noEmit": true,
     "outDir": "/dist"
   },
+  "files" : [
+    "src/back/toy.ts",
+    "src/back/test.ts"
+  ],
   "include": [
     "src",
     "public/electron.js"
