@@ -57,6 +57,13 @@ module.exports = {
 					loader: 'file-loader'
 				}]
 			},
+			{
+				test: /\.worker\.js$/,
+				loader: "worker-loader",
+				options: {
+					esModule: false,
+				},
+			},
 		]
 	},
 	plugins: [
