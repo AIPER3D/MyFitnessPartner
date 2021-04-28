@@ -5,7 +5,9 @@
 //     cv.waitKey();
 // });
 const { spawn } = require('child_process');
-const childPython = spawn('python', ['--version']);
+// const childPython = spawn('python', ['--version']);
+// const childPython = spawn('python', ['./src/back/sum.py']);
+const childPython = spawn('python', ['./src/back/sum.py', 4, 5]);
 
 childPython.stdout.on('data', (data:any)=> {
 	console.log('stdout: '+ data);
