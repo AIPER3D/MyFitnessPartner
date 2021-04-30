@@ -12,6 +12,7 @@ import DevDB from './dev/db';
 
 export {
 	Main,
+	Menu,
 	RoutineCreate,
 	Routines,
 	VideoCreate,
