@@ -64,14 +64,20 @@ function Exercise({ db }: props) {
 
 				const heatmapsTensor =
 					tf.tensor4d(
-						heatmaps?.data, [pdim[0], pdim[1], pdim[2], pdim[3]], 'float32');
+						heatmaps?.data, [hdim[0], hdim[1], hdim[2], hdim[3]], 'float32');
 
-				const process = window.api.spawn(
+				const process = window.api.sp(
 					'python',
-					['src/util/modules/parse_poses.py',
+					['./src/back/sum.py',
 						featuresTensor,
 						partAffinityFieldTensor,
 						heatmapsTensor]);
+
+				console.log(process);
+
+				process.stdout.on('data', (data:any)=> {
+					console.log(data);
+				});
 			}
 
 			// 1차원 배열에 차원 값을 가진 데이터
