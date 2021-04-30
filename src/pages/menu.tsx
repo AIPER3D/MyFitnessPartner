@@ -119,11 +119,11 @@ const UserStatus = styled.p`
 `;
 
 interface Param {
-	page: string;
+	route: string;
 }
 
 function Menu() {
-	const { page } = useParams<Param>();
+	const { route } = useParams<Param>();
 
 	return (
 		<NAV>
@@ -139,19 +139,19 @@ function Menu() {
 				<Button href={'/exercise2'}>운동하기</Button>
 			</DIV>
 			<UL>
-				<LI value={page == undefined ? 'selected' : ''}>
+				<LI value={route == undefined ? 'selected' : ''}>
 					<Link to="/">
 						<FontAwesomeIcon icon={faHome} size={'lg'} color={'#f2f5ea'}/>
 						<MenuName>메인 화면</MenuName>
 					</Link>
 				</LI>
-				<LI value={page == 'videos' ? 'selected' : ''}>
+				<LI value={route == 'videos' ? 'selected' : ''}>
 					<Link to="/videos/1">
 						<FontAwesomeIcon icon={faHome} size={'lg'} color={'#f2f5ea'}/>
 						<MenuName>영상 관리</MenuName>
 					</Link>
 				</LI>
-				<LI value={page == 'routines' ? 'selected' : ''}>
+				<LI value={route == 'routines' ? 'selected' : ''}>
 					<Link to="/routines/1">
 						<FontAwesomeIcon icon={faHome} size={'lg'} color={'#f2f5ea'}/>
 						<MenuName>루틴 관리</MenuName>

@@ -106,6 +106,9 @@ function App() {
 						<Route path="/db">
 							<DevDB />
 						</Route>
+						<Route path="/">
+							<DevMain />
+						</Route>
 					</Switch>
 				</ContainerWithoutMenu>
 			</Router>
@@ -114,14 +117,17 @@ function App() {
 		return (
 			<Router>
 				<Switch>
-					<Route path="/exercise2">
+					<Route path="/exercise">
 						<ContainerWithoutMenu>
-							<Route exact path="/exercise2">
-								<Exercise2 db={ db }/>
-							</Route>
+							<Exercise db={ db }/>
 						</ContainerWithoutMenu>
 					</Route>
-					<Route path="/">
+					<Route path="/exercise2">
+						<ContainerWithoutMenu>
+							<Exercise2 db={ db }/>
+						</ContainerWithoutMenu>
+					</Route>
+					<Route path="/:route">
 						<Menu />
 						<ContainerWithMenu>
 							<Body>
@@ -142,6 +148,14 @@ function App() {
 										<Main db={ db } />
 									</Route>
 								</Switch>
+							</Body>
+						</ContainerWithMenu>
+					</Route>
+					<Route path="/">
+						<Menu />
+						<ContainerWithMenu>
+							<Body>
+								<Main db={ db } />
 							</Body>
 						</ContainerWithMenu>
 					</Route>

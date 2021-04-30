@@ -4,7 +4,9 @@ import { Link } from 'react-router-dom';
 function Main() {
 	return (
 		<div>
-			<Link to={ '/db'} >DB 생성</Link>
+			<ul>
+				<li><Link to={ '/db'} >DB 생성</Link></li>
+			</ul>
 		</div>
 	);
 }
