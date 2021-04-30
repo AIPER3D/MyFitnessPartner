@@ -48,11 +48,30 @@ function Exercise({ db }: props) {
 			const partAffinityField = output.get('pafs');
 			const heatmaps = output.get('heatmaps');
 
-			if (features) {
-				const dim = features?.dims;
+			if (features && partAffinityField && heatmaps) {
+				const fdim = features?.dims;
 
-				console.log(
-					tf.tensor4d(features.data, [dim[0], dim[1], dim[2], dim[3]], 'float32'));
+				const featuresTensor =
+					tf.tensor4d(features.data, [fdim[0], fdim[1], fdim[2], fdim[3]], 'float32');
+
+				const pdim = partAffinityField?.dims;
+
+				const partAffinityFieldTensor =
+					tf.tensor4d(
+						partAffinityField?.data, [pdim[0], pdim[1], pdim[2], pdim[3]], 'float32');
+
+				const hdim = heatmaps.dims;
+
+				const heatmapsTensor =
+					tf.tensor4d(
+						heatmaps?.data, [pdim[0], pdim[1], pdim[2], pdim[3]], 'float32');
+
+				const process = window.api.spawn(
+					'python',
+					['src/util/modules/parse_poses.py',
+						featuresTensor,
+						partAffinityFieldTensor,
+						heatmapsTensor]);
 			}
 
 			// 1차원 배열에 차원 값을 가진 데이터
