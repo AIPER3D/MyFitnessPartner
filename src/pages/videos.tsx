@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { RxDatabase } from 'rxdb';
@@ -22,28 +23,36 @@ const Btn = styled.div`
 
 type PageProps = {
 	db: RxDatabase;
-	setPage: (page : string) => void;
 };
 
-function Videos({ db, setPage } : PageProps) {
+interface Param {
+	page: string;
+}
+
+function Videos({ db } : PageProps) {
+	const perPage = 2;
+	const { page } = useParams<Param>();
+
 	const videoDTO = new VideoDTO();
 	const [content, setContent] = useState<Content[]>([]);
+	const [maxPage, setMaxPage] = useState<Number>(0);
 
 	useEffect(() => {
-		setPage('videos');
-
 		videoDTO.setDB(db);
 		select();
-	}, [db]);
+	}, [db, page]);
 
 	async function select() {
-		const video : VideoDAO[] = await videoDTO.getAllVideosAsArray();
+		const skipContent = ((Number(page) - 1) * perPage);
+		const video : VideoDAO[] = await videoDTO.getVideosByOffset(skipContent, perPage);
+		setMaxPage(Math.ceil(await videoDTO.getCount() / perPage));
 
 		const arr : Content[] = [];
 		for (let i = 0; i < video.length; i++) {
 			arr.push({
 				id: video[i]['id'],
 				title: video[i]['name'],
+				desc: 'id: ' + video[i]['id'],
 				thumbnail: './files/thumbnails/' + video[i]['id'] + '.im',
 			});
 		}
@@ -58,7 +67,12 @@ function Videos({ db, setPage } : PageProps) {
 					<Button href={ '/videos/new' } text={ '영상 등록' } />
 				</Btn>
 			</Header>
-			<Board type='gallery' content={ content }/>
+			<Board
+				type='gallery'
+				content={ content }
+				currentPage={ Number(page) }
+				maxPage={ Number(maxPage) }
+			/>
 		</div>
 	);
 }
