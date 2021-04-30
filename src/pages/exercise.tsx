@@ -5,7 +5,8 @@ import styled from 'styled-components';
 import * as tf from '@tensorflow/tfjs';
 import { Tensor, InferenceSession } from 'onnxjs';
 import { RxDatabase } from 'rxdb';
-
+import {spawn} from 'child_process';
+import { windowsStore } from 'node:process';
 
 type props = {
 	db: RxDatabase
@@ -18,7 +19,6 @@ function Exercise({ db }: props) {
 	const camera = useRef<HTMLVideoElement>(null);
 	let webcamElement : any = null;
 	const session = new InferenceSession({backendHint: 'webgl'});
-
 
 	const width = 1280;
 	const height = 720;
@@ -40,10 +40,22 @@ function Exercise({ db }: props) {
 			const inputTensor = new Tensor(inputArray, 'float32', [1, 3, 256, 448]);
 
 			const output = await session.run([inputTensor]);
-
-			console.log(output.keys());
-
 			image.dispose();
+
+			// console.log(output.keys());
+
+			const features = output.get('features');
+			const partAffinityField = output.get('pafs');
+			const heatmaps = output.get('heatmaps');
+
+			if (features) {
+				const dim = features?.dims;
+
+				console.log(
+					tf.tensor4d(features.data, [dim[0], dim[1], dim[2], dim[3]], 'float32'));
+			}
+
+			// 1차원 배열에 차원 값을 가진 데이터
 			await tf.nextFrame();
 		}
 	};
@@ -55,7 +67,7 @@ function Exercise({ db }: props) {
 		async function loadModel() {
 			console.log('model loading');
 
-			const file = window.api.fs.readFileSync('./src/pages/human-pose-estimation-3d.onnx');
+			const file = window.api.fs.readFileSync('src/model/human-pose-estimation-3d.onnx');
 			const uint8Array = new Uint8Array(file);
 
 			await session.loadModel(uint8Array);
