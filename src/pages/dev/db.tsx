@@ -11,14 +11,8 @@ import {
 } from '../../db/schema';
 
 
-type PageProps = {
-	setPage: (page : string) => void;
-};
-
-function DB({ setPage } : PageProps) {
+function DB() {
 	useEffect(() => {
-		setPage('db');
-
 		(async () => {
 			const tdb = await createRxDatabase({
 				name: 'data',
