@@ -41,7 +41,7 @@ function Exercise({ db }: props) {
 
 			const output = await session.run([inputTensor]);
 
-			console.log(output.get('features'));
+			console.log(output.keys());
 
 			image.dispose();
 			await tf.nextFrame();
