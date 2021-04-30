@@ -1,7 +1,7 @@
 import sys
-a = int(sys.argv[1])
-b = int(sys.argv[2])
+a = sys.argv[1]
+# b = sys.argv[2]
 
-sum  = a + b
+# sum  = a + b
 
-print(str(sum))
+print(a)
