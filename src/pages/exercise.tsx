@@ -3,8 +3,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import styled from 'styled-components';
 import * as tf from '@tensorflow/tfjs';
-import { InferenceSession, Tensor } from 'onnxjs';
+import { Tensor, InferenceSession } from 'onnxjs';
 import { RxDatabase } from 'rxdb';
+
 
 type props = {
 	db: RxDatabase
@@ -14,10 +15,10 @@ const Wrapper = styled.div``;
 
 function Exercise({ db }: props) {
 	const [isPlaying, setPlaying] = useState(false);
-	const camera = useRef(null);
-	let session : InferenceSession;
+	const camera = useRef<HTMLVideoElement>(null);
+	let webcamElement : any = null;
+	const session = new InferenceSession({backendHint: 'webgl'});
 
-	let webcamElement: any;
 
 	const width = 1280;
 	const height = 720;
@@ -25,42 +26,49 @@ function Exercise({ db }: props) {
 	const run = async () => {
 		const webcam = await tf.data.webcam(webcamElement, {
 			resizeHeight: 256,
-			resizeWidth: 256,
+			resizeWidth: 448,
 		});
 
 		while (true) {
 			// 1. caputer iamge
 			const image = await webcam.capture();
 
-			// 2. Float32Array to onnx Tensor
-			const inputArray = image.reshape([3, 256, 256]).dataSync();
+			// // 2. Float32Array to onnx Tensor
+			const inputArray = image.reshape([3, 256, 448]).dataSync();
 
-			// 3. [batch, channel, height, wdith]
-			const inputTensor = new Tensor(inputArray, 'float32');
+			// // 3. [batch, channel, height, wdith]
+			const inputTensor = new Tensor(inputArray, 'float32', [1, 3, 256, 448]);
+
 			const output = await session.run([inputTensor]);
 
-			console.log(output);
+			console.log(output.keys());
 
 			image.dispose();
 			await tf.nextFrame();
 		}
 	};
 
-	run();
 
 	useEffect(() => {
-		session = new InferenceSession();
-
-		if (camera) {
-			webcamElement = camera.current;
-		}
+		console.log(session);
 
 		async function loadModel() {
-			await session.loadModel('human-pose-estimation-3d.onnx');
+			console.log('model loading');
+
+			const file = window.api.fs.readFileSync('./src/pages/human-pose-estimation-3d.onnx');
+			const uint8Array = new Uint8Array(file);
+
+			await session.loadModel(uint8Array);
 			console.log('model loaded');
 		}
 
-		loadModel();
+		loadModel()
+			.then( () => {
+				if (camera) {
+					webcamElement = camera.current;
+					run();
+				}
+			});
 	});
 
 	return (
