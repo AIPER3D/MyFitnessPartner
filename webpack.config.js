@@ -4,7 +4,7 @@ const path = require('path');
 
 module.exports = {
 	entry: './src/index.tsx',
-	target: 'electron-main',
+	target: 'electron-renderer',
 	module: {
 		rules: [
 			// {
@@ -13,7 +13,7 @@ module.exports = {
 			//   include: [path.resolve(__dirname, 'src')]
 			// },
 			{
-				test: /\.(ts|jsx|tsx)$/,
+				test: /\.(ts|js|jsx|tsx)$/,
 				exclude: /(node_modules)/,
 				use: {
 					loader: 'babel-loader',
@@ -56,6 +56,13 @@ module.exports = {
 				use: [{
 					loader: 'file-loader'
 				}]
+			},
+			{
+				test: /\.worker\.(c|m)?js$/i,
+				loader: 'worker-loader',
+				options: {
+					esModule: false,
+				},
 			},
 		]
 	},
