@@ -6,16 +6,11 @@ import { Uploader, Queue, Data } from '../components/file';
 
 type PageProps = {
 	db: RxDatabase;
-	setPage: (page : string) => void;
 };
 
-function VideoCreate({ db, setPage } : PageProps) {
+function VideoCreate({ db } : PageProps) {
 	const [data, setData] = useState<Data[]>([]);
 	const [count, setCount] = useState<number>(0);
-
-	useEffect(() => {
-		setPage('videos');
-	}, [db]);
 
 	function addFile(fileList : FileList) {
 		if (fileList.length <= 0) return;

@@ -6,11 +6,11 @@ import List from './list';
 import Pagination from './pagination';
 import { Content } from './content';
 
-import { Header } from '../common';
-
 type BoardProps = {
 	type: string;
     content: Content[];
+    currentPage: number;
+    maxPage: number;
 };
 
 const Root = styled.div`
@@ -35,16 +35,16 @@ const Item = styled.div`
 	overflow: hidden; 
 `;
 
-function Board({ type, content }: BoardProps) {
+function Board({ type, content, currentPage, maxPage }: BoardProps) {
 	const item = [];
 
 	if (type == 'gallery') {
 		for (let i = 0; i < content.length; i++) {
-			item.push(<Gallery content={content[i]}></Gallery>);
+			item.push(<Gallery key={ i } content={content[i]}></Gallery>);
 		}
 	} else {
 		for (let i = 0; i < content.length; i++) {
-			item.push(<List content={content[i]}></List>);
+			item.push(<List key={ i } content={content[i]}></List>);
 		}
 	}
 
@@ -53,7 +53,7 @@ function Board({ type, content }: BoardProps) {
 			<Box>
 				<Item> {item} </Item>
 			</Box>
-			<Pagination count={ 0 }></Pagination>
+			<Pagination current={ currentPage } max={ maxPage }></Pagination>
 		</Root>
 
 	);

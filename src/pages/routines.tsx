@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { RxDatabase } from 'rxdb';
@@ -22,39 +23,50 @@ const Btn = styled.div`
 
 type PageProps = {
 	db: RxDatabase;
-	setPage: (page : string) => void;
 };
 
-function Routines({ db, setPage } : PageProps) {
+interface Param {
+	page: string;
+}
+
+function Routines({ db } : PageProps) {
+	const perPage = 3;
+	const { page } = useParams<Param>();
+
 	const routineDTO = new RoutineDTO();
 	const [content, setContent] = useState<Content[]>([]);
+	const [maxPage, setMaxPage] = useState<Number>(0);
 
 	useEffect(() => {
-		setPage('routines');
-
 		routineDTO.setDB(db);
 		select();
 	}, [db]);
 
 	async function select() {
-		const routine : RoutineDAO[] = await routineDTO.getAllRoutinesAsArray();
+		const skipContent = ((Number(page) - 1) * perPage);
+		const routine : RoutineDAO[] = await routineDTO.getRoutinesByOffset(skipContent, perPage);
+		setMaxPage(Math.ceil(await routineDTO.getCount() / perPage));
 
 		const arr : Content[] = [];
 		for (let i = 0; i < routine.length; i++) {
-			let thumbnail = '';
-
+			let thumbnail = undefined;
 			if (routine[i]['videos'].length > 0) {
-				thumbnail = routine[i]['videos'][0]['thumbnail'];
+				thumbnail = './files/thumbnails/' + routine[i]['videos'][0] + '.im';
 			}
 
 			arr.push({
 				id: routine[i]['id'],
 				title: routine[i]['name'],
+				desc: 'id : ' + routine[i]['id'],
 				thumbnail: thumbnail,
+				onClick: onClick,
 			});
 		}
 
 		setContent(arr);
+	}
+	function onClick(id: number) {
+		console.log(id);
 	}
 
 	return (
@@ -64,7 +76,12 @@ function Routines({ db, setPage } : PageProps) {
 					<Button href={ '/routines/new' } text={ '루틴 만들기' } />
 				</Btn>
 			</Header>
-			<Board type='list' content={ content }/>
+			<Board
+				type='list'
+				content={ content }
+				currentPage={ Number(page) }
+				maxPage={ Number(maxPage) }
+			/>
 		</div>
 	);
 }

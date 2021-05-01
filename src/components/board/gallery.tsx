@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { Content } from './content';
@@ -79,23 +79,25 @@ const Text = styled.div`
 `;
 
 function Gallery({ content }: GalleryProps) {
-	const exist = window.api.fs.existsSync(content['thumbnail']);
-	if (exist) {
-		const source = window.api.fs.readFileSync(content['thumbnail']);
-		const thumbnail = new TextDecoder().decode(source);
+	const [thumbnail, setThumbnail] = useState<string>(dummy);
 
-		return (
-			<Box>
-				<Image src={ thumbnail }/>
-				<Title> { content.title } </Title>
-				<Text> { content.desc } </Text>
-			</Box>
-		);
-	}
+	useEffect(() => {
+		if (!content.thumbnail) return;
+		if (!window.api.fs.existsSync(content.thumbnail)) return;
+
+		const source = window.api.fs.readFileSync(content['thumbnail']);
+		const thumb = new TextDecoder().decode(source);
+
+		setThumbnail(thumb);
+	}, []);
 
 	return (
-		<Box>
-			<Image src={ dummy }/>
+		<Box onClick = { () => {
+			if (content.onClick) {
+				content.onClick(content.id);
+			}
+		}}>
+			<Image src={ thumbnail }/>
 			<Title> { content.title } </Title>
 			<Text> { content.desc } </Text>
 		</Box>

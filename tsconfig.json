@@ -22,8 +22,8 @@
     "noEmit": true,
     "outDir": "/dist"
   },
-  "files" : [
-    "src/back/toy.ts",
+  "files": [
+    "src/back/toy.ts"
   ],
   "include": [
     "src",

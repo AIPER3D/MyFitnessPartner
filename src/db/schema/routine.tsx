@@ -11,7 +11,7 @@ const RoutineSchema = {
 		'routine_name': {
 			'type': 'string',
 		},
-		'videos': {
+		'routine_videos': {
 			'type': 'array',
 			'items': {
 				'type': 'number',

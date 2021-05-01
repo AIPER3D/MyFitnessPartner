@@ -126,7 +126,7 @@ function Item({ db, data } : ItemProps) {
 				setUploadStatus(2);
 
 				const vidName = id + '.vd';
-				const vidValue = e.target.result.toString();
+				const vidValue = Buffer.from(e.target.result);
 				window.api.fs.writeFileSync('./files/videos/' + vidName, vidValue);
 				setUploadStatus(3);
 				analysis(blob, image);
@@ -184,7 +184,6 @@ function Item({ db, data } : ItemProps) {
 		const videoDAO : VideoDAO = {
 			id: id,
 			name: data.file.name,
-			thumbnail: '',
 		};
 
 		const result = await videoDTO.addVideo(videoDAO);

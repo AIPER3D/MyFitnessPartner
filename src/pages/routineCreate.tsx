@@ -89,7 +89,7 @@ const Right = css`
 	color: #000000;
 	font-size: 9pt;
 	text-align: left;
-	overflow-y: scroll;
+	overflow-y: hidden;
 `;
 
 const Text = styled.p`
@@ -104,20 +104,23 @@ const Delete = styled.p`
 
 type PageProps = {
 	db: RxDatabase;
-	setPage: (page : string) => void;
 };
 
-function RoutineCreate(this: any, { db, setPage } : PageProps) {
+type Video = {
+	id : number;
+	name: string;
+	thumbnail: string;
+}
+
+function RoutineCreate(this: any, { db } : PageProps) {
 	const [title, setTitle] = useState<string>('새 루틴');
-	const [videoDTO, setVideoDTO] = useState<VideoDTO>(new VideoDTO());
-	const [routineDTO, setRoutineDTO] = useState<RoutineDTO>(new RoutineDTO());
-	const [video, setVideo] = useState<VideoDAO[]>([]);
-	const [selected, setSelected] = useState<VideoDAO[]>([]);
+	const [videoDTO] = useState<VideoDTO>(new VideoDTO());
+	const [routineDTO] = useState<RoutineDTO>(new RoutineDTO());
+	const [video, setVideo] = useState<Video[]>([]);
+	const [selected, setSelected] = useState<Video[]>([]);
 	const [redirect, setRedirect] = useState<boolean>(false);
 
 	useEffect(() => {
-		setPage('routines');
-
 		routineDTO.setDB(db);
 		videoDTO.setDB(db);
 
@@ -125,9 +128,27 @@ function RoutineCreate(this: any, { db, setPage } : PageProps) {
 	}, [db]);
 
 	async function select() {
-		const video : VideoDAO[] = await videoDTO.getAllVideosAsArray();
+		const v : VideoDAO[] = await videoDTO.getAllVideosAsArray();
+		const arr : Video[] = [];
 
-		setVideo(video);
+		for (let i = 0; i < v.length; i++) {
+			const path = './files/thumbnails/' + v[i]['id'] + '.im';
+			let thumb = '';
+			if (window.api.fs.existsSync(path)) {
+				const source = window.api.fs.readFileSync(path);
+				thumb = new TextDecoder().decode(source);
+			} else {
+				thumb = '';
+			}
+
+			arr.push({
+				id: v[i]['id'],
+				name: v[i]['name'],
+				thumbnail: thumb,
+			});
+		}
+
+		setVideo(arr);
 	}
 
 	const groupOptionA : GroupOptions = {
@@ -154,10 +175,16 @@ function RoutineCreate(this: any, { db, setPage } : PageProps) {
 	async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
 
+		const ids : number[] = [];
+
+		for (let i = 0; i < selected.length; i++) {
+			ids.push(selected[i]['id']);
+		}
+
 		const routineDAO : RoutineDAO = {
 			id: routineDTO.getNewId(),
 			name: title,
-			videos: selected,
+			videos: ids,
 		};
 
 		const result = await routineDTO.addRoutine(routineDAO);
@@ -187,7 +214,7 @@ function RoutineCreate(this: any, { db, setPage } : PageProps) {
 					setList={ setVideo }
 					sort={ false }
 				>
-					{ video.map((item: VideoDAO, index) => (
+					{ video.map((item: Video, index) => (
 						<Item key={ index }>
 							<Thumbnail src={ item.thumbnail }/>
 							<Name> { item.name } </Name>
@@ -203,7 +230,7 @@ function RoutineCreate(this: any, { db, setPage } : PageProps) {
 					list={ selected }
 					setList={ setSelected }
 				>
-					{ selected.map((item: VideoDAO, index) => (
+					{ selected.map((item: Video, index) => (
 						<Item key={ index }>
 							<Thumbnail src={ item.thumbnail }/>
 							<Name> { item.name } </Name>

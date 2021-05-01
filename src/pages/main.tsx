@@ -4,14 +4,9 @@ import { RxDatabase } from 'rxdb';
 
 type PageProps = {
 	db: RxDatabase;
-	setPage: (page : string) => void;
 };
 
-function Main({ db, setPage } : PageProps) {
-	useEffect(() => {
-		setPage('main');
-	}, []);
-
+function Main({ db } : PageProps) {
 	return (
 		<div className="App">
 			<Calendar db={ db }/>
