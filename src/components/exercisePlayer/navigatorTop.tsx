@@ -111,7 +111,7 @@ function NavigatorTop({ routine, seq } : Props) {
 
 	for (let i = 0; i < routine['videos'].length; i++) {
 		const val = (i / routine['videos'].length * 100);
-		progressArr.push(<ProgressSeq value={ val + '%' } />);
+		progressArr.push(<ProgressSeq key={ i } value={ val + '%' } />);
 	}
 
 	return (
