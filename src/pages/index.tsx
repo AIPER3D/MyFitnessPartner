@@ -5,7 +5,9 @@ import Routines from './routines';
 import VideoCreate from './videoCreate';
 import Videos from './videos';
 import Exercise from './exercise';
-import Exercise2 from './exercise2';
+
+import ExerciseReady from './exerciseReady';
+import ExercisePlay from './exercisePlay';
 
 import DevMain from './dev/main';
 import DevDB from './dev/db';
@@ -18,7 +20,9 @@ export {
 	VideoCreate,
 	Videos,
 	Exercise,
-	Exercise2,
+
+	ExerciseReady,
+	ExercisePlay,
 
 	DevMain,
 	DevDB,

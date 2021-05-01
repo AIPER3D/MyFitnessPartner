@@ -6,8 +6,6 @@ import List from './list';
 import Pagination from './pagination';
 import { Content } from './content';
 
-import { Header } from '../common';
-
 type BoardProps = {
 	type: string;
     content: Content[];
@@ -42,11 +40,11 @@ function Board({ type, content, currentPage, maxPage }: BoardProps) {
 
 	if (type == 'gallery') {
 		for (let i = 0; i < content.length; i++) {
-			item.push(<Gallery content={content[i]}></Gallery>);
+			item.push(<Gallery key={ i } content={content[i]}></Gallery>);
 		}
 	} else {
 		for (let i = 0; i < content.length; i++) {
-			item.push(<List content={content[i]}></List>);
+			item.push(<List key={ i } content={content[i]}></List>);
 		}
 	}
 

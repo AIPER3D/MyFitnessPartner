@@ -49,17 +49,24 @@ function Routines({ db } : PageProps) {
 
 		const arr : Content[] = [];
 		for (let i = 0; i < routine.length; i++) {
-			const thumbnail = '';
+			let thumbnail = undefined;
+			if (routine[i]['videos'].length > 0) {
+				thumbnail = './files/thumbnails/' + routine[i]['videos'][0] + '.im';
+			}
 
 			arr.push({
 				id: routine[i]['id'],
 				title: routine[i]['name'],
 				desc: 'id : ' + routine[i]['id'],
 				thumbnail: thumbnail,
+				onClick: onClick,
 			});
 		}
 
 		setContent(arr);
+	}
+	function onClick(id: number) {
+		console.log(id);
 	}
 
 	return (

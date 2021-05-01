@@ -71,7 +71,7 @@ const MenuName = styled.p`
 	padding: 0px 0px 0px 15px;
 `;
 
-const Button = styled.a`
+const Button = styled(Link)`
 	display: block;
 	width: 220px;
     padding: 15px 5px 15px 5px;
@@ -136,10 +136,7 @@ function Menu() {
 				</User>
 			</DIV>
 			<DIV>
-				<Button href={'/exercise1'}>운동하기 (1)</Button>
-			</DIV>
-			<DIV>
-				<Button href={'/exercise2'}>운동하기 (2)</Button>
+				<Button to={ '/exerciseReady/1' }>운동하기</Button>
 			</DIV>
 			<UL>
 				<LI value={route == undefined ? 'selected' : ''}>

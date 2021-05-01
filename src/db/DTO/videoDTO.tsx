@@ -40,7 +40,6 @@ class VideoDTO {
 		await this. db.collections.videos.insert({
 			video_id: data['id'],
 			video_name: data['name'],
-			video_thumbnail: data['thumbnail'],
 			video_timeline: [],
 		});
 
@@ -66,7 +65,6 @@ class VideoDTO {
 			result.push({
 				id: doc[i].get('video_id'),
 				name: doc[i].get('video_name'),
-				thumbnail: doc[i].get('video_thumbnail'),
 			});
 		}
 
@@ -88,7 +86,6 @@ class VideoDTO {
 			result.push({
 				id: doc[i].get('video_id'),
 				name: doc[i].get('video_name'),
-				thumbnail: doc[i].get('video_thumbnail'),
 			});
 		}
 
@@ -108,7 +105,6 @@ class VideoDTO {
 			result.push({
 				id: doc[i].get('video_id'),
 				name: doc[i].get('video_name'),
-				thumbnail: doc[i].get('video_thumbnail'),
 			});
 		}
 
@@ -128,7 +124,6 @@ class VideoDTO {
     		result[doc[i].get('video_id')] = {
     			id: doc[i].get('video_id'),
     			name: doc[i].get('video_name'),
-    			thumbnail: doc[i].get('video_thumbnail'),
     		};
     	}
 

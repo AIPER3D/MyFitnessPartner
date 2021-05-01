@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
 import { Content } from './content';
@@ -19,25 +19,12 @@ const Box = styled.div`
 	background: #eeeeee;
 	
 	&:hover {
+		transform: scale(1.025);
+		transition: transform 0.1s;
+		//filter: brightness(70%);
 		cursor: pointer;
 	}
-	
 `;
-
-/*
-const Alert = styled.div`
-	position: relative;
-	display: block;
-	width: 300px;
-	height: 20px;
-	padding: 0px 5px 0px 0px;
-	margin: -20px 0px 0px 0px;
-
-	color: #000000;
-	font-size: 9pt;
-	text-align: right;
-`;
-*/
 
 const Image = styled.img`
 	float: left;
@@ -70,13 +57,29 @@ const Text = styled.p`
 	color: #000000;
 	font-size: 10pt;
 	text-align: left;
-	overflow-y: scroll;
+	overflow-y: auto;
 `;
 
 function List({ content }: ListProps) {
+	const [thumbnail, setThumbnail] = useState<string>(dummy);
+
+	useEffect(() => {
+		if (!content.thumbnail) return;
+		if (!window.api.fs.existsSync(content.thumbnail)) return;
+
+		const source = window.api.fs.readFileSync(content['thumbnail']);
+		const thumb = new TextDecoder().decode(source);
+
+		setThumbnail(thumb);
+	}, []);
+
 	return (
-		<Box>
-			<Image src={ content.thumbnail ? content.thumbnail : dummy }></Image>
+		<Box onClick = { () => {
+			if (content.onClick) {
+				content.onClick(content.id);
+			}
+		}}>
+			<Image src={ thumbnail }></Image>
 			<Title> { content.title } </Title>
 			<Text> { content.desc ? content.desc : '' }</Text>
 		</Box>

@@ -14,6 +14,7 @@ type Props = {
 const Wrapper = styled.video``;
 
 function Webcam({ width, height } : Props) {
+	let timer: any = null;
 	const session = new InferenceSession({ backendHint: 'webgl' });
 	const elementRef = useRef<HTMLVideoElement>(null);
 	const webcamRef = useRef<any>(null);
@@ -34,7 +35,7 @@ function Webcam({ width, height } : Props) {
 			resizeWidth: 448,
 		});
 
-		setInterval(capture, 500);
+		timer = setInterval(capture, 500);
 	}
 	async function capture() {
 		if (webcamRef.current == null) return;
@@ -87,6 +88,10 @@ function Webcam({ width, height } : Props) {
 			.then(async () => {
 				await run();
 			});
+
+		return () => {
+
+		};
 	}, [elementRef]);
 
 	return (
@@ -96,8 +101,7 @@ function Webcam({ width, height } : Props) {
 			ref = { elementRef }
 			width = { width }
 			height = { height }
-		>
-		</Wrapper>
+		/>
 	);
 }
 

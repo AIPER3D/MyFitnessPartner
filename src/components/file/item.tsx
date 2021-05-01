@@ -184,7 +184,6 @@ function Item({ db, data } : ItemProps) {
 		const videoDAO : VideoDAO = {
 			id: id,
 			name: data.file.name,
-			thumbnail: '',
 		};
 
 		const result = await videoDTO.addVideo(videoDAO);

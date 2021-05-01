@@ -57,8 +57,8 @@ function Button({ text, href, color, width }: ButtonProps) {
 	if (href) {
 		return (
 			<Go
-				to={ href }
-				width={ width ? width : '960px' }
+				to = { href }
+				width = { width ? width : '960px' }
 			>
 				{ text ? text : '' }
 			</Go>
@@ -66,10 +66,10 @@ function Button({ text, href, color, width }: ButtonProps) {
 	} else {
 		return (
 			<Submit
-				type='submit'
-				color={ color }
-				value={ text ? text : '' }
-				width={ width ? width : '960px' }
+				type = 'submit'
+				color = { color }
+				value = { text ? text : '' }
+				width = { width ? width : '960px' }
 			/>
 		);
 	}
