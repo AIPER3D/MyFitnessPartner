@@ -16,12 +16,10 @@ function Calendar({db} : CalendarProps) {
 	const openModal= (day:string)=>{
 		setModalOpen(true);
 		setPresent(day);
-		console.log(modalOpen);
 	};
 	const closeModal= ()=> {
 		setModalOpen(false);
 		setPresent('');
-		console.log(modalOpen);
 	};
 	function handleMonthInc() {
 		setDate(date.clone().add(1, 'month'));
@@ -29,6 +27,7 @@ function Calendar({db} : CalendarProps) {
 	function handleMonthDec() {
 		setDate(date.clone().subtract(1, 'month'));
 	}
+
 	function generate() {
 		const today = moment();
 		const startWeek = date.clone().startOf('month').week();
