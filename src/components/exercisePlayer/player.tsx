@@ -43,6 +43,8 @@ function Player({ routine, video } : Props) {
 	const [videoRef, setVideoRef] = useState<HTMLVideoElement | null>(null);
 	const [seq, setSeq] = useState<number>(0);
 
+	let inputSclaeRatio : number = 0;
+
 	useEffect(() => {
 		if (videoRef == null) return;
 		if (seq < video.length) load(seq);
@@ -65,7 +67,13 @@ function Player({ routine, video } : Props) {
 
 		videoRef.play()
 			.then(() => {
+				// 1. get video keyframe
 
+				// 2. inference pose
+
+				// 3. upscale pose to video resolution
+
+				// 4. keypoints to ipc
 			})
 			.catch(() => {
 
@@ -76,6 +84,7 @@ function Player({ routine, video } : Props) {
 			setSeq(seq + 1);
 		});
 	}
+
 	function end() {
 		console.log('끝');
 	}
@@ -92,7 +101,7 @@ function Player({ routine, video } : Props) {
 			<NavigatorBottom
 				videoRef = { videoRef }
 			/>
-			<PIP />
+			<PIP/>
 		</Container>
 	);
 }
