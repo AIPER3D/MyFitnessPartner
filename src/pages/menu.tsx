@@ -136,7 +136,10 @@ function Menu() {
 				</User>
 			</DIV>
 			<DIV>
-				<Button href={'/exercise2'}>운동하기</Button>
+				<Button href={'/exercise1'}>운동하기 (1)</Button>
+			</DIV>
+			<DIV>
+				<Button href={'/exercise2'}>운동하기 (2)</Button>
 			</DIV>
 			<UL>
 				<LI value={route == undefined ? 'selected' : ''}>

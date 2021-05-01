@@ -117,7 +117,7 @@ function App() {
 		return (
 			<Router>
 				<Switch>
-					<Route path="/exercise">
+					<Route path="/exercise1">
 						<ContainerWithoutMenu>
 							<Exercise db={ db }/>
 						</ContainerWithoutMenu>
