@@ -1,8 +1,10 @@
 import React from 'react';
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 
 type PaginationProps = {
-    count: number;
+	current: number;
+    max: number;
 };
 
 const color = {
@@ -28,8 +30,9 @@ const Page = styled.li`
 	padding: 10px 0px 10px 0px;
 	margin: 0px 0px 0px 0px;
 	border: 1px solid #dddddd;
-	border-right: ${(props) => props.value == 'r' ? 1 : 0 || 0 }px solid #ddd;
-	background: ${(props) => props.color == 'b' ? color['b'] : '#fff' || '#fff' };
+	border-right: ${(props) => props.value == 'last' ? 1 : 0 || 0 }px solid #ddd;
+	background: ${(props) => props.color == 'active' ? color['d'] : '#fff' || '#fff' };
+	color: ${(props) => props.color == 'active' ? '#fff' : color['d'] || color['d'] };
 	
 	list-style: none;
 	text-align: center;
@@ -41,14 +44,43 @@ const Page = styled.li`
 	}
 `;
 
-function Pagination({ count }: PaginationProps) {
+const Empty = styled.li`
+	display: inline-block;
+	width: 0px;
+	padding: 0px;
+	margin: 0px;
+`;
+
+function Pagination({ current, max }: PaginationProps) {
 	return (
 		<Box>
-			<Page color={'b'}> ◀ </Page>
-			<Page> 1 </Page>
-			<Page color={'b'}> 2 </Page>
-			<Page> 3 </Page>
-			<Page color={'b'} value={'r'}> ▶ </Page>
+			<Link to={ './' + Number(1) }><Page value={'first'}>
+				<b>&laquo;</b></Page>
+			</Link>
+			{ current - 2 >= 1 ?
+				(
+					<Link to={ './' + Number(current - 2) }><Page>{ current - 2 }</Page></Link>
+				) : (<Empty />)
+			}
+			{ current - 1 >= 1 ?
+				(
+					<Link to={ './' + Number(current - 1) }><Page>{ current - 1 }</Page></Link>
+				) : (<Empty />)
+			}
+			<Page color={'active'}> { current } </Page>
+			{ current + 1 <= max ?
+				(
+					<Link to={ './' + Number(current + 1) }><Page>{ current + 1 }</Page></Link>
+				) : (<Empty />)
+			}
+			{ current + 2 <= max ?
+				(
+					<Link to={ './' + Number(current + 2) }><Page>{ current + 2 }</Page></Link>
+				) : (<Empty />)
+			}
+			<Link to={ './' + Number(max) }>
+				<Page value={'last'}><b>&raquo;</b></Page>
+			</Link>
 		</Box>
 	);
 }

@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import styled, { css } from 'styled-components';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHome } from '@fortawesome/free-solid-svg-icons';
@@ -10,11 +10,6 @@ const color = {
 	'pink': '#E75A7C',
 	'white': '#F2F5EA',
 	'blue': '#48ACF0',
-};
-
-type MenuProps = {
-	devMode: boolean;
-    selected: string;
 };
 
 const NAV = styled.nav`
@@ -123,64 +118,51 @@ const UserStatus = styled.p`
 	font-size: 10pt;
 `;
 
-function Menu({ devMode, selected }: MenuProps) {
-	if (devMode) {
-		return (
-			<NAV>
-				<DIV>
-					<User>
-						<UserName>개발자 모드</UserName>
-						<br/>
-						<UserStatus></UserStatus>
-					</User>
-				</DIV>
-				<UL>
-					<LI value={selected == 'db' ? 'selected' : ''}>
-						<Link to="/db">
-							<FontAwesomeIcon icon={faHome} size={'lg'} color={'#f2f5ea'}/>
-							<MenuName>DB 생성</MenuName>
-						</Link>
-					</LI>
-				</UL>
-			</NAV>
-		);
-	} else {
-		return (
-			<NAV>
-				<DIV>
-					<Profile/>
-					<User>
-						<UserName>노영동</UserName>
-						<br/>
-						<UserStatus>오늘 운동 미완료</UserStatus>
-					</User>
-				</DIV>
-				<DIV>
-					<Button href={'/exercise'}>운동하기</Button>
-				</DIV>
-				<UL>
-					<LI value={selected == 'main' ? 'selected' : ''}>
-						<Link to="/">
-							<FontAwesomeIcon icon={faHome} size={'lg'} color={'#f2f5ea'}/>
-							<MenuName>메인 화면</MenuName>
-						</Link>
-					</LI>
-					<LI value={selected == 'videos' ? 'selected' : ''}>
-						<Link to="/videos">
-							<FontAwesomeIcon icon={faHome} size={'lg'} color={'#f2f5ea'}/>
-							<MenuName>영상 관리</MenuName>
-						</Link>
-					</LI>
-					<LI value={selected == 'routines' ? 'selected' : ''}>
-						<Link to="/routines">
-							<FontAwesomeIcon icon={faHome} size={'lg'} color={'#f2f5ea'}/>
-							<MenuName>루틴 관리</MenuName>
-						</Link>
-					</LI>
-				</UL>
-			</NAV>
-		);
-	}
+interface Param {
+	route: string;
+}
+
+function Menu() {
+	const { route } = useParams<Param>();
+
+	return (
+		<NAV>
+			<DIV>
+				<Profile/>
+				<User>
+					<UserName>노영동</UserName>
+					<br/>
+					<UserStatus>오늘 운동 미완료</UserStatus>
+				</User>
+			</DIV>
+			<DIV>
+				<Button href={'/exercise1'}>운동하기 (1)</Button>
+			</DIV>
+			<DIV>
+				<Button href={'/exercise2'}>운동하기 (2)</Button>
+			</DIV>
+			<UL>
+				<LI value={route == undefined ? 'selected' : ''}>
+					<Link to="/">
+						<FontAwesomeIcon icon={faHome} size={'lg'} color={'#f2f5ea'}/>
+						<MenuName>메인 화면</MenuName>
+					</Link>
+				</LI>
+				<LI value={route == 'videos' ? 'selected' : ''}>
+					<Link to="/videos/1">
+						<FontAwesomeIcon icon={faHome} size={'lg'} color={'#f2f5ea'}/>
+						<MenuName>영상 관리</MenuName>
+					</Link>
+				</LI>
+				<LI value={route == 'routines' ? 'selected' : ''}>
+					<Link to="/routines/1">
+						<FontAwesomeIcon icon={faHome} size={'lg'} color={'#f2f5ea'}/>
+						<MenuName>루틴 관리</MenuName>
+					</Link>
+				</LI>
+			</UL>
+		</NAV>
+	);
 }
 
 Menu.MenuProps = {

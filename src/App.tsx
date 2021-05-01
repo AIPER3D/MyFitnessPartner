@@ -1,19 +1,22 @@
 import isElectron from 'is-electron';
 import React, {useEffect, useState} from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { createRxDatabase, addRxPlugin, RxDatabase } from 'rxdb';
 
-import { Menu } from './components/common';
 import { VideoSchema, RoutineSchema, MemoSchema } from './db/schema';
 import {
 	Main,
+	Menu,
 	Routines,
 	RoutineCreate,
 	Videos,
 	VideoCreate,
-	DB,
 	Exercise,
+	Exercise2,
+
+	DevMain,
+	DevDB,
 } from './pages';
 
 declare global {
@@ -21,30 +24,39 @@ declare global {
 		api: any;
 	}
 }
-
-const Root = styled.div`
+const ContainerWithMenu = styled.div`
 	position: fixed;
 	left: 250px; 
 	width: calc(100vw - 250px - 20px);
 	height: calc(100vh - 20px);
+	overflow: auto;
+		
 	margin: 0px auto 0px auto;
 	padding: 20px 0px 0px 20px;
-	
+`;
+
+const ContainerWithoutMenu = styled.div`
+	position: fixed;
+	left: 0px; 
+	width: 100vw;
+	height: 100vh;
 	overflow: auto;
+	
+	margin: 0px;
+	padding: 0px;
 `;
 
 const Body = styled.div`
 	width: 1000px;
+	overflow: auto;
+	
 	margin: 0px auto 0px auto;
 	padding: 20px 0px 0px 0px;
-	
-	overflow: hidden;
 `;
 
 function App() {
 	const devMode = false;
 	const [db, setDB] = useState<RxDatabase>();
-	const [page, setPage] = useState<string>('');
 
 	addRxPlugin(require('pouchdb-adapter-idb'));
 
@@ -89,58 +101,72 @@ function App() {
 	if (devMode) {
 		return (
 			<Router>
-				<Menu devMode={ devMode } selected={ page } />
-				<Root>
-					<Body>
-						<Switch>
-							<Route path="/db">
-								<DB setPage={ setPage } />
-							</Route>
-						</Switch>
-					</Body>
-				</Root>
+				<ContainerWithoutMenu>
+					<Switch>
+						<Route path="/db">
+							<DevDB />
+						</Route>
+						<Route path="/">
+							<DevMain />
+						</Route>
+					</Switch>
+				</ContainerWithoutMenu>
 			</Router>
 		);
 	} else if (db) {
 		return (
 			<Router>
-				<Menu devMode={ devMode } selected={ page } />
-				<Root>
-					<Body>
-						<Switch>
-							<Route exact path="/exercise">
-								<Exercise db={ db }/>
-							</Route>
-							<Route exact path="/videos/new">
-								<VideoCreate db={ db } setPage={ setPage } />
-							</Route>
-							<Route exact path="/videos">
-								<Videos db={ db } setPage={ setPage } />
-							</Route>
-							<Route exact path="/routines/new">
-								<RoutineCreate db={ db } setPage={ setPage } />
-							</Route>
-							<Route path="/routines">
-								<Routines db={ db } setPage={ setPage } />
-							</Route>
-							<Route path="/">
-								<Main db={ db } setPage={ setPage } />
-							</Route>
-						</Switch>
-					</Body>
-				</Root>
+				<Switch>
+					<Route path="/exercise1">
+						<ContainerWithoutMenu>
+							<Exercise db={ db }/>
+						</ContainerWithoutMenu>
+					</Route>
+					<Route path="/exercise2">
+						<ContainerWithoutMenu>
+							<Exercise2 db={ db }/>
+						</ContainerWithoutMenu>
+					</Route>
+					<Route path="/:route">
+						<Menu />
+						<ContainerWithMenu>
+							<Body>
+								<Switch>
+									<Route exact path="/videos/new">
+										<VideoCreate db={ db } />
+									</Route>
+									<Route exact path="/videos/:page">
+										<Videos db={ db } />
+									</Route>
+									<Route exact path="/routines/new">
+										<RoutineCreate db={ db } />
+									</Route>
+									<Route path="/routines/:page">
+										<Routines db={ db } />
+									</Route>
+									<Route path="/">
+										<Main db={ db } />
+									</Route>
+								</Switch>
+							</Body>
+						</ContainerWithMenu>
+					</Route>
+					<Route path="/">
+						<Menu />
+						<ContainerWithMenu>
+							<Body>
+								<Main db={ db } />
+							</Body>
+						</ContainerWithMenu>
+					</Route>
+				</Switch>
 			</Router>
 		);
 	} else {
 		return (
-			<Router>
-				<Menu devMode = { false } selected={ page } />
-				<Root>
-					<Body>
-						<p>DB 접속 오류</p>
-					</Body>
-				</Root>
-			</Router>
+			<ContainerWithoutMenu>
+				<p>DB 접속 오류</p>
+			</ContainerWithoutMenu>
 		);
 	}
 }

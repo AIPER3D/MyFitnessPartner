@@ -11,6 +11,8 @@ import { Header } from '../common';
 type BoardProps = {
 	type: string;
     content: Content[];
+    currentPage: number;
+    maxPage: number;
 };
 
 const Root = styled.div`
@@ -35,7 +37,7 @@ const Item = styled.div`
 	overflow: hidden; 
 `;
 
-function Board({ type, content }: BoardProps) {
+function Board({ type, content, currentPage, maxPage }: BoardProps) {
 	const item = [];
 
 	if (type == 'gallery') {
@@ -53,7 +55,7 @@ function Board({ type, content }: BoardProps) {
 			<Box>
 				<Item> {item} </Item>
 			</Box>
-			<Pagination count={ 0 }></Pagination>
+			<Pagination current={ currentPage } max={ maxPage }></Pagination>
 		</Root>
 
 	);

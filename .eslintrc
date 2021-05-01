@@ -21,7 +21,7 @@
         "google"
     ],
     "rules": {
-        "max-len": ["error", { "code": 100, "tabWidth": 4 }],
+        "max-len": ["error", { "code": 120, "tabWidth": 4 }],
         "max-length": 0, // 0으로 설정하면 에러 검출 X,
         "require-jsdoc":"off",
         "no-unused-vars":"warn",

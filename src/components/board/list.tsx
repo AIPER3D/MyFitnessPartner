@@ -78,7 +78,7 @@ function List({ content }: ListProps) {
 		<Box>
 			<Image src={ content.thumbnail ? content.thumbnail : dummy }></Image>
 			<Title> { content.title } </Title>
-			<Text>text</Text>
+			<Text> { content.desc ? content.desc : '' }</Text>
 		</Box>
 	);
 }

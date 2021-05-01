@@ -104,10 +104,9 @@ const Delete = styled.p`
 
 type PageProps = {
 	db: RxDatabase;
-	setPage: (page : string) => void;
 };
 
-function RoutineCreate(this: any, { db, setPage } : PageProps) {
+function RoutineCreate(this: any, { db } : PageProps) {
 	const [title, setTitle] = useState<string>('새 루틴');
 	const [videoDTO, setVideoDTO] = useState<VideoDTO>(new VideoDTO());
 	const [routineDTO, setRoutineDTO] = useState<RoutineDTO>(new RoutineDTO());
@@ -116,8 +115,6 @@ function RoutineCreate(this: any, { db, setPage } : PageProps) {
 	const [redirect, setRedirect] = useState<boolean>(false);
 
 	useEffect(() => {
-		setPage('routines');
-
 		routineDTO.setDB(db);
 		videoDTO.setDB(db);
 
@@ -154,10 +151,16 @@ function RoutineCreate(this: any, { db, setPage } : PageProps) {
 	async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
 
+		const ids : number[] = [];
+
+		for (let i = 0; i < selected.length; i++) {
+			ids.push(selected[i]['id']);
+		}
+
 		const routineDAO : RoutineDAO = {
 			id: routineDTO.getNewId(),
 			name: title,
-			videos: selected,
+			videos: ids,
 		};
 
 		const result = await routineDTO.addRoutine(routineDAO);

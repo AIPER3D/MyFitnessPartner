@@ -11,10 +11,10 @@ const VideoSchema = {
 		'video_name': {
 			'type': 'string',
 		},
-		'thumbnail': {
+		'video_thumbnail': {
 			'type': 'string',
 		},
-		'timeline': {
+		'video_timeline': {
 			'type': 'array',
 			'items': {
 				'type': 'object',
