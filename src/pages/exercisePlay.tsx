@@ -9,26 +9,20 @@ import { VideoDAO, RoutineDAO } from '../db/DAO';
 import { Player } from '../components/exercisePlayer';
 
 const Back = styled.div`
-	position: absolute;
-	display: block;
-	
-	top: 0px;
-	left: 0px;
-	width: calc(100vw - 250px);
-	height: calc(100vh);
+	background-color: #000000;
 `;
-
 
 type PageProps = {
     db: RxDatabase;
 };
 
 interface Param {
-    page: string;
+    id: string;
 }
 
 function Exercise2({ db } : PageProps) {
-	const id = 1619602985935;
+	const { id } = useParams<Param>();
+
 	const routineDTO = new RoutineDTO();
 	const videoDTO = new VideoDTO();
 
@@ -43,7 +37,7 @@ function Exercise2({ db } : PageProps) {
 	}, [db]);
 
 	async function select() {
-		const routineData : RoutineDAO | null = await routineDTO.getRoutineById(id);
+		const routineData : RoutineDAO | null = await routineDTO.getRoutineById(Number(id));
 		if (routineData == null) return;
 
 		setRoutine(routineData);
@@ -56,13 +50,11 @@ function Exercise2({ db } : PageProps) {
 
 	if (routine == null || video.length <= 0) {
 		return (
-			<div> 오류 </div>
+			<Back />
 		);
 	} else {
 		return (
-			<Back>
-				<Player routine={ routine } video={ video } />
-			</Back>
+			<Player routine={ routine } video={ video } />
 		);
 	}
 }

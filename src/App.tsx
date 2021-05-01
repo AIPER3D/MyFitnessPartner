@@ -13,7 +13,9 @@ import {
 	Videos,
 	VideoCreate,
 	Exercise,
-	Exercise2,
+
+	ExerciseReady,
+	ExercisePlay,
 
 	DevMain,
 	DevDB,
@@ -122,9 +124,9 @@ function App() {
 							<Exercise db={ db }/>
 						</ContainerWithoutMenu>
 					</Route>
-					<Route path="/exercise2">
+					<Route path="/exercisePlay/:id">
 						<ContainerWithoutMenu>
-							<Exercise2 db={ db }/>
+							<ExercisePlay db={ db }/>
 						</ContainerWithoutMenu>
 					</Route>
 					<Route path="/:route">
@@ -132,6 +134,9 @@ function App() {
 						<ContainerWithMenu>
 							<Body>
 								<Switch>
+									<Route path="/exerciseReady/:page">
+										<ExerciseReady db={ db }/>
+									</Route>
 									<Route exact path="/videos/new">
 										<VideoCreate db={ db } />
 									</Route>
