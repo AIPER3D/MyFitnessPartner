@@ -35,7 +35,7 @@ function Webcam({ width, height } : Props) {
 			resizeWidth: 448,
 		});
 
-		timer = setInterval(capture, 500);
+		timer = setInterval(capture, 10000);
 	}
 	async function capture() {
 		if (webcamRef.current == null) return;
