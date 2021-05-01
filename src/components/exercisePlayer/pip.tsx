@@ -1,6 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 
+import { Webcam } from './';
+
 type Props = {
 
 };
@@ -71,7 +73,10 @@ function PIP() {
 			onMouseUp = { dragMouseUp }
 			onMouseMove = { dragMouse }
 		>
-
+			<Webcam
+				width = { 640 }
+				height = { 360 }
+			/>
 		</Container>
 	);
 }

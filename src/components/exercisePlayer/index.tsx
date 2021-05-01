@@ -3,4 +3,6 @@ import NavigatorTop from './navigatorTop';
 import NavigatorBottom from './navigatorBottom';
 import PIP from './pip';
 
-export { Player, NavigatorTop, NavigatorBottom, PIP };
+import Webcam from './webcam';
+
+export { Player, NavigatorTop, NavigatorBottom, PIP, Webcam };
