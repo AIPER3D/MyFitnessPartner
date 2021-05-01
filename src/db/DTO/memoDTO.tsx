@@ -21,12 +21,12 @@ class MemoDTO {
 	async addMemo(data: MemoDAO) {
 		if (!this.db) return false;
 		if (!this.db.collections.memos) return false;
-		console.log(await this.db.collections.memos.insert({
+		await this.db.collections.memos.insert({
 			memo_id: data['memoId'],
 			memo_date: data['memoDate'],
 			memo_type: data['memoType'],
 			memo_value: data['memoValue'],
-		}));
+		});
 
 		return true;
 	}
@@ -40,7 +40,6 @@ class MemoDTO {
 			.where('memo_date')
 			.eq(data)
 			.exec();
-
 		return doc.length;
 	}
 
@@ -53,7 +52,6 @@ class MemoDTO {
 			.where('memo_date')
 			.eq(data)
 			.exec();
-
 		const result : MemoDAO[] = [];
 		for (let i =0; i < doc.length; i++) {
 			result.push({
@@ -63,6 +61,9 @@ class MemoDTO {
 				memoValue: doc[i].get('memo_value'),
 			});
 		}
+		result.sort(function(a, b) {
+			return a.memoId - b.memoId;
+		});
 		return result;
 	}
 
@@ -73,7 +74,7 @@ class MemoDTO {
 		const doc = await this.db.collections.memos
 			.findOne()
 			.where({memo_id: data['memoId']})
-			.update({ $set: {memo_value: data['memoValue']}});
+			.update({ $set: {memo_value: data['memoValue'], memo_type: data['memoType']}});
 
 		return true;
 	}
@@ -89,6 +90,38 @@ class MemoDTO {
 			.remove();
 
 		return true;
+	}
+
+	async isMemohere(data: string) {
+		if (!this.db) return false;
+		if (!this.db.collections.memos) return false;
+
+		const doc = await this.db.collections.memos
+			.find()
+			.where({memo_id: data, memo_type: 'memo'})
+			.exec();
+
+		if (doc !== null) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	async isCaloryhere(data: string) {
+		if (!this.db) return false;
+		if (!this.db.collections.memos) return false;
+
+		const doc = await this.db.collections.memos
+			.find()
+			.where({memo_id: data, memo_type: 'calory'})
+			.exec();
+
+		if (doc !== null) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 }
 

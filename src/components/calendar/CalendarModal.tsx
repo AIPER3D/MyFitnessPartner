@@ -30,7 +30,7 @@ function CalendarModal({open, close, header, db, children}: Props) {
 			memoId: new Date().getTime(),
 			memoDate: header,
 			memoType: 'memo',
-			memoValue: 'test',
+			memoValue: '',
 		};
 		await memoDTO.addMemo(memo);
 		onRefresh();
@@ -41,6 +41,7 @@ function CalendarModal({open, close, header, db, children}: Props) {
 	async function generate() {
 		setMemo(await memoDTO.getMemo(header));
 	}
+
 	return (
 		<div className={ open ? 'openModal modal' : 'modal' }>
 			{ open ? (
