@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import {createRxDatabase, RxDatabase} from 'rxdb';
+import { createRxDatabase, RxDatabase } from 'rxdb';
+import { Link } from 'react-router-dom';
 
 import {
 	ExerciseSchema,
@@ -9,7 +10,6 @@ import {
 	UserSchema,
 	MemoSchema,
 } from '../../db/schema';
-
 
 function DB() {
 	useEffect(() => {
@@ -56,6 +56,9 @@ function DB() {
 	return (
 		<div>
 			<p>데이터베이스 생성</p>
+			<ul>
+				<li><Link to={ '/dev' } >돌아가기</Link></li>
+			</ul>
 		</div>
 	);
 }
