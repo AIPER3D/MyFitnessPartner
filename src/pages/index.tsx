@@ -1,5 +1,6 @@
 import Main from './main';
 import Menu from './menu';
+import Test from './test';
 import RoutineCreate from './routineCreate';
 import Routines from './routines';
 import VideoCreate from './videoCreate';
@@ -10,11 +11,14 @@ import ExerciseReady from './exerciseReady';
 import ExercisePlay from './exercisePlay';
 
 import DevMain from './dev/main';
-import DevDB from './dev/db';
+
+import New from './new';
+import Reset from './reset';
 
 export {
 	Main,
 	Menu,
+	Test,
 	RoutineCreate,
 	Routines,
 	VideoCreate,
@@ -25,5 +29,7 @@ export {
 	ExercisePlay,
 
 	DevMain,
-	DevDB,
+
+	New,
+	Reset,
 };

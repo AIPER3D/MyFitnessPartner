@@ -5,6 +5,12 @@ const UserSchema = {
 	'version': 0,
 	'type': 'object',
 	'properties': {
+		'id': {
+			'type': 'number',
+		},
+		'name': {
+			'type': 'string',
+		},
 		'height': {
 			'type': 'number',
 		},

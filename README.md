@@ -44,7 +44,7 @@ run wepback auto updater
 
 run react web application
 
-### `npm run electron-start`
+### `npm run electron:start`
 
 run react & electron application
 

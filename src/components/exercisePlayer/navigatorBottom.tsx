@@ -39,15 +39,27 @@ const ProgressLight = styled.div`
 	background-color: #48ACF0;
 `;
 
+const NavTitle = styled.div`
+	position: absolute;
+	height: 25px;
+	
+	border-radius: 5px;
+	margin-top: 11px;
+	margin-left: 40px;
+	
+	color: #F2F5EA;
+	text-align: left;
+	font-weight: bold;
+`;
+
 const NavTime = styled.div`
 	position: absolute;
 	width: 150px;
 	height: 25px;
 	
 	border-radius: 5px;
-	margin-top: 11px;
-	margin-left: calc(100% / 2 - 75px);
-	margin-right: calc(100% / 2 - 75px);
+	margin-top: 10px;
+	margin-left: calc(100% - 170px);
 	
 	background-color: #F2F5EA;
 	text-align: center;
@@ -58,8 +70,8 @@ const Icon = styled(FontAwesomeIcon)`
 	width: 24px;
 	height: 24px;
 	
-	margin-top: 12px;
-	margin-left: 12px;
+	margin-top: 11px;
+	margin-left: 11px;
 	
 	border-radius: 16px;
 	transition: all 0.2s;
@@ -144,6 +156,7 @@ function NavigatorBottom({ videoRef } : Props) {
 					<Icon icon={faPlay} size={'lg'} color={'#F2F5EA'} onClick={play} />
 				)
 			}
+			<NavTitle> 운동 명 </NavTitle>
 			<NavTime> { getTime(current) } / { getTime(duration) } </NavTime>
 		</Bottom>
 	);

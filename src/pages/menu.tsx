@@ -1,9 +1,14 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import styled, { css } from 'styled-components';
 import { Link, useParams } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faVideo, faList } from '@fortawesome/free-solid-svg-icons';
+
+import { RxDatabase } from 'rxdb';
+import { UserDTO } from '../db/DTO';
+import { UserDAO } from '../db/DAO';
+
 
 const color = {
 	'dark': '#2C363F',
@@ -59,6 +64,31 @@ const LI = styled.li`
     
     	color: ${ color.white };
         text-decoration: none;
+    }
+`;
+
+const Bottom = styled.div`
+	position: absolute;
+	bottom: 5px;
+	width: 250px;		
+    padding: 0px 0px 0px 0px;
+	margin: 0px 0px 0px 0px;
+	
+	background-color: ${ color.dark };
+
+    ${'a'} {
+    	display: block;
+		padding: 0px 0px 0px 15px;
+		margin: 0px 0px 10px 0px;
+		
+		color: #bbbbbb;
+		text-decoration: none;
+		font-size: 12pt;
+		
+		&:hover {
+			transition: all 0.5s;
+			filter: brightness(110%);
+		}
     }
 `;
 
@@ -118,22 +148,45 @@ const UserStatus = styled.p`
 	font-size: 10pt;
 `;
 
+type PageProps = {
+	db: RxDatabase;
+};
+
 interface Param {
 	route: string;
 }
 
-function Menu() {
+function Menu({ db } : PageProps) {
+	const userDTO = new UserDTO();
 	const { route } = useParams<Param>();
+	const [user, setUser] = useState<UserDAO | null>(null);
+
+	useEffect(() => {
+		userDTO.setDB(db);
+		select();
+	}, [db]);
+
+	async function select() {
+		setUser(await userDTO.getUser());
+	}
 
 	return (
 		<NAV>
 			<DIV>
 				<Profile/>
-				<User>
-					<UserName>노영동</UserName>
-					<br/>
-					<UserStatus>오늘 운동 미완료</UserStatus>
-				</User>
+				{ user ? (
+					<User>
+						<UserName>{ user.name }</UserName>
+						<br/>
+						<UserStatus>{ user.height.toFixed(1) }cm / { user.weight.toFixed(1) }kg</UserStatus>
+					</User>
+				) : (
+					<User>
+						<UserName></UserName>
+						<br/>
+						<UserStatus></UserStatus>
+					</User>
+				)}
 			</DIV>
 			<DIV>
 				<Button to={ '/exerciseReady/1' }>운동하기</Button>
@@ -141,22 +194,26 @@ function Menu() {
 			<UL>
 				<LI value={route == undefined ? 'selected' : ''}>
 					<Link to="/">
-						<FontAwesomeIcon icon={faHome} size={'lg'} color={'#f2f5ea'}/>
+						<FontAwesomeIcon icon={ faHome } size={'lg'} color={'#f2f5ea'}/>
 						<MenuName>메인 화면</MenuName>
 					</Link>
 				</LI>
 				<LI value={route == 'videos' ? 'selected' : ''}>
 					<Link to="/videos/1">
-						<FontAwesomeIcon icon={faHome} size={'lg'} color={'#f2f5ea'}/>
+						<FontAwesomeIcon icon={ faVideo } size={'lg'} color={'#f2f5ea'}/>
 						<MenuName>영상 관리</MenuName>
 					</Link>
 				</LI>
 				<LI value={route == 'routines' ? 'selected' : ''}>
 					<Link to="/routines/1">
-						<FontAwesomeIcon icon={faHome} size={'lg'} color={'#f2f5ea'}/>
+						<FontAwesomeIcon icon={ faList } size={'lg'} color={'#f2f5ea'}/>
 						<MenuName>루틴 관리</MenuName>
 					</Link>
 				</LI>
+				<Bottom>
+					<Link to="/dev">개발자 모드</Link>
+					<Link to="/reset">데이터 초기화</Link>
+				</Bottom>
 			</UL>
 		</NAV>
 	);

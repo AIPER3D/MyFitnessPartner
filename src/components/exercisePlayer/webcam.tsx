@@ -8,6 +8,7 @@ import { Stage, Sprite, Graphics } from '@inlet/react-pixi';
 import { Container } from 'pixi.js';
 import { useCallback } from 'react';
 import { useState } from 'react';
+import { iif } from 'rxjs';
 
 type Props = {
 	width: number;
@@ -27,6 +28,8 @@ function Webcam({ width, height }: Props) {
 	const upScaleRatio = width / inputWidth;
 
 	const [keypoints, setKeypoints] = useState<any>(null);
+
+	const [isPlaying, setPlaying] = useState<boolean>(true);
 
 	async function load() {
 		net = await posenet.load({
@@ -61,6 +64,8 @@ function Webcam({ width, height }: Props) {
 		const pose = await net.estimateSinglePose(image, {
 			flipHorizontal: false,
 		});
+
+		if (pose.score < 0.2) return;
 
 		// 3. upscale keypoints to webcam resolution
 		pose.keypoints.map( (keypoints : any) => {
