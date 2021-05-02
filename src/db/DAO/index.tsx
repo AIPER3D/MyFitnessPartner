@@ -1,5 +1,8 @@
+import { UserDAO } from './userDAO';
+import { MemoDAO } from './memoDAO';
 import { VideoDAO } from './videoDAO';
 import { RoutineDAO } from './routineDAO';
-import { MemoDAO } from './memoDAO';
+import { RecordDAO } from './recordDAO';
 
-export type { VideoDAO, RoutineDAO, MemoDAO };
+
+export type { UserDAO, MemoDAO, VideoDAO, RoutineDAO, RecordDAO };

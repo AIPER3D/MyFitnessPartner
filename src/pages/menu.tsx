@@ -1,9 +1,14 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import styled, { css } from 'styled-components';
 import { Link, useParams } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faVideo, faList, faClipboard } from '@fortawesome/free-solid-svg-icons';
+
+import { RxDatabase } from 'rxdb';
+import { UserDTO } from '../db/DTO';
+import { UserDAO } from '../db/DAO';
+
 
 const color = {
 	'dark': '#2C363F',
@@ -62,12 +67,41 @@ const LI = styled.li`
     }
 `;
 
+const Bottom = styled.div`
+	position: absolute;
+	bottom: 5px;
+	width: 250px;		
+    padding: 0px 0px 0px 0px;
+	margin: 0px 0px 0px 0px;
+	
+	background-color: ${ color.dark };
+
+    ${'a'} {
+    	display: block;
+		padding: 0px 0px 0px 15px;
+		margin: 0px 0px 10px 0px;
+		
+		color: #bbbbbb;
+		text-decoration: none;
+		font-size: 12pt;
+		
+		&:hover {
+			transition: all 0.5s;
+			filter: brightness(110%);
+		}
+    }
+`;
+
 const DIV = styled.div`
 	overflow: auto;
 `;
 
 const MenuName = styled.p`
+	position: relative;
 	display: inline;
+	top: 0px;
+	left: 0px;
+	
 	padding: 0px 0px 0px 15px;
 `;
 
@@ -118,22 +152,53 @@ const UserStatus = styled.p`
 	font-size: 10pt;
 `;
 
+const Icon = styled.div`
+	display: inline-block;
+	width: 24px;
+	height: 24px;
+	
+	text-align: center;
+`;
+
+type PageProps = {
+	db: RxDatabase;
+};
+
 interface Param {
 	route: string;
 }
 
-function Menu() {
+function Menu({ db } : PageProps) {
+	const userDTO = new UserDTO();
 	const { route } = useParams<Param>();
+	const [user, setUser] = useState<UserDAO | null>(null);
+
+	useEffect(() => {
+		userDTO.setDB(db);
+		select();
+	}, [db]);
+
+	async function select() {
+		setUser(await userDTO.getUser());
+	}
 
 	return (
 		<NAV>
 			<DIV>
 				<Profile/>
-				<User>
-					<UserName>노영동</UserName>
-					<br/>
-					<UserStatus>오늘 운동 미완료</UserStatus>
-				</User>
+				{ user ? (
+					<User>
+						<UserName>{ user.name }</UserName>
+						<br/>
+						<UserStatus>{ user.height.toFixed(1) }cm / { user.weight.toFixed(1) }kg</UserStatus>
+					</User>
+				) : (
+					<User>
+						<UserName></UserName>
+						<br/>
+						<UserStatus></UserStatus>
+					</User>
+				)}
 			</DIV>
 			<DIV>
 				<Button to={ '/exerciseReady/1' }>운동하기</Button>
@@ -141,22 +206,40 @@ function Menu() {
 			<UL>
 				<LI value={route == undefined ? 'selected' : ''}>
 					<Link to="/">
-						<FontAwesomeIcon icon={faHome} size={'lg'} color={'#f2f5ea'}/>
+						<Icon>
+							<FontAwesomeIcon icon={ faHome } size={'lg'} color={'#f2f5ea'}/>
+						</Icon>
 						<MenuName>메인 화면</MenuName>
 					</Link>
 				</LI>
 				<LI value={route == 'videos' ? 'selected' : ''}>
 					<Link to="/videos/1">
-						<FontAwesomeIcon icon={faHome} size={'lg'} color={'#f2f5ea'}/>
+						<Icon>
+							<FontAwesomeIcon icon={ faVideo } size={'lg'} color={'#f2f5ea'}/>
+						</Icon>
 						<MenuName>영상 관리</MenuName>
 					</Link>
 				</LI>
 				<LI value={route == 'routines' ? 'selected' : ''}>
 					<Link to="/routines/1">
-						<FontAwesomeIcon icon={faHome} size={'lg'} color={'#f2f5ea'}/>
+						<Icon>
+							<FontAwesomeIcon icon={ faList } size={'lg'} color={'#f2f5ea'}/>
+						</Icon>
 						<MenuName>루틴 관리</MenuName>
 					</Link>
 				</LI>
+				<LI value={route == 'records' || route == 'record' ? 'selected' : ''}>
+					<Link to="/records/1">
+						<Icon>
+							<FontAwesomeIcon icon={ faClipboard } size={'lg'} color={'#f2f5ea'}/>
+						</Icon>
+						<MenuName>기록 관리</MenuName>
+					</Link>
+				</LI>
+				<Bottom>
+					<Link to="/dev">개발자 모드</Link>
+					<Link to="/reset">데이터 초기화</Link>
+				</Bottom>
 			</UL>
 		</NAV>
 	);

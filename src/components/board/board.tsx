@@ -3,6 +3,7 @@ import styled from 'styled-components';
 
 import Gallery from './gallery';
 import List from './list';
+import TextList from './textlist';
 import Pagination from './pagination';
 import { Content } from './content';
 
@@ -26,6 +27,8 @@ const Box = styled.div`
 	font-size: 12pt;
 	text-align: center;
 	overflow: hidden;
+	
+	background-color:#ffffff;
 `;
 
 const Item = styled.div`
@@ -42,9 +45,13 @@ function Board({ type, content, currentPage, maxPage }: BoardProps) {
 		for (let i = 0; i < content.length; i++) {
 			item.push(<Gallery key={ i } content={content[i]}></Gallery>);
 		}
-	} else {
+	} else if (type == 'list') {
 		for (let i = 0; i < content.length; i++) {
 			item.push(<List key={ i } content={content[i]}></List>);
+		}
+	} else {
+		for (let i = 0; i < content.length; i++) {
+			item.push(<TextList key={ i } content={content[i]}></TextList>);
 		}
 	}
 

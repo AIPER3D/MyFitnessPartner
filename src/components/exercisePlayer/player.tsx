@@ -1,14 +1,19 @@
 import React, {useState, useRef, useEffect} from 'react';
 import styled, { css } from 'styled-components';
+import { Redirect } from 'react-router-dom';
 
 import { NavigatorTop, NavigatorBottom, PIP } from './';
-import { VideoDAO, RoutineDAO } from '../../db/DAO';
+import { VideoDAO, RoutineDAO, RecordDAO } from '../../db/DAO';
+
 import * as tf from '@tensorflow/tfjs';
 import * as posenet from '@tensorflow-models/posenet';
+import {iamgeDataToTensor, imageFromVideo, resizeImage} from '../../util/video-util';
+import { Stage, Graphics } from '@inlet/react-pixi';
 
 type Props = {
 	routine: RoutineDAO;
 	video: VideoDAO[];
+	onEnded: (record: RecordDAO) => void;
 };
 
 const colorCode = {
@@ -41,11 +46,18 @@ const Video = styled.video`
 	background-color: #000000;
 `;
 
-function Player({ routine, video } : Props) {
+function Player({ routine, video, onEnded } : Props) {
+	const record : RecordDAO = {
+		id: 0,
+		time: new Date().getTime(),
+		routineId: routine['id'],
+		routineName: routine['name'],
+	};
 	const [videoRef, setVideoRef] = useState<HTMLVideoElement | null>(null);
 	const [seq, setSeq] = useState<number>(0);
 
-	const inputSclaeRatio : number = 0;
+	let widthScaleRatio : number = 0;
+	let	heightScaleRatio : number = 0;
 	const inputWidth = 512;
 	const inputHeight = 512;
 
@@ -55,17 +67,9 @@ function Player({ routine, video } : Props) {
 
 	useEffect(() => {
 		if (videoRef == null) return;
-		if (seq < video.length) {
-			loadModel();
-			load(seq);
-		} else end();
+		if (seq < video.length) load(seq);
+		else onEnded(record);
 	}, [videoRef, seq]);
-
-	// const imageToByteArray = (image, )
-
-	const imageToTensor = (image : any, NUMBER_OF_CHANNELS : number) => {
-
-	};
 
 	async function loadModel() {
 		net = await posenet.load({
@@ -86,14 +90,21 @@ function Player({ routine, video } : Props) {
 		const blob = new Blob([arrayBuffer]);
 		const url = URL.createObjectURL(blob);
 
-		videoRef.controls = false;
+		widthScaleRatio = videoRef.videoWidth / inputWidth;
+		heightScaleRatio = videoRef.videoHeight / inputHeight;
+
+		videoRef.controls = true;
 		videoRef.playsInline = true;
 		videoRef.src = url;
 		videoRef.volume = 0.2;
 
 		videoRef.play()
 			.then(async () => {
-				// setInterval(capture, 100);
+				// while ( !videoRef.paused &&
+				// 		videoRef.currentTime < videoRef.duration ) {
+				// 	await capture();
+				// }
+				capture();
 			})
 			.catch(() => {
 
@@ -106,36 +117,57 @@ function Player({ routine, video } : Props) {
 	}
 
 	const capture = async () => {
+		// 1. get image from video
 		if (videoRef == null) return;
 
-		// 1. initializa video frames
-		const videoFramer = await tf.data.webcam(videoRef, {
-			resizeWidth: inputWidth,
-			resizeHeight: inputHeight,
-		});
+		// const image = imageFromVideo(videoRef);
+		// const tensor = iamgeDataToTensor(image);
+		// console.log(tensor);
 
-		// 2. get video keyframe
-		const image = await videoFramer.capture();
+		// // 2. resize image
+		// const resizedImage = resizeImage(tensor, { width: 512, height: 256});
 
-		// 3. inference pose
-		const pose = await net.estimateSinglePose(image, {
+		// // 3. inference pose
+		const pose = await net.estimateSinglePose(videoRef, {
 			flipHorizontal: false,
 		});
 
-		// 4. upscale pose to video resolution
+		console.log(pose);
 
-		// 5. setKeypoints
-		setKeypoints(pose.keypoints);
+		// // 4. upscale pose to video resolution
+		// pose.keypoints.map( (keypoints : any) => {
+		// 	keypoints.position.x *= widthScaleRatio;
+		// 	keypoints.position.y *= heightScaleRatio;
+		// });
 
-		console.log(keypoints);
-
-		image.dispose();
-		await tf.nextFrame();
+		// // 5. setKeypoints
+		// setKeypoints(pose.keypoints);
 	};
 
-	function end() {
-		console.log('끝');
-	}
+	const drawKeypoints = React.useCallback( (graphics) => {
+		graphics.clear();
+
+		if (keypoints == null) return;
+
+		for (let i=0; i<keypoints.length; i++) {
+			const x = keypoints[i].position.x;
+			const y = keypoints[i].position.y;
+
+			graphics.beginFill(0xffffff);
+			graphics.drawCircle(x, y, 5);
+			graphics.endFill();
+		}
+	}, [keypoints]);
+
+	const stageProps = {
+		width: videoRef?.videoWidth,
+		height: videoRef?.videoHeight,
+		options: {
+			backgroundAlpha: 0,
+			antialias: true,
+			backgroundColor: 0x000000,
+		},
+	};
 
 	return (
 		<Container>
@@ -143,9 +175,15 @@ function Player({ routine, video } : Props) {
 				routine = { routine }
 				seq = { seq + 1 }
 			/>
+
 			<Video ref={ (ref) => {
 				setVideoRef(ref);
 			} } />
+
+			<PixiStage {...stageProps}>
+				<Graphics draw={drawKeypoints}/>
+			</PixiStage>
+
 			<NavigatorBottom
 				videoRef = { videoRef }
 			/>
@@ -157,5 +195,14 @@ function Player({ routine, video } : Props) {
 Player.defaultProps = {
 
 };
+
+const PixiStage = styled(Stage)`
+	position: absolute;
+
+	top: 0px;
+	left: 0px;
+
+	z-index : 800;
+`;
 
 export default Player;

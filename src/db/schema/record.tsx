@@ -8,10 +8,16 @@ const RecordSchema = {
 		'record_id': {
 			'type': 'number',
 		},
-		'created_time': {
+		'record_time': {
+			'type': 'number',
+		},
+		'routine_id': {
+			'type': 'number',
+		},
+		'routine_name': {
 			'type': 'string',
 		},
-		'exercise': {
+		'record_exercises': {
 			'type': 'array',
 			'items': {
 				'type': 'object',
@@ -20,17 +26,6 @@ const RecordSchema = {
 						'type': 'number',
 					},
 					'exercise_value': {
-						'type': 'number',
-					},
-				},
-			},
-		},
-		'check_seq': {
-			'type': 'array',
-			'items': {
-				'type': 'object',
-				'properties': {
-					'seq': {
 						'type': 'number',
 					},
 				},

@@ -61,7 +61,7 @@ const NavTitle = styled.div`
 	height: 25px;
 	
 	border-radius: 5px;
-	margin-top: 10px;
+	margin-top: 11px;
 	margin-left: 40px;
 	
 	color: #F2F5EA;
@@ -87,8 +87,8 @@ const Icon = styled(FontAwesomeIcon)`
 	width: 24px;
 	height: 24px;
 	
-	margin-top: 10px;
-	margin-left: 10px;
+	margin-top: 11px;
+	margin-left: 11px;
 	
 	border-radius: 16px;
 	transition: all 0.2s;

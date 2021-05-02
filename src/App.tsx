@@ -4,22 +4,27 @@ import styled, { css } from 'styled-components';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { createRxDatabase, addRxPlugin, RxDatabase } from 'rxdb';
 
-import { VideoSchema, RoutineSchema, MemoSchema } from './db/schema';
+import { UserSchema, MemoSchema, VideoSchema, RoutineSchema, RecordSchema } from './db/schema';
 import {
 	Main,
 	Menu,
-	Test,
-	Routines,
-	RoutineCreate,
+
 	Videos,
 	VideoCreate,
-	Exercise,
+	Routines,
+	RoutineCreate,
+	Record,
+	Records,
 
+	Exercise,
 	ExerciseReady,
 	ExercisePlay,
 
 	DevMain,
-	DevDB,
+	Test,
+
+	New,
+	Reset,
 } from './pages';
 
 declare global {
@@ -58,19 +63,29 @@ const Body = styled.div`
 `;
 
 function App() {
-	const devMode = false;
-	const [db, setDB] = useState<RxDatabase>();
+	const devMode = true;
+	const [newMode, setNewMode] = useState<boolean>(true);
+	const [db, setDB] = useState<RxDatabase | null>(null);
 
 	addRxPlugin(require('pouchdb-adapter-idb'));
 
 	useEffect(() => {
 		(async () => {
-			if (devMode) return;
 			if (db) return;
 
 			const tdb = await createRxDatabase({
 				name: 'data',
 				adapter: 'idb',
+			});
+
+			await tdb.collection({
+				name: 'users',
+				schema: UserSchema,
+			});
+
+			await tdb.collection({
+				name: 'memos',
+				schema: MemoSchema,
 			});
 
 			await tdb.collection({
@@ -84,11 +99,17 @@ function App() {
 			});
 
 			await tdb.collection({
-				name: 'memos',
-				schema: MemoSchema,
+				name: 'records',
+				schema: RecordSchema,
 			});
 
 			setDB(tdb);
+
+			const doc = await tdb.collections.users
+				.find()
+				.exec();
+
+			setNewMode(doc.length <= 0);
 		})();
 
 		return () => {
@@ -101,25 +122,24 @@ function App() {
 		};
 	}, []);
 
-	if (devMode) {
-		return (
-			<Router>
-				<ContainerWithoutMenu>
-					<Switch>
-						<Route path="/db">
-							<DevDB />
-						</Route>
-						<Route path="/">
-							<DevMain />
-						</Route>
-					</Switch>
-				</ContainerWithoutMenu>
-			</Router>
-		);
-	} else if (db) {
+	if (db) {
 		return (
 			<Router>
 				<Switch>
+					{ devMode ? (
+						<Route path="/dev">
+							<ContainerWithoutMenu>
+								<DevMain db = { db } />
+							</ContainerWithoutMenu>
+						</Route>
+					) : (<Route path="/dev"></Route>)}
+					{ newMode ? (
+						<Route path="/">
+							<ContainerWithoutMenu>
+								<New db = { db } />
+							</ContainerWithoutMenu>
+						</Route>
+					) : (<Route path="/new"></Route>)}
 					<Route path="/exercise1">
 						<ContainerWithoutMenu>
 							<Exercise db={ db }/>
@@ -130,8 +150,13 @@ function App() {
 							<ExercisePlay db={ db }/>
 						</ContainerWithoutMenu>
 					</Route>
+					<Route path="/reset">
+						<ContainerWithoutMenu>
+							<Reset db={ db }/>
+						</ContainerWithoutMenu>
+					</Route>
 					<Route path="/:route">
-						<Menu />
+						<Menu db = { db } />
 						<ContainerWithMenu>
 							<Body>
 								<Switch>
@@ -153,6 +178,12 @@ function App() {
 									<Route path="/routines/:page">
 										<Routines db={ db } />
 									</Route>
+									<Route path="/record/:id">
+										<Record db={ db } />
+									</Route>
+									<Route path="/records/:page">
+										<Records db={ db } />
+									</Route>
 									<Route path="/">
 										<Main db={ db } />
 									</Route>
@@ -161,7 +192,7 @@ function App() {
 						</ContainerWithMenu>
 					</Route>
 					<Route path="/">
-						<Menu />
+						<Menu db = { db } />
 						<ContainerWithMenu>
 							<Body>
 								<Main db={ db } />
@@ -173,9 +204,17 @@ function App() {
 		);
 	} else {
 		return (
-			<ContainerWithoutMenu>
-				<p>DB 접속 오류</p>
-			</ContainerWithoutMenu>
+			<Router>
+				<Switch>
+					{ devMode ? (
+						<Route path="/">
+							<ContainerWithoutMenu>
+								<DevMain db = { db } />
+							</ContainerWithoutMenu>
+						</Route>
+					) : (<Route path="/"></Route>)}
+				</Switch>
+			</Router>
 		);
 	}
 }
