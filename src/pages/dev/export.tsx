@@ -3,12 +3,19 @@ import { createRxDatabase } from 'rxdb';
 import { Link } from 'react-router-dom';
 import { MemoSchema, RoutineSchema, VideoSchema } from '../../db/schema';
 
-function Export() {
+import { RxDatabase } from 'rxdb';
+
+type PageProps = {
+	db: RxDatabase;
+};
+
+function Export({ db } : PageProps) {
 	useEffect(() => {
 		(async () => {
 			const tdb = await createRxDatabase({
 				name: 'data',
 				adapter: 'idb',
+				ignoreDuplicate: true,
 			});
 
 			await tdb.collection({

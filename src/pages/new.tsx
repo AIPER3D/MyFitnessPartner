@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import styled, { css } from 'styled-components';
+import { Link } from 'react-router-dom';
 
 import { RxDatabase } from 'rxdb';
 import { Button } from '../components/common';
+
 
 type InputProps = {
     vwidth: string;
@@ -123,6 +125,7 @@ function New({ db } : PageProps) {
 					<Input vwidth = { '150px' }	vmargin = { '0px 18px 30px 18px' }/>
 				</Item>
 				<Button text = { '시작하기' } width = { '100% - 40px' } />
+				<Link to="/dev">개발자 모드</Link>
 			</Form>
 		</Body>
 	);
