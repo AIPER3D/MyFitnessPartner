@@ -24,8 +24,16 @@ const Box = css`
 const RoutineName = styled.input`
 	${ Box }
 	width: 930px;
+	height: 30px;
 	padding: 5px 5px 5px 15px;
-	margin: 5px 20px 5px 20px;
+	margin: 5px 20px 15px 20px;
+`;
+
+const ColumnTitle = styled.div`
+	width: 920px;
+	padding-left: 20px;
+	
+	font-weight: bold;
 `;
 
 const Title = styled.div`
@@ -203,7 +211,9 @@ function RoutineCreate(this: any, { db } : PageProps) {
 	return (
 		<Root onSubmit={ onSubmit }>
 			<Header text='나만의 루틴 만들기' />
+			<ColumnTitle>루틴 명</ColumnTitle>
 			<RoutineName placeholder='루틴 명' onChange={ onSetTitle } value={ title }/>
+			<ColumnTitle>영상</ColumnTitle>
 			<Title>영상 목록 ({ video.length })</Title>
 			<Title>선택한 영상 ({ selected.length })</Title>
 			<List>

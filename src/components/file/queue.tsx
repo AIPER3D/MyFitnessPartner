@@ -43,7 +43,7 @@ function Queue({ db, data } : QueueProps) {
 	const arr = [];
 	for (let i = 0; i < data.length; i++) {
 		arr.push(
-			<Item db= { db } data={ data[i] } />
+			<Item key = { i } db= { db } data={ data[i] } />
 		);
 	}
 
