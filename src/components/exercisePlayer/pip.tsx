@@ -1,3 +1,5 @@
+import { Stage } from '@inlet/react-pixi';
+import { Graphics } from '@inlet/react-pixi';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -7,7 +9,7 @@ type Props = {
 
 };
 
-const Container = styled.div`
+const Wrapper = styled.div`
 	position: absolute;
 	display: block;
 	
@@ -16,10 +18,9 @@ const Container = styled.div`
 	width: 640px;
 	height: 360px;
 	
-	background-color: #2C363F;
-	z-index: 1000005;
+	/* background-color: #2C363F; */
+	z-index: 1000;
 	
-	opacity: 0.5;
 `;
 
 
@@ -68,16 +69,18 @@ function PIP() {
 	}
 
 	return (
-		<Container
+		<Wrapper
 			onMouseDown = { dragMouseDown }
 			onMouseUp = { dragMouseUp }
 			onMouseMove = { dragMouse }
 		>
+
 			<Webcam
 				width = { 640 }
-				height = { 360 }
+				height = { 320 }
+				opacity = {0.5}
 			/>
-		</Container>
+		</Wrapper>
 	);
 }
 

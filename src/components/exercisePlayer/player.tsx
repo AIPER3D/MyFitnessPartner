@@ -3,6 +3,8 @@ import styled, { css } from 'styled-components';
 
 import { NavigatorTop, NavigatorBottom, PIP } from './';
 import { VideoDAO, RoutineDAO } from '../../db/DAO';
+import * as tf from '@tensorflow/tfjs';
+import * as posenet from '@tensorflow-models/posenet';
 
 type Props = {
 	routine: RoutineDAO;
@@ -43,11 +45,37 @@ function Player({ routine, video } : Props) {
 	const [videoRef, setVideoRef] = useState<HTMLVideoElement | null>(null);
 	const [seq, setSeq] = useState<number>(0);
 
+	const inputSclaeRatio : number = 0;
+	const inputWidth = 512;
+	const inputHeight = 512;
+
+	const [keypoints, setKeypoints] = useState<any>(null);
+
+	let net : any;
+
 	useEffect(() => {
 		if (videoRef == null) return;
-		if (seq < video.length) load(seq);
-		else end();
+		if (seq < video.length) {
+			loadModel();
+			load(seq);
+		} else end();
 	}, [videoRef, seq]);
+
+	// const imageToByteArray = (image, )
+
+	const imageToTensor = (image : any, NUMBER_OF_CHANNELS : number) => {
+
+	};
+
+	async function loadModel() {
+		net = await posenet.load({
+			architecture: 'MobileNetV1',
+			outputStride: 16,
+			inputResolution: { width: inputWidth, height: inputHeight },
+			multiplier: 1,
+			quantBytes: 2,
+		});
+	}
 
 	function load(seq : number) {
 		if (videoRef == null) return;
@@ -64,8 +92,8 @@ function Player({ routine, video } : Props) {
 		videoRef.volume = 0.2;
 
 		videoRef.play()
-			.then(() => {
-
+			.then(async () => {
+				// setInterval(capture, 100);
 			})
 			.catch(() => {
 
@@ -76,6 +104,35 @@ function Player({ routine, video } : Props) {
 			setSeq(seq + 1);
 		});
 	}
+
+	const capture = async () => {
+		if (videoRef == null) return;
+
+		// 1. initializa video frames
+		const videoFramer = await tf.data.webcam(videoRef, {
+			resizeWidth: inputWidth,
+			resizeHeight: inputHeight,
+		});
+
+		// 2. get video keyframe
+		const image = await videoFramer.capture();
+
+		// 3. inference pose
+		const pose = await net.estimateSinglePose(image, {
+			flipHorizontal: false,
+		});
+
+		// 4. upscale pose to video resolution
+
+		// 5. setKeypoints
+		setKeypoints(pose.keypoints);
+
+		console.log(keypoints);
+
+		image.dispose();
+		await tf.nextFrame();
+	};
+
 	function end() {
 		console.log('끝');
 	}
@@ -92,7 +149,7 @@ function Player({ routine, video } : Props) {
 			<NavigatorBottom
 				videoRef = { videoRef }
 			/>
-			<PIP />
+			<PIP/>
 		</Container>
 	);
 }

@@ -1,11 +1,15 @@
-.editableBox{
+
+    .editableBox{
     max-width: 300px;
-    margin: 0 auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-around;
     .btn{
         font-size: 14px; 
+        margin-top: 15px;
         white-space:nowrap; 
         font-family: Open Sans, Helvetica,Arial,sans-serif; 
-        display: inline-block; 
+        display: inline-flex; 
         color: #fff; 
         text-align: center; 
         position:relative; 
@@ -16,18 +20,85 @@
     }
     .btn.btn-dark:hover{
         background-color:#202d3d;
-        
     }
     .btn.btn-dark:active{
-        top: 3px; outline: none; 
+        top: 3px; 
+        outline: none; 
         -webkit-box-shadow: none; 
         box-shadow: none;
+    }
+    .remove_button {
+        width: 25px;
+        height: 25px;
+        margin: auto;
+        margin-top: 12px;
+        text-align: center;
+        &:hover {
+            background-color: rgba(182, 207, 211, 0.863);
+        }
+        &:active {
+            background-color: rgb(182, 207, 211);
+        }
+    }
+    .inputBox {
+        position: relative;
+        > input {
+            flex-grow: 3;
+            border: none;
+            border-bottom: 0.125rem solid var(--omrs-color-ink-medium-contrast);
+            margin-right: 10px;
+            height: 1.2rem;
+            font-size: 1rem;
+            line-height: 160%;
+            padding-top: 0.825rem;
+            padding-bottom: 0.2rem;
+            &:focus, &:valid {
+                outline: none;
+                + .typeBar > .input_label {
+                    top: 0;
+                    font-size: 0.85rem;
+                    margin-bottom: 32px;;
+                    color: var(--omrs-color-interaction);
+                }
+                + .typeBar > .nonselected {
+                    border: none;
+                    background-color: rgba(0,0,0,0);
+                    display: flex;
+                    color: rgba(39, 38, 38, 0.493);
+                    &:hover {
+                        color: rgba(39, 38, 38, 0.829);
+                    }
+                }
+            }
+            &:hover {
+                background: var(--omrs-color-interaction-minus-two);
+                border-color: var(--omrs-color-ink-high-contrast);
+            }
+        }
+        .typeBar {
+            display: flex;
+            flex-direction:row;
+            .input_label {
+                position: absolute;
+                top: 0.4rem;
+                left: 0.4rem;
+                line-height: 147.6%;
+                color: var(--omrs-color-ink-medium-contrast);
+                transition: top .2s;
+            }
+            .nonselected {
+                position: absolute;
+                top: 0.4rem;
+                left: 3rem;
+                display: none;
+            }
+        }
     }
 }
 
 .noneditableBox{
     max-width: 300px;
-    margin: 0 auto;
+    padding: 2px 0;
     .btn{
         font-size: 14px; 
         white-space:nowrap; 
@@ -47,4 +118,27 @@
     .btn.btn-sunflower:active{
         top: 3px; outline: none; 
     }
+    .remove_button {
+        width: 25px;
+        height: 25px;
+        padding: 3px 6px;
+        margin: 12px 10px;
+        &:hover {
+            background-color: rgba(182, 207, 211, 0.863);
+        }
+        &:active {
+            background-color: rgb(182, 207, 211);
+        }
+    }
+}
+:root {
+	--omrs-color-ink-lowest-contrast: rgba(47, 60, 85, 0.18);
+	--omrs-color-ink-low-contrast: rgba(60, 60, 67, 0.3);
+	--omrs-color-ink-medium-contrast: rgba(19, 19, 21, 0.6);
+	--omrs-color-interaction: #1e4bd1;
+	--omrs-color-interaction-minus-two: rgba(73, 133, 224, 0.12);
+	--omrs-color-danger: #b50706;
+	--omrs-color-bg-low-contrast: #eff1f2;
+	--omrs-color-ink-high-contrast: #121212;
+	--omrs-color-bg-high-contrast: #ffffff;
 }

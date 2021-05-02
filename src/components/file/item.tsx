@@ -117,6 +117,7 @@ function Item({ db, data } : ItemProps) {
 			if (success) {
 				if (e.target == null || e.target.result == null) {
 					setUploadStatus(-1);
+					console.log(e);
 					return;
 				}
 
@@ -155,7 +156,8 @@ function Item({ db, data } : ItemProps) {
 			.then(() => {
 
 			})
-			.catch(() => {
+			.catch((e) => {
+				console.log(e);
 				setUploadStatus(-1);
 			});
 	};

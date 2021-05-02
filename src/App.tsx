@@ -8,6 +8,7 @@ import { UserSchema, VideoSchema, RoutineSchema, MemoSchema } from './db/schema'
 import {
 	Main,
 	Menu,
+	Test,
 	Routines,
 	RoutineCreate,
 	Videos,
@@ -151,6 +152,9 @@ function App() {
 						<ContainerWithMenu>
 							<Body>
 								<Switch>
+									<Route path="/test">
+										<Test db={ db }/>
+									</Route>
 									<Route path="/exerciseReady/:page">
 										<ExerciseReady db={ db }/>
 									</Route>

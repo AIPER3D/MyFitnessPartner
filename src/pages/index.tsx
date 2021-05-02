@@ -1,5 +1,6 @@
 import Main from './main';
 import Menu from './menu';
+import Test from './test';
 import RoutineCreate from './routineCreate';
 import Routines from './routines';
 import VideoCreate from './videoCreate';
@@ -17,6 +18,7 @@ import Reset from './reset';
 export {
 	Main,
 	Menu,
+	Test,
 	RoutineCreate,
 	Routines,
 	VideoCreate,
