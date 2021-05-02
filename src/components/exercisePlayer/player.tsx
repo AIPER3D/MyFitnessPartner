@@ -58,10 +58,8 @@ function Player({ routine, video } : Props) {
 
 	useEffect(() => {
 		if (videoRef == null) return;
-		if (seq < video.length) {
-			loadModel();
-			load(seq);
-		} else end();
+		if (seq < video.length) load(seq);
+		else end();
 	}, [videoRef, seq]);
 
 

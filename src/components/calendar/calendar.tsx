@@ -1,9 +1,10 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import './calendar.scss';
 import { MdChevronLeft, MdChevronRight } from 'react-icons/md';
 import moment, { Moment as MomentTypes } from 'moment';
 import CalendarModal from './CalendarModal';
 import { RxDatabase } from 'rxdb';
+import { MemoDTO } from '../../db/DTO/memoDTO';
 
 type CalendarProps = {
 	db : RxDatabase;
@@ -13,6 +14,10 @@ function Calendar({db} : CalendarProps) {
 	const [date, setDate] = useState<MomentTypes>(moment());
 	const [modalOpen, setModalOpen] = useState(false);
 	const [present, setPresent] = useState<string>('');
+	const [memoDTO, setMemoDTO] = useState<MemoDTO>(new MemoDTO());
+	useEffect(()=>{
+		memoDTO.setDB(db);
+	}, [db]);
 	const openModal= (day:string)=>{
 		setModalOpen(true);
 		setPresent(day);
@@ -66,6 +71,32 @@ function Calendar({db} : CalendarProps) {
 			);
 		}
 		return calendar;
+	}
+
+
+	async function checkMemo(day: string) {
+		return memoDTO.isMemohere(day);
+	}
+
+	async function checkCalory(day: string) {
+		return memoDTO.isCaloryhere(day);
+	}
+
+	function generateCheck(day: string) {
+		const checklist = [];
+		if (checkMemo(day)) {
+			checklist.push(
+				<span className="check_memo"> </span>
+			);
+		}
+
+		if (checkCalory(day)) {
+			checklist.push(
+				<span className="check_calory"> </span>
+			);
+		}
+
+		return checklist;
 	}
 	return (
 		<div className="Calendar">

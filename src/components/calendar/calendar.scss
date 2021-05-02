@@ -98,6 +98,25 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%,-50%);
+            span.check_memo {
+              display: inline-block;
+              transform: rotate(45deg);
+              height: var(--height);
+              width: var(--width);
+              border-bottom: var(--borderWidth) solid var(--borderColorMemo);
+              border-right: var(--borderWidth) solid var(--borderColorMemo);
+              margin-right: 5px;
+              margin-top: 3px;
+            }
+            span.check_calory {
+              display: inline-block;
+              transform: rotate(45deg);
+              height: var(--height);
+              width: var(--width);
+              border-bottom: var(--borderWidth) solid var(--borderColorCalory);
+              border-right: var(--borderWidth) solid var(--borderColorCalory);
+              margin: 10px 5px;
+            }
           }
         }
         .box_day{
@@ -130,3 +149,12 @@
       }
     }
   }
+
+
+:root {
+    --borderWidth: 4px;
+    --height: 12px;
+    --width: 6px;
+    --borderColorMemo: #3fa0b1;
+    --borderColorCalory: #e2e46d;
+}

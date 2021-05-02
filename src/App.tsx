@@ -62,7 +62,7 @@ const Body = styled.div`
 function App() {
 	const devMode = true;
 	const [newMode, setNewMode] = useState<boolean>(true);
-	const [db, setDB] = useState<RxDatabase>();
+	const [db, setDB] = useState<RxDatabase | null>(null);
 
 	addRxPlugin(require('pouchdb-adapter-idb'));
 
@@ -121,7 +121,7 @@ function App() {
 					{ devMode ? (
 						<Route path="/dev">
 							<ContainerWithoutMenu>
-								<DevMain />
+								<DevMain db = { db } />
 							</ContainerWithoutMenu>
 						</Route>
 					) : (<Route path="/dev"></Route>)}
@@ -195,7 +195,7 @@ function App() {
 					{ devMode ? (
 						<Route path="/">
 							<ContainerWithoutMenu>
-								<DevMain />
+								<DevMain db = { db } />
 							</ContainerWithoutMenu>
 						</Route>
 					) : (<Route path="/"></Route>)}

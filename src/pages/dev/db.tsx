@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { createRxDatabase, RxDatabase } from 'rxdb';
+import {createRxDatabase, removeRxDatabase, RxDatabase} from 'rxdb';
 import { Link } from 'react-router-dom';
 
 import {
@@ -14,12 +14,7 @@ import {
 function DB() {
 	useEffect(() => {
 		(async () => {
-			const tdb = await createRxDatabase({
-				name: 'data',
-				adapter: 'idb',
-			});
-
-			await tdb.remove();
+			await removeRxDatabase('data', 'idb');
 
 			setTimeout(async () => {
 				const tdb = await createRxDatabase({

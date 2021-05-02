@@ -107,6 +107,7 @@ function CalendarEditableBox({ memo, onRefresh, db } : Props) {
 				</div>
 			) : (
 				<div className="noneditableBox">
+					<span className="check"> </span>
 					{
 						inputTypeCheck() ? (
 							<span onClick={editOn}>{text}</span>

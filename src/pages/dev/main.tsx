@@ -1,8 +1,13 @@
 import React from 'react';
 import { BrowserRouter as Router, Link, Route, Switch} from 'react-router-dom';
 import { DevDB, DevExport, DevDelete } from './';
+import { RxDatabase } from 'rxdb';
 
-function Main() {
+type PageProps = {
+	db: RxDatabase | null;
+};
+
+function Main({ db } : PageProps) {
 	return (
 		<div>
 			<ul>
@@ -14,12 +19,15 @@ function Main() {
 
 			<Router>
 				<Switch>
-					<Route path="/dev/db">
-						<DevDB />
-					</Route>
-					<Route path="/dev/export">
-						<DevExport />
-					</Route>
+					{ db ? (
+						<Route path="/dev/export">
+							<DevExport db = { db } />
+						</Route>
+					) : (
+						<Route path="/dev/db">
+							<DevDB />
+						</Route>
+					)}
 					<Route path="/dev/delete">
 						<DevDelete />
 					</Route>
