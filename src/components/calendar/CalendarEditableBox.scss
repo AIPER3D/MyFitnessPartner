@@ -1,5 +1,4 @@
-
-    .editableBox{
+.editableBox{
     max-width: 300px;
     display: flex;
     align-items: flex-start;
@@ -98,7 +97,18 @@
 
 .noneditableBox{
     max-width: 300px;
-    padding: 2px 0;
+    padding: 4px 0;
+    display: flex;
+    .check {
+        display: inline-block;
+        transform: rotate(45deg);
+        height: var(--height);
+        width: var(--width);
+        border-bottom: var(--borderWidth) solid var(--borderColor);
+        border-right: var(--borderWidth) solid var(--borderColor);
+        margin-right: 5px;
+        margin-top: 3px;
+      }
     .btn{
         font-size: 14px; 
         white-space:nowrap; 
@@ -118,11 +128,12 @@
     .btn.btn-sunflower:active{
         top: 3px; outline: none; 
     }
+        
     .remove_button {
         width: 25px;
         height: 25px;
-        padding: 3px 6px;
-        margin: 12px 10px;
+        margin-left: 10px;
+        text-align: center;
         &:hover {
             background-color: rgba(182, 207, 211, 0.863);
         }
@@ -141,4 +152,8 @@
 	--omrs-color-bg-low-contrast: #eff1f2;
 	--omrs-color-ink-high-contrast: #121212;
 	--omrs-color-bg-high-contrast: #ffffff;
+    --borderWidth: 4px;
+    --height: 12px;
+    --width: 6px;
+    --borderColor: #a9aca6;
 }

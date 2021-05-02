@@ -43,7 +43,7 @@ function Player({ routine, video } : Props) {
 	const [videoRef, setVideoRef] = useState<HTMLVideoElement | null>(null);
 	const [seq, setSeq] = useState<number>(0);
 
-	let inputSclaeRatio : number = 0;
+	const inputScaleRatio : number = 0;
 
 	useEffect(() => {
 		if (videoRef == null) return;
