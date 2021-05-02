@@ -1,8 +1,10 @@
 import React, {useState, useRef, useEffect} from 'react';
 import styled, { css } from 'styled-components';
+import { Redirect } from 'react-router-dom';
 
 import { NavigatorTop, NavigatorBottom, PIP } from './';
-import { VideoDAO, RoutineDAO } from '../../db/DAO';
+import { VideoDAO, RoutineDAO, RecordDAO } from '../../db/DAO';
+
 import * as tf from '@tensorflow/tfjs';
 import * as posenet from '@tensorflow-models/posenet';
 import {iamgeDataToTensor, imageFromVideo, resizeImage} from '../../util/video-util';
@@ -11,6 +13,7 @@ import { Stage, Graphics } from '@inlet/react-pixi';
 type Props = {
 	routine: RoutineDAO;
 	video: VideoDAO[];
+	onEnded: (record: RecordDAO) => void;
 };
 
 const colorCode = {
@@ -43,7 +46,13 @@ const Video = styled.video`
 	background-color: #000000;
 `;
 
-function Player({ routine, video } : Props) {
+function Player({ routine, video, onEnded } : Props) {
+	const record : RecordDAO = {
+		id: 0,
+		time: new Date().getTime(),
+		routineId: routine['id'],
+		routineName: routine['name'],
+	};
 	const [videoRef, setVideoRef] = useState<HTMLVideoElement | null>(null);
 	const [seq, setSeq] = useState<number>(0);
 
@@ -59,9 +68,8 @@ function Player({ routine, video } : Props) {
 	useEffect(() => {
 		if (videoRef == null) return;
 		if (seq < video.length) load(seq);
-		else end();
+		else onEnded(record);
 	}, [videoRef, seq]);
-
 
 	async function loadModel() {
 		net = await posenet.load({
@@ -85,7 +93,7 @@ function Player({ routine, video } : Props) {
 		widthScaleRatio = videoRef.videoWidth / inputWidth;
 		heightScaleRatio = videoRef.videoHeight / inputHeight;
 
-		videoRef.controls = false;
+		videoRef.controls = true;
 		videoRef.playsInline = true;
 		videoRef.src = url;
 		videoRef.volume = 0.2;
@@ -150,10 +158,6 @@ function Player({ routine, video } : Props) {
 			graphics.endFill();
 		}
 	}, [keypoints]);
-
-	function end() {
-		console.log('끝');
-	}
 
 	const stageProps = {
 		width: videoRef?.videoWidth,

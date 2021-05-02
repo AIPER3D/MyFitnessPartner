@@ -3,12 +3,11 @@ import {createRxDatabase, removeRxDatabase, RxDatabase} from 'rxdb';
 import { Link } from 'react-router-dom';
 
 import {
-	ExerciseSchema,
+	UserSchema,
+	MemoSchema,
 	VideoSchema,
 	RoutineSchema,
 	RecordSchema,
-	UserSchema,
-	MemoSchema,
 } from '../../db/schema';
 
 function DB() {
@@ -23,8 +22,11 @@ function DB() {
 				});
 
 				await tdb.addCollections({
-					exercises: {
-						schema: ExerciseSchema,
+					users: {
+						schema: UserSchema,
+					},
+					memos: {
+						schema: MemoSchema,
 					},
 					videos: {
 						schema: VideoSchema,
@@ -34,12 +36,6 @@ function DB() {
 					},
 					records: {
 						schema: RecordSchema,
-					},
-					users: {
-						schema: UserSchema,
-					},
-					memos: {
-						schema: MemoSchema,
 					},
 				});
 

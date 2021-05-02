@@ -1,6 +1,7 @@
 import { UserDTO } from './userDTO';
+import { MemoDTO } from './memoDTO';
 import { VideoDTO } from './videoDTO';
 import { RoutineDTO } from './routineDTO';
-import { MemoDTO } from './memoDTO';
+import { RecordDTO } from './recordDTO';
 
-export { UserDTO, VideoDTO, RoutineDTO, MemoDTO };
+export { UserDTO, MemoDTO, VideoDTO, RoutineDTO, RecordDTO };

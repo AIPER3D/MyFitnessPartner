@@ -3,7 +3,7 @@ import styled, { css } from 'styled-components';
 import { Link, useParams } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faVideo, faList } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faVideo, faList, faClipboard } from '@fortawesome/free-solid-svg-icons';
 
 import { RxDatabase } from 'rxdb';
 import { UserDTO } from '../db/DTO';
@@ -97,7 +97,11 @@ const DIV = styled.div`
 `;
 
 const MenuName = styled.p`
+	position: relative;
 	display: inline;
+	top: 0px;
+	left: 0px;
+	
 	padding: 0px 0px 0px 15px;
 `;
 
@@ -148,6 +152,14 @@ const UserStatus = styled.p`
 	font-size: 10pt;
 `;
 
+const Icon = styled.div`
+	display: inline-block;
+	width: 24px;
+	height: 24px;
+	
+	text-align: center;
+`;
+
 type PageProps = {
 	db: RxDatabase;
 };
@@ -194,20 +206,34 @@ function Menu({ db } : PageProps) {
 			<UL>
 				<LI value={route == undefined ? 'selected' : ''}>
 					<Link to="/">
-						<FontAwesomeIcon icon={ faHome } size={'lg'} color={'#f2f5ea'}/>
+						<Icon>
+							<FontAwesomeIcon icon={ faHome } size={'lg'} color={'#f2f5ea'}/>
+						</Icon>
 						<MenuName>메인 화면</MenuName>
 					</Link>
 				</LI>
 				<LI value={route == 'videos' ? 'selected' : ''}>
 					<Link to="/videos/1">
-						<FontAwesomeIcon icon={ faVideo } size={'lg'} color={'#f2f5ea'}/>
+						<Icon>
+							<FontAwesomeIcon icon={ faVideo } size={'lg'} color={'#f2f5ea'}/>
+						</Icon>
 						<MenuName>영상 관리</MenuName>
 					</Link>
 				</LI>
 				<LI value={route == 'routines' ? 'selected' : ''}>
 					<Link to="/routines/1">
-						<FontAwesomeIcon icon={ faList } size={'lg'} color={'#f2f5ea'}/>
+						<Icon>
+							<FontAwesomeIcon icon={ faList } size={'lg'} color={'#f2f5ea'}/>
+						</Icon>
 						<MenuName>루틴 관리</MenuName>
+					</Link>
+				</LI>
+				<LI value={route == 'records' || route == 'record' ? 'selected' : ''}>
+					<Link to="/records/1">
+						<Icon>
+							<FontAwesomeIcon icon={ faClipboard } size={'lg'} color={'#f2f5ea'}/>
+						</Icon>
+						<MenuName>기록 관리</MenuName>
 					</Link>
 				</LI>
 				<Bottom>
