@@ -18,7 +18,7 @@ type ButtonProps = {
 
 const style = css`
 	display: block;
-	width: ${ (props: ButtonProps) => props.width || '960px' };
+	width: calc(${ (props: ButtonProps) => props.width || '960px' });
     padding: 10px 0px 10px 0px;
     margin: 10px 20px 10px 20px;
     
