@@ -10,7 +10,9 @@ import ExerciseReady from './exerciseReady';
 import ExercisePlay from './exercisePlay';
 
 import DevMain from './dev/main';
-import DevDB from './dev/db';
+
+import New from './new';
+import Reset from './reset';
 
 export {
 	Main,
@@ -25,5 +27,7 @@ export {
 	ExercisePlay,
 
 	DevMain,
-	DevDB,
+
+	New,
+	Reset,
 };
