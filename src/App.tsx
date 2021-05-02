@@ -4,21 +4,24 @@ import styled, { css } from 'styled-components';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { createRxDatabase, addRxPlugin, RxDatabase } from 'rxdb';
 
-import { UserSchema, VideoSchema, RoutineSchema, MemoSchema } from './db/schema';
+import { UserSchema, MemoSchema, VideoSchema, RoutineSchema, RecordSchema } from './db/schema';
 import {
 	Main,
 	Menu,
-	Test,
-	Routines,
-	RoutineCreate,
+
 	Videos,
 	VideoCreate,
-	Exercise,
+	Routines,
+	RoutineCreate,
+	Record,
+	Records,
 
+	Exercise,
 	ExerciseReady,
 	ExercisePlay,
 
 	DevMain,
+	Test,
 
 	New,
 	Reset,
@@ -81,6 +84,11 @@ function App() {
 			});
 
 			await tdb.collection({
+				name: 'memos',
+				schema: MemoSchema,
+			});
+
+			await tdb.collection({
 				name: 'routines',
 				schema: RoutineSchema,
 			});
@@ -91,8 +99,8 @@ function App() {
 			});
 
 			await tdb.collection({
-				name: 'memos',
-				schema: MemoSchema,
+				name: 'records',
+				schema: RecordSchema,
 			});
 
 			setDB(tdb);
@@ -169,6 +177,12 @@ function App() {
 									</Route>
 									<Route path="/routines/:page">
 										<Routines db={ db } />
+									</Route>
+									<Route path="/record/:id">
+										<Record db={ db } />
+									</Route>
+									<Route path="/records/:page">
+										<Records db={ db } />
 									</Route>
 									<Route path="/">
 										<Main db={ db } />
