@@ -1,6 +1,5 @@
-import React, {useState, useRef, useEffect} from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import styled, { css } from 'styled-components';
-import { Redirect } from 'react-router-dom';
 
 import { NavigatorTop, NavigatorBottom, PIP } from './';
 import { VideoDAO, RoutineDAO, RecordDAO } from '../../db/DAO';
@@ -8,7 +7,7 @@ import { VideoDAO, RoutineDAO, RecordDAO } from '../../db/DAO';
 import * as tf from '@tensorflow/tfjs';
 import * as posenet from '@tensorflow-models/posenet';
 import { Stage, Graphics } from '@inlet/react-pixi';
-import { drawSegment, getSkeleton } from '../../util/posenet-utils';
+import { drawKeypoints, drawSkeleton} from '../../util/posenet-utils';
 
 type Props = {
 	routine: RoutineDAO;
@@ -16,7 +15,8 @@ type Props = {
 	onEnded: (record: RecordDAO) => void;
 };
 
-function Player({ routine, video } : Props) {
+function Player({ routine, video }: Props) {
+	const [isLoading, setLoading] = useState<boolean>(false);
 	const [videoRef, setVideoRef] = useState<HTMLVideoElement | null>(null);
 	const [seq, setSeq] = useState<number>(0);
 
@@ -26,11 +26,19 @@ function Player({ routine, video } : Props) {
 	const widthScaleRatio = window.innerWidth / inputWidth;
 	const heightScaleRatio = (window.innerHeight - 100) / inputHeight;
 
-	const [pose, setPose] = useState<any>(null);
+	const [poses, setPose] = useState<any>(null);
 
-	let net : any;
+	let net: any;
 
 	useEffect(() => {
+		// 1. loding true
+		setLoading(true);
+
+		// 2. when all task is ready, set loading false
+		setTimeout( () => {
+			setLoading(false);
+		}, 8000);
+
 		if (videoRef == null) return;
 		if (seq < video.length) {
 			load(seq);
@@ -40,7 +48,7 @@ function Player({ routine, video } : Props) {
 	}, [videoRef, seq]);
 
 	// load video and model
-	async function load(seq : number) {
+	async function load(seq: number) {
 		if (videoRef == null) return;
 
 		// 1. file loading
@@ -82,7 +90,7 @@ function Player({ routine, video } : Props) {
 	}
 
 	function end() {
-		console.log(end);
+		console.log('끝');
 	}
 
 	const capture = async () => {
@@ -93,86 +101,41 @@ function Player({ routine, video } : Props) {
 		videoRef.height = inputHeight;
 
 		// 2. inference iamge
-		const inferencedPose = await net.estimateSinglePose(videoRef, {
+		const inferencedPoses = await net.estimateMultiplePoses(videoRef, {
 			flipHorizontal: false,
+			maxDetections: 3,
+			scoreThreshold: 0.5,
+			nmsRadius: 20,
 		});
-
-		if (inferencedPose.score < 0.2) return;
 
 		// 3. upscale keypoints to webcam resolution
-		inferencedPose.keypoints.map( (keypoints : any) => {
-			keypoints.position.x *= widthScaleRatio;
-			keypoints.position.y *= heightScaleRatio;
+		inferencedPoses.forEach(({ score, keypoints }: { score: number, keypoints: [] }) => {
+			keypoints.map((keypoint: any) => {
+				keypoint.position.x *= widthScaleRatio;
+				keypoint.position.y *= heightScaleRatio;
+			});
 		});
-		// 4. set keypoints and skelecton
-		setPose(inferencedPose);
 
-		console.log(pose);
+		// 4. set keypoints and skelecton
+		setPose(inferencedPoses);
 
 		// 5. recursion capture()
 		requestAnimationFrame(capture);
 	};
 
-	const drawKeypoints = (graphics : any, keypoints : any, minConfidence : number) => {
-		for (let i=0; i<keypoints.length; i++) {
-			const keypoint = keypoints[i];
-
-			if (keypoint.score < minConfidence) {
-				continue;
-			}
-
-			const { y, x } = keypoint.position;
-
-			drawPoint(graphics, y, x, 5, 0xffffff);
-		}
-	};
-
-	function drawPoint(graphics : any, x : number, y : number, raidus : number, color : number) {
-		graphics.beginFill(color);
-		graphics.drawCircle(x, y, raidus);
-		graphics.endFill();
-	}
-
-	function drawLine(graphics : any, [ax, ay] : [number, number],
-		[bx, by] : [number, number], thickness : number, color : number) {
-		graphics.beginFill();
-		graphics.lineStyle(thickness, color);
-		graphics.moveTo(ax, ay);
-		graphics.lineTo(bx, by);
-		graphics.endFill();
-	}
-
-	function drawSkeleton(graphics : any, keypoints : any, minConfidence : number, ) {
-		const skeleton = posenet.getAdjacentKeyPoints(keypoints, minConfidence);
-
-		function toTuple({y, x} : {y : any, x : any}) {
-			return [y, x];
-		}
-
-		skeleton.forEach(( keypoints) => {
-			// const ax = keypoints[0].position.x;
-			// const ay = keypoints[0].position.y;
-
-			console.log(keypoints[0].position);
-
-			// drawLine(
-			// graphics, [ax, ay], toTuple(keypoints[1].position), 2, 0xffffff
-			// );
-		});
-	}
-
 	// draw keypoints of inferenced pose
-	const draw = React.useCallback( (graphics) => {
+	const draw = React.useCallback((graphics) => {
 		graphics.clear();
 
-		if (pose == null) return;
+		if (poses == null) return;
 
-		const keypoints = pose.keypoints;
-		const skeleton = getSkeleton(pose);
-
-		drawKeypoints(keypoints, 0.2, graphics);
-		drawSkeleton(skeleton, 0.2, graphics);
-	}, [pose]);
+		poses.forEach(({ score, keypoints }: { score: number, keypoints: [] }) => {
+			if (score >= 0.5) {
+				drawKeypoints(graphics, keypoints, 0.5);
+				drawSkeleton(graphics, keypoints, 0.5);
+			}
+		});
+	}, [poses]);
 
 	const stageProps = {
 		width: window.innerWidth,
@@ -187,22 +150,22 @@ function Player({ routine, video } : Props) {
 	return (
 		<Container>
 			<NavigatorTop
-				routine = { routine }
-				seq = { seq + 1 }
+				routine={routine}
+				seq={seq + 1}
 			/>
 
-			<Video ref={ (ref) => {
+			<Video ref={(ref) => {
 				setVideoRef(ref);
-			} } />
+			}} />
 
 			<PixiStage {...stageProps}>
-				<Graphics draw={draw}/>
+				<Graphics draw={draw} />
 			</PixiStage>
 
 			<NavigatorBottom
-				videoRef = { videoRef }
+				videoRef={videoRef}
 			/>
-			<PIP/>
+			<PIP />
 		</Container>
 	);
 }
@@ -217,9 +180,6 @@ const PixiStage = styled(Stage)`
 
 	top: 50px;
 	left: 0px;
-
-	/* width: calc(100vw); */
-	/* height: calc(100vh - 100px); */
 
 	margin: 0px;
 	padding: 0px;
