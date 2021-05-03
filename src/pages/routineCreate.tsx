@@ -50,7 +50,7 @@ const List = styled.div`
 	height: 500px;
 	padding: 5px 5px 5px 5px;
 	margin: 10px 20px 20px 20px;
-	overflow: hidden;
+	overflow: auto;
 	
 	& > div {
 		height: 99%;
