@@ -1,8 +1,10 @@
 import React, {useState, useRef, useEffect} from 'react';
 import styled, { css } from 'styled-components';
+import { Redirect } from 'react-router-dom';
 
 import { NavigatorTop, NavigatorBottom, PIP } from './';
-import { VideoDAO, RoutineDAO } from '../../db/DAO';
+import { VideoDAO, RoutineDAO, RecordDAO } from '../../db/DAO';
+
 import * as tf from '@tensorflow/tfjs';
 import * as posenet from '@tensorflow-models/posenet';
 import { Stage, Graphics } from '@inlet/react-pixi';
@@ -11,6 +13,7 @@ import { drawSegment, getSkeleton } from '../../util/posenet-utils';
 type Props = {
 	routine: RoutineDAO;
 	video: VideoDAO[];
+	onEnded: (record: RecordDAO) => void;
 };
 
 function Player({ routine, video } : Props) {
@@ -47,8 +50,7 @@ function Player({ routine, video } : Props) {
 		const blob = new Blob([arrayBuffer]);
 		const url = URL.createObjectURL(blob);
 
-		// 2. video property settings
-		videoRef.controls = false;
+		videoRef.controls = true;
 		videoRef.playsInline = true;
 		videoRef.src = url;
 		videoRef.volume = 0.2;
@@ -167,10 +169,6 @@ function Player({ routine, video } : Props) {
 		drawKeypoints(keypoints, 0.2, graphics);
 		drawSkeleton(skeleton, 0.2, graphics);
 	}, [pose]);
-
-	function end() {
-		console.log('끝');
-	}
 
 	const stageProps = {
 		width: window.innerWidth,

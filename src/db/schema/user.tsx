@@ -5,16 +5,16 @@ const UserSchema = {
 	'version': 0,
 	'type': 'object',
 	'properties': {
-		'id': {
+		'user_id': {
 			'type': 'number',
 		},
-		'name': {
+		'user_name': {
 			'type': 'string',
 		},
-		'height': {
+		'user_height': {
 			'type': 'number',
 		},
-		'weight': {
+		'user_weight': {
 			'type': 'number',
 		},
 	},

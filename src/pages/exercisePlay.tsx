@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Redirect } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { RxDatabase } from 'rxdb';
-import { VideoDTO, RoutineDTO } from '../db/DTO';
-import { VideoDAO, RoutineDAO } from '../db/DAO';
+import { VideoDTO, RoutineDTO, RecordDTO } from '../db/DTO';
+import { VideoDAO, RoutineDAO, RecordDAO } from '../db/DAO';
 
 import { Player } from '../components/exercisePlayer';
 
@@ -28,6 +28,7 @@ function Exercise2({ db } : PageProps) {
 
 	const [routine, setRoutine] = useState<RoutineDAO | null>(null);
 	const [video, setVideo] = useState<VideoDAO[]>([]);
+	const [redirect, setRedirect] = useState<number>(0);
 
 	useEffect(() => {
 		routineDTO.setDB(db);
@@ -48,13 +49,23 @@ function Exercise2({ db } : PageProps) {
 		setVideo(videoData);
 	}
 
-	if (routine == null || video.length <= 0) {
+	async function onEnded(record: RecordDAO) {
+		const recordDTO = new RecordDTO();
+		recordDTO.setDB(db);
+		setRedirect(await recordDTO.addRecord(record));
+	}
+
+	if (redirect != 0) {
+		return (
+			<Redirect to={ redirect > 0 ? '/record/' + redirect : '/' } />
+		);
+	} else if (routine == null || video.length <= 0) {
 		return (
 			<Back />
 		);
 	} else {
 		return (
-			<Player routine={ routine } video={ video } />
+			<Player routine={ routine } video={ video } onEnded={ onEnded }/>
 		);
 	}
 }
