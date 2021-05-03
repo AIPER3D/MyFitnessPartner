@@ -1,3 +1,4 @@
+const fs = window.require('fs');
 import React, { useEffect } from 'react';
 import { createRxDatabase } from 'rxdb';
 import { Link } from 'react-router-dom';
@@ -30,16 +31,13 @@ function Export({ db } : PageProps) {
 
 			const dump = await tdb.dump();
 			const str = JSON.stringify(dump);
-			window.api.fs.writeFileSync('./files/data.db', str);
+			fs.writeFileSync('./files/data.db', str);
 		})();
 	}, []);
 
 	return (
 		<div>
 			<p>데이터베이스 내보내기</p>
-			<ul>
-				<li><Link to={ '/dev' } >돌아가기</Link></li>
-			</ul>
 		</div>
 	);
 }
