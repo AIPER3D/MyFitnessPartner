@@ -98,7 +98,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%,-50%);
-            span.check_memo {
+            .check_memo {
               display: inline-block;
               transform: rotate(45deg);
               height: var(--height);
@@ -108,7 +108,7 @@
               margin-right: 5px;
               margin-top: 3px;
             }
-            span.check_calory {
+            .check_calory {
               display: inline-block;
               transform: rotate(45deg);
               height: var(--height);
@@ -116,6 +116,12 @@
               border-bottom: var(--borderWidth) solid var(--borderColorCalory);
               border-right: var(--borderWidth) solid var(--borderColorCalory);
               margin: 10px 5px;
+            }
+            .uncheck_memo {
+              display: none;
+            }
+            .uncheck_calory {
+              display: none;
             }
           }
         }

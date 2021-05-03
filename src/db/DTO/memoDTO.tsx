@@ -85,43 +85,33 @@ class MemoDTO {
 
 		const doc = await this.db.collections.memos
 			.find()
-			.where('memo_id')
-			.eq(data)
+			.where({memo_id: data})
 			.remove();
-
 		return true;
 	}
 
 	async isMemohere(data: string) {
-		if (!this.db) return false;
-		if (!this.db.collections.memos) return false;
+		if (!this.db) return 0;
+		if (!this.db.collections.memos) return 0;
 
 		const doc = await this.db.collections.memos
 			.find()
-			.where({memo_id: data, memo_type: 'memo'})
+			.where({memo_date: data, memo_type: 'memo'})
 			.exec();
 
-		if (doc !== null) {
-			return true;
-		} else {
-			return false;
-		}
+		return doc.length;
 	}
 
 	async isCaloryhere(data: string) {
-		if (!this.db) return false;
-		if (!this.db.collections.memos) return false;
+		if (!this.db) return 0;
+		if (!this.db.collections.memos) return 0;
 
 		const doc = await this.db.collections.memos
 			.find()
-			.where({memo_id: data, memo_type: 'calory'})
+			.where({memo_date: data, memo_type: 'calory'})
 			.exec();
 
-		if (doc !== null) {
-			return true;
-		} else {
-			return false;
-		}
+		return doc.length;
 	}
 }
 
