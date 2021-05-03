@@ -1,13 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 import { NavigatorTop, NavigatorBottom, PIP } from './';
 import { VideoDAO, RoutineDAO, RecordDAO } from '../../db/DAO';
 
-import * as tf from '@tensorflow/tfjs';
 import * as posenet from '@tensorflow-models/posenet';
 import { Stage, Graphics } from '@inlet/react-pixi';
-import { drawKeypoints, drawSkeleton} from '../../util/posenet-utils';
+import { drawKeypoints, drawSkeleton } from '../../util/posenet-utils';
+
+import { css } from '@emotion/core';
+import PuffLoader from 'react-spinners/PuffLoader';
 
 type Props = {
 	routine: RoutineDAO;
@@ -15,8 +17,15 @@ type Props = {
 	onEnded: (record: RecordDAO) => void;
 };
 
-function Player({ routine, video }: Props) {
-	const [isLoading, setLoading] = useState<boolean>(false);
+function Player({ routine, video, onEnded }: Props) {
+	const record : RecordDAO = {
+		id: 0,
+		time: new Date().getTime(),
+		routineId: routine['id'],
+		routineName: routine['name'],
+	};
+
+	const [isLoading, setLoading] = useState<boolean>(true);
 	const [videoRef, setVideoRef] = useState<HTMLVideoElement | null>(null);
 	const [seq, setSeq] = useState<number>(0);
 
@@ -31,19 +40,23 @@ function Player({ routine, video }: Props) {
 	let net: any;
 
 	useEffect(() => {
-		// 1. loding true
-		setLoading(true);
+		// 1. posenet load
+		(async () => {
+			net = await posenet.load({
+				architecture: 'MobileNetV1',
+				outputStride: 16,
+				inputResolution: { width: inputWidth, height: inputHeight },
+				multiplier: 1,
+				quantBytes: 2,
+			});
+		})();
 
 		// 2. when all task is ready, set loading false
-		setTimeout( () => {
-			setLoading(false);
-		}, 8000);
-
 		if (videoRef == null) return;
 		if (seq < video.length) {
 			load(seq);
 		} else {
-			end();
+			onEnded(record);
 		}
 	}, [videoRef, seq]);
 
@@ -58,29 +71,19 @@ function Player({ routine, video }: Props) {
 		const blob = new Blob([arrayBuffer]);
 		const url = URL.createObjectURL(blob);
 
-		videoRef.controls = true;
+		// 2. settings
+		videoRef.controls = false;
 		videoRef.playsInline = true;
 		videoRef.src = url;
 		videoRef.volume = 0.2;
 
-		// 3. posenet load
-		net = await posenet.load({
-			architecture: 'MobileNetV1',
-			outputStride: 16,
-			inputResolution: { width: inputWidth, height: inputHeight },
-			multiplier: 1,
-			quantBytes: 2,
-		});
+		setLoading(false);
 
 		// 4. play video
-		videoRef.play()
-			.then(async () => {
-				// 5. capture image and detect pose while video playing
-				await capture();
-			})
-			.catch(() => {
+		await videoRef.play();
 
-			});
+		// 5. capture image and detect pose while video playing
+		await capture();
 
 		// 5. when video ended play next video
 		videoRef.addEventListener('ended', () => {
@@ -99,6 +102,11 @@ function Player({ routine, video }: Props) {
 		// 1. resize video element
 		videoRef.width = inputWidth;
 		videoRef.height = inputHeight;
+
+		if (net == null) {
+			requestAnimationFrame(capture);
+			return;
+		}
 
 		// 2. inference iamge
 		const inferencedPoses = await net.estimateMultiplePoses(videoRef, {
@@ -129,8 +137,10 @@ function Player({ routine, video }: Props) {
 
 		if (poses == null) return;
 
+		console.log(poses);
+
 		poses.forEach(({ score, keypoints }: { score: number, keypoints: [] }) => {
-			if (score >= 0.5) {
+			if (score >= 0.3) {
 				drawKeypoints(graphics, keypoints, 0.5);
 				drawSkeleton(graphics, keypoints, 0.5);
 			}
@@ -149,23 +159,30 @@ function Player({ routine, video }: Props) {
 
 	return (
 		<Container>
-			<NavigatorTop
-				routine={routine}
-				seq={seq + 1}
-			/>
+			{
+				isLoading ? (
+					<PuffLoader css={Loader} color={'#E75A7C'} loading={isLoading} size={300} />
+				) : (
+					<>
+						<NavigatorTop
+							routine={routine}
+							seq={seq + 1}
+						/>
 
-			<Video ref={(ref) => {
-				setVideoRef(ref);
-			}} />
+						<PixiStage {...stageProps}>
+							<Graphics draw={draw} />
+						</PixiStage>
 
-			<PixiStage {...stageProps}>
-				<Graphics draw={draw} />
-			</PixiStage>
+						<NavigatorBottom
+							videoRef={videoRef}
+						/>
+						<PIP />
+					</>
+				)
+			}
 
-			<NavigatorBottom
-				videoRef={videoRef}
-			/>
-			<PIP />
+			<Video ref={setVideoRef}/>
+
 		</Container>
 	);
 }
@@ -173,6 +190,10 @@ function Player({ routine, video }: Props) {
 Player.defaultProps = {
 
 };
+
+const Loader = css`
+	z-index : 1000;
+`;
 
 const PixiStage = styled(Stage)`
 	position: absolute;
@@ -183,6 +204,8 @@ const PixiStage = styled(Stage)`
 
 	margin: 0px;
 	padding: 0px;
+
+	z-index : 1001;
 
 	overflow:hidden;
 `;
@@ -195,11 +218,17 @@ const colorCode = {
 };
 
 const Container = styled.div`
+
+	display: flex;
+	justify-content: center;
+	align-items: center;
+
 	margin: 0px;
 	padding: 0px;
+
+	min-height: 100vh;
 	
 	overflow:hidden;
-	background-color: #000000;
 `;
 
 const Video = styled.video`

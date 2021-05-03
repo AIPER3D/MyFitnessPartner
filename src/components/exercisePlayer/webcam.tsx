@@ -51,7 +51,7 @@ function Webcam({ width, height }: Props) {
 			resizeWidth: inputWidth,
 		});
 
-		capture();
+		await capture();
 	}
 
 	async function capture() {
@@ -101,8 +101,6 @@ function Webcam({ width, height }: Props) {
 		graphics.clear();
 
 		if (poses == null) return;
-
-		console.log(poses);
 
 		poses.forEach(({ score, keypoints }: { score: number, keypoints: [] }) => {
 			if (score >= 0.3) {
