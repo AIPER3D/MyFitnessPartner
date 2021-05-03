@@ -37,6 +37,7 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.3",
     "react-sortablejs": "^6.0.0",
+    "react-spinners": "^0.10.6",
     "rxdb": "^9.15.0",
     "rxjs": "^6.6.6",
     "sass": "^1.32.8",
