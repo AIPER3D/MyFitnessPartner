@@ -133,7 +133,7 @@ function App() {
 							</ContainerWithoutMenu>
 						</Route>
 					) : (<Route path="/dev"></Route>)}
-					{ newMode ? (
+					{ !newMode ? (
 						<Route path="/">
 							<ContainerWithoutMenu>
 								<New db = { db } />
