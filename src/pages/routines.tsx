@@ -30,7 +30,7 @@ interface Param {
 }
 
 function Routines({ db } : PageProps) {
-	const perPage = 3;
+	const perPage = 5;
 	const { page } = useParams<Param>();
 
 	const routineDTO = new RoutineDTO();

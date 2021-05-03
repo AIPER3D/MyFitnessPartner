@@ -4,6 +4,7 @@
   "private": true,
   "main": "public/electron.js",
   "dependencies": {
+    "@emotion/react": "^11.1.5",
     "@fortawesome/fontawesome-svg-core": "^1.2.35",
     "@fortawesome/free-solid-svg-icons": "^5.15.3",
     "@fortawesome/react-fontawesome": "^0.1.14",
@@ -37,6 +38,7 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.3",
     "react-sortablejs": "^6.0.0",
+    "react-spinners": "^0.10.6",
     "rxdb": "^9.15.0",
     "rxjs": "^6.6.6",
     "sass": "^1.32.8",
