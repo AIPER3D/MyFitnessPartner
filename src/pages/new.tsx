@@ -31,7 +31,7 @@ const Form = styled.form`
 	height: 300px;
 	overflow: hidden;
 	
-	margin-top: calc(50vh - 150px);
+	margin-top: calc(50vh - 170px);
 	margin-left: auto;
 	margin-right: auto;
 	padding: 20px 0px 0px 0px;
