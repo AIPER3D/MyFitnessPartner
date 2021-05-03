@@ -12,27 +12,38 @@ function createWindow() {
 		center: true,
 		// fullscreen: true,
 		webPreferences: {
-			nodeIntegration: false,
-			nodeIntegrationInWorker: false,
+			nodeIntegration: true,
+			nodeIntegrationInWorker: true,
 			enableRemoteModule: false,
 			worldSafeExecuteJavaScript: true,
-			contextIsolation: true,
+			contextIsolation: false,
 			devTools: true,
-			preload: path.join(__dirname, 'preload.js'),
 		},
 	});
 
+
+	win.loadURL('http://localhost:3000');
+
+	/*
+	win.loadURL(require('url').format({
+		protocol: 'file',
+		slashes: true,
+		pathname: require('path').join(__dirname, '../build/index.html'),
+	}));
+	*/
+	/*
 	if (isDev) {
 		// 개발 중에는 개발 도구에서 호스팅하는 주소에서 로드
 		win.loadURL('http://localhost:3000');
 		win.webContents.openDevTools();
 	} else {
-		win.loadURL('http://localhost:3000');
-		win.webContents.openDevTools();
+		// win.loadURL('http://localhost:3000');
+		// win.webContents.openDevTools();
 
 		// 프로덕션 환경에서는 패키지 내부 리소스에 접근
-		// win.loadFile(path.join(__dirname, '../build/index.html'));
+		win.loadFile(path.join(__dirname, '../build/index.html'));
 	}
+	*/
 }
 
 /*

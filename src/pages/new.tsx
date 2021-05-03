@@ -1,3 +1,4 @@
+const fs = window.require('fs');
 import React, {useEffect} from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
@@ -100,7 +101,7 @@ function New({ db } : PageProps) {
 		console.log(h + ' > ' + height);
 		console.log(w + ' > ' + weight);
 
-		const source = window.api.fs.readFileSync('./files/data.db');
+		const source = fs.readFileSync('./files/data.db');
 		const val = new TextDecoder().decode(source);
 		const dump = JSON.parse(val);
 		await db.importDump(dump);

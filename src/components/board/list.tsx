@@ -1,3 +1,4 @@
+const fs = window.require('fs');
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
@@ -65,9 +66,9 @@ function List({ content }: ListProps) {
 
 	useEffect(() => {
 		if (!content.thumbnail) return;
-		if (!window.api.fs.existsSync(content.thumbnail)) return;
+		if (!fs.existsSync(content.thumbnail)) return;
 
-		const source = window.api.fs.readFileSync(content['thumbnail']);
+		const source = fs.readFileSync(content['thumbnail']);
 		const thumb = new TextDecoder().decode(source);
 
 		setThumbnail(thumb);

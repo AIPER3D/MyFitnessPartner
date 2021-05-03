@@ -1,3 +1,4 @@
+const fs = window.require('fs');
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 
@@ -65,7 +66,7 @@ function Player({ routine, video, onEnded }: Props) {
 		if (videoRef == null) return;
 
 		// 1. file loading
-		const file = window.api.fs.readFileSync('./files/videos/' + video[seq]['id'] + '.vd');
+		const file = fs.readFileSync('./files/videos/' + video[seq]['id'] + '.vd');
 		const uint8Array = new Uint8Array(file);
 		const arrayBuffer = uint8Array.buffer;
 		const blob = new Blob([arrayBuffer]);
