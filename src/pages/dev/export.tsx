@@ -28,11 +28,6 @@ function Export({ db } : PageProps) {
 				schema: VideoSchema,
 			});
 
-			await tdb.collection({
-				name: 'memos',
-				schema: MemoSchema,
-			});
-
 			const dump = await tdb.dump();
 			const str = JSON.stringify(dump);
 			window.api.fs.writeFileSync('./files/data.db', str);

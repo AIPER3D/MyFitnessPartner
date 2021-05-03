@@ -1,13 +1,7 @@
-import { Stage } from '@inlet/react-pixi';
-import { Graphics } from '@inlet/react-pixi';
-import React from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
 
 import { Webcam } from './';
-
-type Props = {
-
-};
 
 const Wrapper = styled.div`
 	position: absolute;
@@ -23,32 +17,31 @@ const Wrapper = styled.div`
 	
 `;
 
-
 function PIP() {
-	let down = false;
-	let x = 0;
-	let y = 0;
+	const [down, setDown] = useState<boolean>(false);
+	const [x, setX] = useState<number>(0);
+	const [y, setY] = useState<number>(0);
 
 	function dragMouseDown(e : React.MouseEvent<HTMLDivElement>) {
 		e.preventDefault();
 
-		x = e.clientX - e.currentTarget.offsetLeft;
-		y = e.clientY - e.currentTarget.offsetTop;
-		down = true;
+		setX(e.clientX - e.currentTarget.offsetLeft);
+		setY(e.clientY - e.currentTarget.offsetTop);
+		setDown(true);
 	}
 
 	function dragMouseUp(e : React.MouseEvent<HTMLDivElement>) {
 		e.preventDefault();
 
-		x = 0;
-		y = 0;
-		down = false;
+		setX(0);
+		setY(0);
+		setDown(false);
 	}
 
 	function dragMouse(e : React.DragEvent<HTMLDivElement>) {
 		e.preventDefault();
 
-		if (down != true) return;
+		if (!down) return;
 
 		let toX = (e.clientX - x);
 		if (toX < 0) {
