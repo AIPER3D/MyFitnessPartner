@@ -56,7 +56,6 @@ function Videos({ db } : PageProps) {
 				thumbnail: './files/thumbnails/' + video[i]['id'] + '.im',
 			});
 		}
-		console.log(arr);
 		setContent(arr);
 	}
 
