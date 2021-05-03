@@ -89,7 +89,7 @@ function Gallery({ content }: GalleryProps) {
 		const thumb = new TextDecoder().decode(source);
 
 		setThumbnail(thumb);
-	}, []);
+	}, [content.thumbnail]);
 
 	return (
 		<Box onClick = { () => {

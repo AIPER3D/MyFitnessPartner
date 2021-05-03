@@ -4,7 +4,6 @@ import { RxDatabase } from 'rxdb';
 
 import * as tf from '@tensorflow/tfjs';
 import * as mobilenet from '@tensorflow-models/mobilenet';
-import { imageFromVideo } from '../util/video-util';
 
 type PageProps = {
 	db: RxDatabase;

@@ -1,10 +1,12 @@
-import React from 'react';
-import styled, { css } from 'styled-components';
+import React, {useEffect} from 'react';
+import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 
 import { RxDatabase } from 'rxdb';
-import { Button } from '../components/common';
+import { UserDTO } from '../db/DTO';
+import { UserDAO } from '../db/DAO';
 
+import { Button } from '../components/common';
 
 type InputProps = {
     vwidth: string;
@@ -29,7 +31,7 @@ const Form = styled.form`
 	height: 300px;
 	overflow: hidden;
 	
-	margin-top: calc(50vh - 150px);
+	margin-top: calc(50vh - 170px);
 	margin-left: auto;
 	margin-right: auto;
 	padding: 20px 0px 0px 0px;
@@ -69,6 +71,12 @@ type PageProps = {
 };
 
 function New({ db } : PageProps) {
+	const userDTO = new UserDTO();
+
+	useEffect(() => {
+		userDTO.setDB(db);
+	}, [db]);
+
 	async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
 
@@ -97,12 +105,14 @@ function New({ db } : PageProps) {
 		const dump = JSON.parse(val);
 		await db.importDump(dump);
 
-		await db.collections.users.insert({
+
+		const user : UserDAO = {
 			id: 1,
 			name: name,
 			height: height,
 			weight: weight,
-		});
+		};
+		await userDTO.addUser(user);
 
 		window.location.replace('./');
 	}

@@ -71,7 +71,7 @@ function List({ content }: ListProps) {
 		const thumb = new TextDecoder().decode(source);
 
 		setThumbnail(thumb);
-	}, []);
+	}, [content.thumbnail]);
 
 	return (
 		<Box onClick = { () => {

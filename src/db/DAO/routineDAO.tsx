@@ -1,5 +1,3 @@
-import { VideoDAO } from './';
-
 interface RoutineDAO {
     id: number;
     name: string;

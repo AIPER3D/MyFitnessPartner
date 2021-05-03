@@ -21,7 +21,7 @@ const Form = styled.form`
 	height: 300px;
 	overflow: hidden;
 	
-	margin-top: calc(50vh - 150px);
+	margin-top: calc(50vh - 170px);
 	margin-left: auto;
 	margin-right: auto;
 	padding: 20px 0px 0px 0px;
@@ -69,8 +69,8 @@ function Reset({ db } : PageProps) {
 			<Form onSubmit = { onSubmit }>
 				<Name>데이터 초기화</Name>
 				<Box>
-					<p>영상, 루틴, 사용자 정보를 모두 초기화 합니다.</p>
-					<p>데이터가 삭제된 후 복구할 수 없습니다.</p>
+					<p>사용자, 영상, 루틴, 기록 데이터를 초기화합니다. <br />데이터가 삭제된 후 복구할 수 없습니다.</p>
+					<p>(기본 영상, 루틴은 삭제되지 않습니다.)</p>
 				</Box>
 				<Button text = { '초기화' } width = { '100% - 40px' } color = { 'pink' } />
 			</Form>

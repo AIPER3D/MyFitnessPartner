@@ -1,16 +1,19 @@
 import Main from './main';
 import Menu from './menu';
-import Test from './test';
-import RoutineCreate from './routineCreate';
-import Routines from './routines';
+
 import VideoCreate from './videoCreate';
 import Videos from './videos';
-import Exercise from './exercise';
+import RoutineCreate from './routineCreate';
+import Routines from './routines';
+import Record from './record';
+import Records from './records';
 
+import Exercise from './exercise';
 import ExerciseReady from './exerciseReady';
 import ExercisePlay from './exercisePlay';
 
 import DevMain from './dev/main';
+import Test from './test';
 
 import New from './new';
 import Reset from './reset';
@@ -18,17 +21,20 @@ import Reset from './reset';
 export {
 	Main,
 	Menu,
-	Test,
-	RoutineCreate,
-	Routines,
+
 	VideoCreate,
 	Videos,
-	Exercise,
+	RoutineCreate,
+	Routines,
+	Record,
+	Records,
 
+	Exercise,
 	ExerciseReady,
 	ExercisePlay,
 
 	DevMain,
+	Test,
 
 	New,
 	Reset,
