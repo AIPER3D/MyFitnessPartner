@@ -9,6 +9,7 @@ import { Container } from 'pixi.js';
 import { useCallback } from 'react';
 import { useState } from 'react';
 import { iif } from 'rxjs';
+import { drawKeypoints, drawSkeleton } from '../../util/posenet-utils';
 
 type Props = {
 	width: number;
@@ -17,17 +18,17 @@ type Props = {
 }
 
 function Webcam({ width, height }: Props) {
-	let timer: any = null;
 	const elementRef = useRef<HTMLVideoElement>(null);
 	const webcamRef = useRef<any>(null);
 	let net: any;
 
 	const inputHeight = 256;
-	const inputWidth = 512;
+	const inputWidth = 256;
 
-	const upScaleRatio = width / inputWidth;
+	const widthScaleRatio = width / inputWidth;
+	const heightScaleRatio = height / inputHeight;
 
-	const [keypoints, setKeypoints] = useState<any>(null);
+	const [poses, setPose] = useState<any>(null);
 
 	const [isPlaying, setPlaying] = useState<boolean>(true);
 
@@ -50,7 +51,7 @@ function Webcam({ width, height }: Props) {
 			resizeWidth: inputWidth,
 		});
 
-		timer = setInterval(capture, 100);
+		capture();
 	}
 
 	async function capture() {
@@ -61,25 +62,28 @@ function Webcam({ width, height }: Props) {
 		const image = await webcam.capture();
 
 		// 2. inference iamge
-		const pose = await net.estimateSinglePose(image, {
+		const inferencedPoses = await net.estimateMultiplePoses(image, {
 			flipHorizontal: false,
+			maxDetections: 3,
+			scoreThreshold: 0.5,
+			nmsRadius: 20,
 		});
 
-		if (pose.score < 0.2) return;
-
 		// 3. upscale keypoints to webcam resolution
-		pose.keypoints.map( (keypoints : any) => {
-			keypoints.position.x *= upScaleRatio;
-			keypoints.position.y *= upScaleRatio;
+		inferencedPoses.forEach(({ score, keypoints }: { score: number, keypoints: [] }) => {
+			keypoints.map((keypoint: any) => {
+				keypoint.position.x *= widthScaleRatio;
+				keypoint.position.y *= heightScaleRatio;
+			});
 		});
 
 		// 4. set keypoints
-		setKeypoints(pose.keypoints);
-
-		// 5. keypoitns to ipc
+		setPose(inferencedPoses);
 
 		image.dispose();
 		await tf.nextFrame();
+
+		requestAnimationFrame(capture);
 	}
 
 	useEffect(() => {
@@ -93,20 +97,20 @@ function Webcam({ width, height }: Props) {
 		};
 	}, [elementRef]);
 
-	const drawKeypoints = React.useCallback((graphics) => {
+	const draw = React.useCallback( (graphics) => {
 		graphics.clear();
 
-		if (!keypoints) return;
+		if (poses == null) return;
 
-		for (let i=0; i<keypoints.length; i++) {
-			const x = keypoints[i].position.x;
-			const y = keypoints[i].position.y;
+		console.log(poses);
 
-			graphics.beginFill(0x3970E3);
-			graphics.drawCircle(x, y, 5);
-			graphics.endFill();
-		}
-	}, [keypoints]);
+		poses.forEach(({ score, keypoints }: { score: number, keypoints: [] }) => {
+			if (score >= 0.3) {
+				drawKeypoints(graphics, keypoints, 0.5);
+				drawSkeleton(graphics, keypoints, 0.5);
+			}
+		});
+	}, [poses]);
 
 	const stageProps = {
 		width: width,
@@ -128,9 +132,9 @@ function Webcam({ width, height }: Props) {
 				height={height}
 			/>
 
-			<SStage {...stageProps}>
-				<Graphics draw={drawKeypoints}/>
-			</SStage>
+			<PixiStage {...stageProps}>
+				<Graphics draw={draw}/>
+			</PixiStage>
 
 		</Wrapper>
 
@@ -142,7 +146,7 @@ const Wrapper = styled.div`
 `;
 const Video = styled.video``;
 
-const SStage = styled(Stage)`
+const PixiStage = styled(Stage)`
 	position: absolute;
 
 	top: 0px;
