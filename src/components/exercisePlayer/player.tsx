@@ -81,6 +81,10 @@ function Player({ routine, video } : Props) {
 		});
 	}
 
+	function end() {
+		console.log(end);
+	}
+
 	const capture = async () => {
 		if (videoRef == null) return;
 
