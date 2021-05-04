@@ -51,6 +51,13 @@ app.on('window-all-closed', () => {
 	app.quit();
 });
 
+ipcMain.handle('tfjs-test', async (event, arg) => {
+	const tfjsn = require('@tensorflow/tfjs-node');
+	const handler = tfjsn.io.fileSystem('./files/models/model.json');
+	const model = await tfjsn.loadLayersModel(handler);
+	return JSON.stringify(model.toJSON());
+});
+
 ipcMain.handle('ping', (event, arg) => {
 	const result = arg + ' -> arg_pong';
 	return result;
