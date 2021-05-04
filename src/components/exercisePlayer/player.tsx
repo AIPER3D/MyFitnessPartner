@@ -64,6 +64,11 @@ function Player({ routine, video, onEnded }: Props) {
 		} else {
 			onEnded(record);
 		}
+
+		ipcRenderer.on('pose-similarity', (event, args) => {
+			setPoseSimilarity(args);
+			console.log(args);
+		});
 	}, [videoRef, seq]);
 
 	// load video and model
@@ -102,11 +107,6 @@ function Player({ routine, video, onEnded }: Props) {
 		console.log('끝');
 	}
 
-	ipcRenderer.on('pose-similarity', (event, args) => {
-		setPoseSimilarity(args);
-		console.log(args);
-	});
-
 	const capture = async () => {
 		if (videoRef == null) return;
 
@@ -136,7 +136,7 @@ function Player({ routine, video, onEnded }: Props) {
 		});
 
 		if (inferencedPoses.length >= 1) {
-			ipcRenderer.sendSync('video-poses', inferencedPoses);
+			ipcRenderer.send('video-poses', inferencedPoses);
 
 
 			// 4. set keypoints and skelecton

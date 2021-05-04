@@ -80,7 +80,7 @@ function Webcam({ width, height }: Props) {
 		});
 
 		if (inferencedPoses.length >= 1) {
-			ipcRenderer.send('video-poses', inferencedPoses);
+			ipcRenderer.send('webcam-poses', inferencedPoses);
 		}
 
 
