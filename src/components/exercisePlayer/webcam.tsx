@@ -20,13 +20,10 @@ function Webcam({ width, height }: Props) {
 	// const tf = window.require('@tensorflow/tfjs');
 	const {ipcRenderer} = window.require('electron');
 
-	const fs = window.require('fs');
-
 	const elementRef = useRef<HTMLVideoElement>(null);
 	const webcamRef = useRef<any>(null);
 
 	let poseNet: any;
-	let classNet: tf.LayersModel;
 
 	const inputHeight = 256;
 	const inputWidth = 256;
@@ -46,12 +43,6 @@ function Webcam({ width, height }: Props) {
 			multiplier: 1,
 			quantBytes: 2,
 		});
-
-		const uploadJSONInput = document.createElement('upload-json');
-		const uploadWeightsInput = document.getElementById('upload-weights');
-
-		const handler = tf.io.browserFiles(fs.readFileSync('src/model/exercise_classifier/model.json'));
-		classNet = await tf.loadLayersModel(handler);
 	}
 
 	async function run() {
@@ -95,11 +86,6 @@ function Webcam({ width, height }: Props) {
 
 		// 4. set keypoints
 		setPose(inferencedPoses);
-
-		// 5. inference class
-		const label = classNet.predict(image);
-
-		console.log(label);
 
 		image.dispose();
 		await tf.nextFrame();
