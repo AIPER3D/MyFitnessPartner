@@ -9,7 +9,7 @@ import * as posenet from '@tensorflow-models/posenet';
 import { Stage, Graphics } from '@inlet/react-pixi';
 import { drawKeypoints, drawSkeleton } from '../../util/posenet-utils';
 
-import { css } from '@emotion/core';
+import { css } from '@emotion/react';
 import PuffLoader from 'react-spinners/PuffLoader';
 
 type Props = {
@@ -47,6 +47,8 @@ function Player({ routine, video, onEnded }: Props) {
 
 
 	useEffect(() => {
+		const result = ipcRenderer.invoke('tfjs-test', '');
+		console.log(result);
 		// 1. posenet load
 		(async () => {
 			net = await posenet.load({
