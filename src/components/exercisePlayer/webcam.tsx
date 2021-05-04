@@ -8,7 +8,6 @@ import { Stage, Sprite, Graphics } from '@inlet/react-pixi';
 import { Container } from 'pixi.js';
 import { useCallback } from 'react';
 import { useState } from 'react';
-import { iif } from 'rxjs';
 import { drawKeypoints, drawSkeleton } from '../../util/posenet-utils';
 
 type Props = {
@@ -18,11 +17,16 @@ type Props = {
 }
 
 function Webcam({ width, height }: Props) {
+	// const tf = window.require('@tensorflow/tfjs');
 	const {ipcRenderer} = window.require('electron');
+
+	const fs = window.require('fs');
 
 	const elementRef = useRef<HTMLVideoElement>(null);
 	const webcamRef = useRef<any>(null);
-	let net: any;
+
+	let poseNet: any;
+	let classNet: tf.LayersModel;
 
 	const inputHeight = 256;
 	const inputWidth = 256;
@@ -35,13 +39,19 @@ function Webcam({ width, height }: Props) {
 	const [isPlaying, setPlaying] = useState<boolean>(true);
 
 	async function load() {
-		net = await posenet.load({
+		poseNet = await posenet.load({
 			architecture: 'MobileNetV1',
 			outputStride: 16,
 			inputResolution: { width: inputWidth, height: inputHeight },
 			multiplier: 1,
 			quantBytes: 2,
 		});
+
+		const uploadJSONInput = document.createElement('upload-json');
+		const uploadWeightsInput = document.getElementById('upload-weights');
+
+		const handler = tf.io.browserFiles(fs.readFileSync('src/model/exercise_classifier/model.json'));
+		classNet = await tf.loadLayersModel(handler);
 	}
 
 	async function run() {
@@ -64,7 +74,7 @@ function Webcam({ width, height }: Props) {
 		const image = await webcam.capture();
 
 		// 2. inference iamge
-		const inferencedPoses = await net.estimateMultiplePoses(image, {
+		const inferencedPoses = await poseNet.estimateMultiplePoses(image, {
 			flipHorizontal: false,
 			maxDetections: 3,
 			scoreThreshold: 0.5,
@@ -85,6 +95,11 @@ function Webcam({ width, height }: Props) {
 
 		// 4. set keypoints
 		setPose(inferencedPoses);
+
+		// 5. inference class
+		const label = classNet.predict(image);
+
+		console.log(label);
 
 		image.dispose();
 		await tf.nextFrame();
