@@ -32,6 +32,7 @@ function Player({ routine, video, onEnded }: Props) {
 	const [videoRef, setVideoRef] = useState<HTMLVideoElement | null>(null);
 	const [seq, setSeq] = useState<number>(0);
 
+	const [poseLabel, setPoseLabel] = useState<string>('');
 	const [poseSimilarity, setPoseSimilarity] = useState<any>(0);
 
 	const inputWidth = 256;
@@ -188,7 +189,8 @@ function Player({ routine, video, onEnded }: Props) {
 
 						<NavigatorBottom
 							videoRef={videoRef}
-							accuracy={ 0 }
+							exercise={ poseLabel }
+							accuracy={ poseSimilarity }
 						/>
 						<PIP />
 					</>
