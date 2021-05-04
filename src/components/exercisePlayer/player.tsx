@@ -189,6 +189,7 @@ function Player({ routine, video, onEnded }: Props) {
 
 						<NavigatorBottom
 							videoRef={videoRef}
+							accuracy={ 0 }
 						/>
 						<PIP />
 					</>
