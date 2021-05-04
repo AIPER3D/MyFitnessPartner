@@ -137,14 +137,13 @@ function Player({ routine, video, onEnded }: Props) {
 
 		if (inferencedPoses.length >= 1) {
 			ipcRenderer.send('video-poses', inferencedPoses);
-
-
-			// 4. set keypoints and skelecton
-			setPose(inferencedPoses);
-
-			// 5. recursion capture()
-			requestAnimationFrame(capture);
 		}
+
+		// 4. set keypoints and skelecton
+		setPose(inferencedPoses);
+
+		// 5. recursion capture()
+		requestAnimationFrame(capture);
 	};
 
 	// draw keypoints of inferenced pose

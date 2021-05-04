@@ -83,7 +83,6 @@ function Webcam({ width, height }: Props) {
 			ipcRenderer.send('webcam-poses', inferencedPoses);
 		}
 
-
 		// 4. set keypoints
 		setPose(inferencedPoses);
 
