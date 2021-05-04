@@ -18,6 +18,8 @@ type Props = {
 }
 
 function Webcam({ width, height }: Props) {
+	const {ipcRenderer} = window.require('electron');
+
 	const elementRef = useRef<HTMLVideoElement>(null);
 	const webcamRef = useRef<any>(null);
 	let net: any;
@@ -76,6 +78,11 @@ function Webcam({ width, height }: Props) {
 				keypoint.position.y *= heightScaleRatio;
 			});
 		});
+
+		if (inferencedPoses.length >= 1) {
+			ipcRenderer.send('video-poses', inferencedPoses);
+		}
+
 
 		// 4. set keypoints
 		setPose(inferencedPoses);

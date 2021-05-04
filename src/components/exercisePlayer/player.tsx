@@ -19,7 +19,9 @@ type Props = {
 };
 
 function Player({ routine, video, onEnded }: Props) {
-	const record : RecordDAO = {
+	const { ipcRenderer } = window.require('electron');
+
+	const record: RecordDAO = {
 		id: 0,
 		time: new Date().getTime(),
 		routineId: routine['id'],
@@ -30,6 +32,8 @@ function Player({ routine, video, onEnded }: Props) {
 	const [videoRef, setVideoRef] = useState<HTMLVideoElement | null>(null);
 	const [seq, setSeq] = useState<number>(0);
 
+	const [poseSimilarity, setPoseSimilarity] = useState<any>(0);
+
 	const inputWidth = 256;
 	const inputHeight = 256;
 
@@ -39,6 +43,7 @@ function Player({ routine, video, onEnded }: Props) {
 	const [poses, setPose] = useState<any>(null);
 
 	let net: any;
+
 
 	useEffect(() => {
 		// 1. posenet load
@@ -97,6 +102,11 @@ function Player({ routine, video, onEnded }: Props) {
 		console.log('끝');
 	}
 
+	ipcRenderer.on('pose-similarity', (event, args) => {
+		setPoseSimilarity(args);
+		console.log(args);
+	});
+
 	const capture = async () => {
 		if (videoRef == null) return;
 
@@ -125,11 +135,16 @@ function Player({ routine, video, onEnded }: Props) {
 			});
 		});
 
-		// 4. set keypoints and skelecton
-		setPose(inferencedPoses);
+		if (inferencedPoses.length >= 1) {
+			ipcRenderer.sendSync('video-poses', inferencedPoses);
 
-		// 5. recursion capture()
-		requestAnimationFrame(capture);
+
+			// 4. set keypoints and skelecton
+			setPose(inferencedPoses);
+
+			// 5. recursion capture()
+			requestAnimationFrame(capture);
+		}
 	};
 
 	// draw keypoints of inferenced pose
@@ -137,8 +152,6 @@ function Player({ routine, video, onEnded }: Props) {
 		graphics.clear();
 
 		if (poses == null) return;
-
-		console.log(poses);
 
 		poses.forEach(({ score, keypoints }: { score: number, keypoints: [] }) => {
 			if (score >= 0.3) {
@@ -182,15 +195,11 @@ function Player({ routine, video, onEnded }: Props) {
 				)
 			}
 
-			<Video ref={setVideoRef}/>
+			<Video ref={setVideoRef} />
 
 		</Container>
 	);
 }
-
-Player.defaultProps = {
-
-};
 
 const Loader = css`
 	z-index : 1000;
