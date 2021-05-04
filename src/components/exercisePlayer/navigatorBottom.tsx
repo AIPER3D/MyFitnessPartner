@@ -171,7 +171,7 @@ function NavigatorBottom({ videoRef, accuracy } : Props) {
 				)
 			}
 			<NavTitle> 운동 명 </NavTitle>
-			<NavAccuracy> { accuracy }00.0 </NavAccuracy>
+			<NavAccuracy> { accuracy } </NavAccuracy>
 			<NavTime> { getTime(current) } / { getTime(duration) } </NavTime>
 		</Bottom>
 	);
