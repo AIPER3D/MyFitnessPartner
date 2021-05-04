@@ -6,6 +6,8 @@ import { NavigatorTop, NavigatorBottom, PIP } from './';
 import { VideoDAO, RoutineDAO, RecordDAO } from '../../db/DAO';
 
 import * as posenet from '@tensorflow-models/posenet';
+import * as tf from '@tensorflow/tfjs';
+
 import { Stage, Graphics } from '@inlet/react-pixi';
 import { drawKeypoints, drawSkeleton } from '../../util/posenet-utils';
 
@@ -42,13 +44,13 @@ function Player({ routine, video, onEnded }: Props) {
 
 	const [poses, setPose] = useState<any>(null);
 
-	let net: any;
+	let poseNet: any;
 
 
 	useEffect(() => {
 		// 1. posenet load
 		(async () => {
-			net = await posenet.load({
+			poseNet = await posenet.load({
 				architecture: 'MobileNetV1',
 				outputStride: 16,
 				inputResolution: { width: inputWidth, height: inputHeight },
@@ -114,13 +116,13 @@ function Player({ routine, video, onEnded }: Props) {
 		videoRef.width = inputWidth;
 		videoRef.height = inputHeight;
 
-		if (net == null) {
+		if (poseNet == null) {
 			requestAnimationFrame(capture);
 			return;
 		}
 
 		// 2. inference iamge
-		const inferencedPoses = await net.estimateMultiplePoses(videoRef, {
+		const inferencedPoses = await poseNet.estimateMultiplePoses(videoRef, {
 			flipHorizontal: false,
 			maxDetections: 3,
 			scoreThreshold: 0.5,
