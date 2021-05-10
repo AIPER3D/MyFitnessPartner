@@ -3,6 +3,9 @@ import styled from 'styled-components';
 import { RxDatabase } from 'rxdb';
 
 import { Item, Data } from './';
+import {createFFmpeg, fetchFile} from '@ffmpeg/ffmpeg';
+import { useEffect } from 'react';
+
 
 type QueueProps = {
 	db: RxDatabase;
@@ -40,12 +43,22 @@ const Count = styled.p`
 `;
 
 function Queue({ db, data } : QueueProps) {
+	const ffmpeg = createFFmpeg({log: true});
+
+	const load = async () => {
+		await ffmpeg.load();
+	};
+
 	const arr = [];
 	for (let i = 0; i < data.length; i++) {
 		arr.push(
-			<Item key = { i } db= { db } data={ data[i] } />
+			<Item key = { i } db= { db } data={ data[i] } ffmpeg={ ffmpeg } />
 		);
 	}
+
+	useEffect( () => {
+		load();
+	}, []);
 
 	return (
 		<div>

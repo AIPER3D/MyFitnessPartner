@@ -11,10 +11,12 @@ import progress from './images/progress.gif';
 import progress16 from './images/progress16.gif';
 import check16 from './images/check16.png';
 import Status from './status';
+import { FFmpeg } from '@ffmpeg/ffmpeg';
 
 type ItemProps = {
 	db: RxDatabase;
     data: Data;
+	ffmpeg : FFmpeg;
 };
 
 const Root = styled.div`
@@ -80,7 +82,7 @@ const Text = styled.p`
 `;
 
 
-function Item({ db, data } : ItemProps) {
+function Item({ db, data, ffmpeg } : ItemProps) {
 	const videoDTO = new VideoDTO();
 	const [id, setId] = useState<number>(videoDTO.getNewId());
 	const [thumb, setThumb] = useState<string>(progress);
@@ -174,8 +176,18 @@ function Item({ db, data } : ItemProps) {
 
 	// 운동 영상 분석
 	function analysis(video : Blob, thumbnail : string) {
+		// 1. 영상 분석 중
 		setAnalysisStatus(Status.ANALYZING);
 
+		// 2. 영상 프레임마다 반복
+		function getVideoFrame() {
+
+		}
+
+		// 3. 각 프레임을 입력으로 exercise classification에 추론
+
+
+		// 5. 3초 뒤에 영상 등록
 		setTimeout(() => {
 			setAnalysisStatus(Status.ANALYZING_SUCCES);
 			submit(video, thumbnail).then(() => { });
