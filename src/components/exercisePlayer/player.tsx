@@ -70,7 +70,7 @@ function Player({ routine, video, onEnded }: Props) {
 			onEnded(record);
 		}
 
-		ipcRenderer.on('pose-similarity', (event, args) => {
+		ipcRenderer.on('pose-similarity', (event : any, args : any) => {
 			setPoseSimilarity(Math.abs(args));
 			// console.log(args);
 		});

@@ -16,7 +16,6 @@ import {
 	Record,
 	Records,
 
-	Exercise,
 	ExerciseReady,
 	ExercisePlay,
 
@@ -140,11 +139,6 @@ function App() {
 							</ContainerWithoutMenu>
 						</Route>
 					) : (<Route path="/new"></Route>)}
-					<Route path="/exercise1">
-						<ContainerWithoutMenu>
-							<Exercise db={ db }/>
-						</ContainerWithoutMenu>
-					</Route>
 					<Route path="/exercisePlay/:id">
 						<ContainerWithoutMenu>
 							<ExercisePlay db={ db }/>

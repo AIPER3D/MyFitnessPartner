@@ -8,7 +8,6 @@ import Routines from './routines';
 import Record from './record';
 import Records from './records';
 
-import Exercise from './exercise';
 import ExerciseReady from './exerciseReady';
 import ExercisePlay from './exercisePlay';
 
@@ -29,7 +28,6 @@ export {
 	Record,
 	Records,
 
-	Exercise,
 	ExerciseReady,
 	ExercisePlay,
 
