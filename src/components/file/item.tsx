@@ -10,6 +10,7 @@ import { Data } from './data';
 import progress from './images/progress.gif';
 import progress16 from './images/progress16.gif';
 import check16 from './images/check16.png';
+import Status from './status';
 
 type ItemProps = {
 	db: RxDatabase;
@@ -78,6 +79,7 @@ const Text = styled.p`
 	vertical-align: top;
 `;
 
+
 function Item({ db, data } : ItemProps) {
 	const videoDTO = new VideoDTO();
 	const [id, setId] = useState<number>(videoDTO.getNewId());
@@ -117,7 +119,7 @@ function Item({ db, data } : ItemProps) {
 
 			if (success) {
 				if (e.target == null || e.target.result == null) {
-					setUploadStatus(-1);
+					setUploadStatus(Status.UPLOADING_ERROR);
 					console.log(e);
 					return;
 				}
@@ -125,12 +127,12 @@ function Item({ db, data } : ItemProps) {
 				const thumbName = id + '.im';
 				fs.writeFileSync('./files/thumbnails/' + thumbName, image);
 				setThumb(image);
-				setUploadStatus(2);
+				setUploadStatus(Status.SAVING_THUMBNAIL);
 
 				const vidName = id + '.vd';
 				const vidValue = Buffer.from(e.target.result);
 				fs.writeFileSync('./files/videos/' + vidName, vidValue);
-				setUploadStatus(3);
+				setUploadStatus(Status.SAVING_VIDEO);
 				analysis(blob, image);
 			}
 			return success;
@@ -159,7 +161,7 @@ function Item({ db, data } : ItemProps) {
 			})
 			.catch((e) => {
 				console.log(e);
-				setUploadStatus(-1);
+				setUploadStatus(Status.UPLOADING_ERROR);
 			});
 	};
 	data.reader.onprogress = (e) => {
@@ -172,17 +174,17 @@ function Item({ db, data } : ItemProps) {
 
 	// 운동 영상 분석
 	function analysis(video : Blob, thumbnail : string) {
-		setAnalysisStatus(1);
+		setAnalysisStatus(Status.ANALYZING);
 
 		setTimeout(() => {
-			setAnalysisStatus(2);
+			setAnalysisStatus(Status.ANALYZING_SUCCES);
 			submit(video, thumbnail).then(() => { });
 		}, 3000);
 	}
 
 	// 운동 영상 등록
 	async function submit(video : Blob, thumbnail : string) {
-		setSubmitStatus(1);
+		setSubmitStatus(Status.SUBMITTING);
 
 		const videoDAO : VideoDAO = {
 			id: id,
@@ -191,37 +193,37 @@ function Item({ db, data } : ItemProps) {
 
 		const result = await videoDTO.addVideo(videoDAO);
 		if (!result) {
-			setSubmitStatus(-1);
+			setSubmitStatus(Status.SUBMITTING_FAIL);
 			return;
 		}
-		setSubmitStatus(2);
+		setSubmitStatus(Status.SUBMITTING_SUCCESS);
 	}
 
 	// 출력
 	const arr = [];
 
 	// 업로드
-	if (uploadStatus == 0) {
+	if (uploadStatus == Status.UPLOADING) {
 		arr.push(<Line key={ 0 }>
 			<Image src={ progress16 } />
 			<Text>업로드 중 ({ Math.round(100 * current / total).toFixed(0) }%)</Text>
 		</Line>);
-	} else if (uploadStatus == 1) {
+	} else if (uploadStatus == Status.SAVING_THUMBNAIL) {
 		arr.push(<Line key={ 0 }>
 			<Image src={ progress16 } />
 			<Text>썸네일 저장중</Text>
 		</Line>);
-	} else if (uploadStatus == 2) {
+	} else if (uploadStatus == Status.SAVING_VIDEO) {
 		arr.push(<Line key={ 0 }>
 			<Image src={ progress16 } />
 			<Text>영상 저장중</Text>
 		</Line>);
-	} else if (uploadStatus == 3) {
+	} else if (uploadStatus == Status.UPLOADING_SUCCES) {
 		arr.push(<Line key={ 0 }>
 			<Image src={ check16 } />
 			<Text>업로드 완료</Text>
 		</Line>);
-	} else if (uploadStatus == -1) {
+	} else if (uploadStatus == Status.UPLOADING_ERROR) {
 		arr.push(<Line key={ 0 }>
 			<Image src={ check16 } />
 			<Text>업로드 오류</Text>
@@ -229,17 +231,17 @@ function Item({ db, data } : ItemProps) {
 	}
 
 	// 분석
-	if (analysisStatus == 1) {
+	if (analysisStatus == Status.ANALYZING) {
 		arr.push(<Line key={ 1 }>
 			<Image src={ progress16 } />
 			<Text>분석 중</Text>
 		</Line>);
-	} else if (analysisStatus == 2) {
+	} else if (analysisStatus == Status.ANALYZING_SUCCES) {
 		arr.push(<Line key={ 1 }>
 			<Image src={ check16 } />
 			<Text>분석 완료</Text>
 		</Line>);
-	} else if (analysisStatus == -1) {
+	} else if (analysisStatus == Status.ANALYZING_FAIL) {
 		arr.push(<Line key={ 1 }>
 			<Image src={ check16 } />
 			<Text>분석 실패</Text>
@@ -247,17 +249,17 @@ function Item({ db, data } : ItemProps) {
 	}
 
 	// 등록
-	if (submitStatus == 1) {
+	if (submitStatus == Status.SUBMITTING) {
 		arr.push(<Line key={ 2 }>
 			<Image src={ progress16 } />
 			<Text>등록 중</Text>
 		</Line>);
-	} else if (submitStatus == 2) {
+	} else if (submitStatus == Status.SUBMITTING_SUCCESS) {
 		arr.push(<Line key={ 2 }>
 			<Image src={ check16 } />
 			<Text>등록 완료</Text>
 		</Line>);
-	} else if (submitStatus == -1) {
+	} else if (submitStatus == Status.SUBMITTING_FAIL) {
 		arr.push(<Line key={ 2 }>
 			<Image src={ check16 } />
 			<Text>등록 실패</Text>
