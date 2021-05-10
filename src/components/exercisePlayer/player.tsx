@@ -1,14 +1,18 @@
-import React, {useState, useRef, useEffect} from 'react';
-import styled, { css } from 'styled-components';
-import { Redirect } from 'react-router-dom';
+const fs = window.require('fs');
+import React, { useState, useRef, useEffect } from 'react';
+import styled from 'styled-components';
 
 import { NavigatorTop, NavigatorBottom, PIP } from './';
 import { VideoDAO, RoutineDAO, RecordDAO } from '../../db/DAO';
 
-import * as tf from '@tensorflow/tfjs';
 import * as posenet from '@tensorflow-models/posenet';
+import * as tf from '@tensorflow/tfjs';
+
 import { Stage, Graphics } from '@inlet/react-pixi';
-import { drawSegment, getSkeleton } from '../../util/posenet-utils';
+import { drawKeypoints, drawSkeleton } from '../../util/posenet-utils';
+
+import { css } from '@emotion/react';
+import PuffLoader from 'react-spinners/PuffLoader';
 
 type Props = {
 	routine: RoutineDAO;
@@ -16,9 +20,22 @@ type Props = {
 	onEnded: (record: RecordDAO) => void;
 };
 
-function Player({ routine, video } : Props) {
+function Player({ routine, video, onEnded }: Props) {
+	const { ipcRenderer } = window.require('electron');
+
+	const record: RecordDAO = {
+		id: 0,
+		time: new Date().getTime(),
+		routineId: routine['id'],
+		routineName: routine['name'],
+	};
+
+	const [isLoading, setLoading] = useState<boolean>(true);
 	const [videoRef, setVideoRef] = useState<HTMLVideoElement | null>(null);
 	const [seq, setSeq] = useState<number>(0);
+
+	const [poseLabel, setPoseLabel] = useState<string>('');
+	const [poseSimilarity, setPoseSimilarity] = useState<any>(0);
 
 	const inputWidth = 256;
 	const inputHeight = 256;
@@ -26,53 +43,63 @@ function Player({ routine, video } : Props) {
 	const widthScaleRatio = window.innerWidth / inputWidth;
 	const heightScaleRatio = (window.innerHeight - 100) / inputHeight;
 
-	const [pose, setPose] = useState<any>(null);
+	const [poses, setPose] = useState<any>(null);
 
-	let net : any;
+	let poseNet: any;
+
 
 	useEffect(() => {
+		const result = ipcRenderer.invoke('tfjs-test', '');
+		console.log(result);
+		// 1. posenet load
+		(async () => {
+			poseNet = await posenet.load({
+				architecture: 'MobileNetV1',
+				outputStride: 16,
+				inputResolution: { width: inputWidth, height: inputHeight },
+				multiplier: 1,
+				quantBytes: 2,
+			});
+		})();
+
+		// 2. when all task is ready, set loading false
 		if (videoRef == null) return;
 		if (seq < video.length) {
 			load(seq);
 		} else {
-			end();
+			onEnded(record);
 		}
+
+		ipcRenderer.on('pose-similarity', (event, args) => {
+			setPoseSimilarity(Math.abs(args));
+			// console.log(args);
+		});
 	}, [videoRef, seq]);
 
 	// load video and model
-	async function load(seq : number) {
+	async function load(seq: number) {
 		if (videoRef == null) return;
 
 		// 1. file loading
-		const file = window.api.fs.readFileSync('./files/videos/' + video[seq]['id'] + '.vd');
+		const file = fs.readFileSync('./files/videos/' + video[seq]['id'] + '.vd');
 		const uint8Array = new Uint8Array(file);
 		const arrayBuffer = uint8Array.buffer;
 		const blob = new Blob([arrayBuffer]);
 		const url = URL.createObjectURL(blob);
 
-		videoRef.controls = true;
+		// 2. settings
+		videoRef.controls = false;
 		videoRef.playsInline = true;
 		videoRef.src = url;
 		videoRef.volume = 0.2;
 
-		// 3. posenet load
-		net = await posenet.load({
-			architecture: 'MobileNetV1',
-			outputStride: 16,
-			inputResolution: { width: inputWidth, height: inputHeight },
-			multiplier: 1,
-			quantBytes: 2,
-		});
+		setLoading(false);
 
 		// 4. play video
-		videoRef.play()
-			.then(async () => {
-				// 5. capture image and detect pose while video playing
-				await capture();
-			})
-			.catch(() => {
+		await videoRef.play();
 
-			});
+		// 5. capture image and detect pose while video playing
+		await capture();
 
 		// 5. when video ended play next video
 		videoRef.addEventListener('ended', () => {
@@ -82,7 +109,7 @@ function Player({ routine, video } : Props) {
 	}
 
 	function end() {
-		console.log(end);
+		console.log('끝');
 	}
 
 	const capture = async () => {
@@ -92,87 +119,51 @@ function Player({ routine, video } : Props) {
 		videoRef.width = inputWidth;
 		videoRef.height = inputHeight;
 
-		// 2. inference iamge
-		const inferencedPose = await net.estimateSinglePose(videoRef, {
-			flipHorizontal: false,
-		});
+		if (poseNet == null) {
+			requestAnimationFrame(capture);
+			return;
+		}
 
-		if (inferencedPose.score < 0.2) return;
+		// 2. inference iamge
+		const inferencedPoses = await poseNet.estimateMultiplePoses(videoRef, {
+			flipHorizontal: false,
+			maxDetections: 3,
+			scoreThreshold: 0.5,
+			nmsRadius: 20,
+		});
 
 		// 3. upscale keypoints to webcam resolution
-		inferencedPose.keypoints.map( (keypoints : any) => {
-			keypoints.position.x *= widthScaleRatio;
-			keypoints.position.y *= heightScaleRatio;
+		inferencedPoses.forEach(({ score, keypoints }: { score: number, keypoints: [] }) => {
+			keypoints.map((keypoint: any) => {
+				keypoint.position.x *= widthScaleRatio;
+				keypoint.position.y *= heightScaleRatio;
+			});
 		});
-		// 4. set keypoints and skelecton
-		setPose(inferencedPose);
 
-		console.log(pose);
+		if (inferencedPoses.length >= 1) {
+			ipcRenderer.send('video-poses', inferencedPoses);
+		}
+
+		// 4. set keypoints and skelecton
+		setPose(inferencedPoses);
 
 		// 5. recursion capture()
 		requestAnimationFrame(capture);
 	};
 
-	const drawKeypoints = (graphics : any, keypoints : any, minConfidence : number) => {
-		for (let i=0; i<keypoints.length; i++) {
-			const keypoint = keypoints[i];
-
-			if (keypoint.score < minConfidence) {
-				continue;
-			}
-
-			const { y, x } = keypoint.position;
-
-			drawPoint(graphics, y, x, 5, 0xffffff);
-		}
-	};
-
-	function drawPoint(graphics : any, x : number, y : number, raidus : number, color : number) {
-		graphics.beginFill(color);
-		graphics.drawCircle(x, y, raidus);
-		graphics.endFill();
-	}
-
-	function drawLine(graphics : any, [ax, ay] : [number, number],
-		[bx, by] : [number, number], thickness : number, color : number) {
-		graphics.beginFill();
-		graphics.lineStyle(thickness, color);
-		graphics.moveTo(ax, ay);
-		graphics.lineTo(bx, by);
-		graphics.endFill();
-	}
-
-	function drawSkeleton(graphics : any, keypoints : any, minConfidence : number, ) {
-		const skeleton = posenet.getAdjacentKeyPoints(keypoints, minConfidence);
-
-		function toTuple({y, x} : {y : any, x : any}) {
-			return [y, x];
-		}
-
-		skeleton.forEach(( keypoints) => {
-			// const ax = keypoints[0].position.x;
-			// const ay = keypoints[0].position.y;
-
-			console.log(keypoints[0].position);
-
-			// drawLine(
-			// graphics, [ax, ay], toTuple(keypoints[1].position), 2, 0xffffff
-			// );
-		});
-	}
-
 	// draw keypoints of inferenced pose
-	const draw = React.useCallback( (graphics) => {
+	const draw = React.useCallback((graphics) => {
 		graphics.clear();
 
-		if (pose == null) return;
+		if (poses == null) return;
 
-		const keypoints = pose.keypoints;
-		const skeleton = getSkeleton(pose);
-
-		drawKeypoints(keypoints, 0.2, graphics);
-		drawSkeleton(skeleton, 0.2, graphics);
-	}, [pose]);
+		poses.forEach(({ score, keypoints }: { score: number, keypoints: [] }) => {
+			if (score >= 0.3) {
+				drawKeypoints(graphics, keypoints, 0.5);
+				drawSkeleton(graphics, keypoints, 0.5);
+			}
+		});
+	}, [poses]);
 
 	const stageProps = {
 		width: window.innerWidth,
@@ -186,30 +177,39 @@ function Player({ routine, video } : Props) {
 
 	return (
 		<Container>
-			<NavigatorTop
-				routine = { routine }
-				seq = { seq + 1 }
-			/>
+			{
+				isLoading ? (
+					<PuffLoader css={Loader} color={'#E75A7C'} loading={isLoading} size={300} />
+				) : (
+					<>
+						<NavigatorTop
+							routine={routine}
+							seq={seq + 1}
+						/>
 
-			<Video ref={ (ref) => {
-				setVideoRef(ref);
-			} } />
+						<PixiStage {...stageProps}>
+							<Graphics draw={draw} />
+						</PixiStage>
 
-			<PixiStage {...stageProps}>
-				<Graphics draw={draw}/>
-			</PixiStage>
+						<NavigatorBottom
+							videoRef={videoRef}
+							exercise={ poseLabel }
+							accuracy={ poseSimilarity }
+						/>
+						<PIP />
+					</>
+				)
+			}
 
-			<NavigatorBottom
-				videoRef = { videoRef }
-			/>
-			<PIP/>
+			<Video ref={setVideoRef} />
+
 		</Container>
 	);
 }
 
-Player.defaultProps = {
-
-};
+const Loader = css`
+	z-index : 1000;
+`;
 
 const PixiStage = styled(Stage)`
 	position: absolute;
@@ -218,11 +218,10 @@ const PixiStage = styled(Stage)`
 	top: 50px;
 	left: 0px;
 
-	/* width: calc(100vw); */
-	/* height: calc(100vh - 100px); */
-
 	margin: 0px;
 	padding: 0px;
+
+	z-index : 1001;
 
 	overflow:hidden;
 `;
@@ -235,11 +234,17 @@ const colorCode = {
 };
 
 const Container = styled.div`
+
+	display: flex;
+	justify-content: center;
+	align-items: center;
+
 	margin: 0px;
 	padding: 0px;
+
+	min-height: 100vh;
 	
 	overflow:hidden;
-	background-color: #000000;
 `;
 
 const Video = styled.video`

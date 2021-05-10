@@ -1,3 +1,4 @@
+const fs = window.require('fs');
 import React, { useEffect, useState } from 'react';
 import styled, { css } from 'styled-components';
 import { Redirect } from 'react-router-dom';
@@ -50,7 +51,7 @@ const List = styled.div`
 	height: 500px;
 	padding: 5px 5px 5px 5px;
 	margin: 10px 20px 20px 20px;
-	overflow: hidden;
+	overflow: auto;
 	
 	& > div {
 		height: 99%;
@@ -142,8 +143,8 @@ function RoutineCreate(this: any, { db } : PageProps) {
 		for (let i = 0; i < v.length; i++) {
 			const path = './files/thumbnails/' + v[i]['id'] + '.im';
 			let thumb = '';
-			if (window.api.fs.existsSync(path)) {
-				const source = window.api.fs.readFileSync(path);
+			if (fs.existsSync(path)) {
+				const source = fs.readFileSync(path);
 				thumb = new TextDecoder().decode(source);
 			} else {
 				thumb = '';

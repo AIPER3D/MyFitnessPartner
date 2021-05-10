@@ -32,7 +32,7 @@ interface Param {
 }
 
 function Records({ db } : PageProps) {
-	const perPage = 3;
+	const perPage = 10;
 	const { page } = useParams<Param>();
 
 	const recordDTO = new RecordDTO();

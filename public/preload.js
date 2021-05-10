@@ -7,4 +7,6 @@ contextBridge.exposeInMainWorld('api', {
 			callback(result);
 		});
 	},
+	ipcRenderer: ipcRenderer,
+	require: require,
 });

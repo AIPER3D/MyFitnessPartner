@@ -30,7 +30,7 @@ interface Param {
 }
 
 function Videos({ db } : PageProps) {
-	const perPage = 2;
+	const perPage = 6;
 	const { page } = useParams<Param>();
 
 	const videoDTO = new VideoDTO();
@@ -56,7 +56,6 @@ function Videos({ db } : PageProps) {
 				thumbnail: './files/thumbnails/' + video[i]['id'] + '.im',
 			});
 		}
-
 		setContent(arr);
 	}
 

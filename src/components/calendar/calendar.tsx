@@ -73,30 +73,19 @@ function Calendar({db} : CalendarProps) {
 		return calendar;
 	}
 
-
-	async function checkMemo(day: string) {
-		return memoDTO.isMemohere(day);
-	}
-
-	async function checkCalory(day: string) {
-		return memoDTO.isCaloryhere(day);
-	}
-
-	function generateCheck(day: string) {
-		const checklist = [];
-		if (checkMemo(day)) {
-			checklist.push(
-				<span className="check_memo"> </span>
-			);
+	async function memoCheck(day: string) {
+		if (await memoDTO.isMemohere(day) > 0) {
+			return true;
+		} else {
+			return false;
 		}
-
-		if (checkCalory(day)) {
-			checklist.push(
-				<span className="check_calory"> </span>
-			);
+	}
+	async function caloryCheck(day: string) {
+		if (await memoDTO.isCaloryhere(day) > 0) {
+			return true;
+		} else {
+			return false;
 		}
-
-		return checklist;
 	}
 	return (
 		<div className="Calendar">

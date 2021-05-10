@@ -1,3 +1,4 @@
+const fs = window.require('fs');
 import React, {useState} from 'react';
 import styled from 'styled-components';
 
@@ -122,13 +123,13 @@ function Item({ db, data } : ItemProps) {
 				}
 
 				const thumbName = id + '.im';
-				window.api.fs.writeFileSync('./files/thumbnails/' + thumbName, image);
+				fs.writeFileSync('./files/thumbnails/' + thumbName, image);
 				setThumb(image);
 				setUploadStatus(2);
 
 				const vidName = id + '.vd';
 				const vidValue = Buffer.from(e.target.result);
-				window.api.fs.writeFileSync('./files/videos/' + vidName, vidValue);
+				fs.writeFileSync('./files/videos/' + vidName, vidValue);
 				setUploadStatus(3);
 				analysis(blob, image);
 			}

@@ -13,9 +13,6 @@ function Delete() {
 	return (
 		<div>
 			<p>데이터베이스 삭제</p>
-			<ul>
-				<li><Link to={ '/dev' } >돌아가기</Link></li>
-			</ul>
 		</div>
 	);
 }

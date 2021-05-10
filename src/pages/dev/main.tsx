@@ -11,10 +11,9 @@ function Main({ db } : PageProps) {
 	return (
 		<div>
 			<ul>
-				<li><a href={ '/' } >일반 모드로 복귀</a></li>
-				<li><a href={ '/dev/db' } >DB 생성</a></li>
-				<li><a href={ '/dev/export' } >DB 내보내기</a></li>
-				<li><a href={ '/dev/delete' } >DB 삭제</a></li>
+				<li><Link to={ '/' } >일반 모드로 복귀</Link></li>
+				<li><Link to={ '/dev/export' } >DB 내보내기</Link></li>
+				<li><Link to={ '/dev/delete' } >DB 삭제</Link></li>
 			</ul>
 
 			<Router>

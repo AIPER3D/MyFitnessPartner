@@ -6,6 +6,8 @@ import { faPlay, faPause } from '@fortawesome/free-solid-svg-icons';
 
 type Props = {
 	videoRef: HTMLVideoElement | null;
+	exercise: string;
+	accuracy: number;
 };
 
 type ProgressProps = {
@@ -65,6 +67,19 @@ const NavTime = styled.div`
 	text-align: center;
 `;
 
+const NavAccuracy = styled.div`
+	position: absolute;
+	width: 70px;
+	height: 25px;
+	
+	border-radius: 5px;
+	margin-top: 10px;
+	margin-left: calc(100% - 250px);
+	
+	background-color: #F2F5EA;
+	text-align: center;
+`;
+
 const Icon = styled(FontAwesomeIcon)`
 	position: absolute;
 	width: 24px;
@@ -89,7 +104,7 @@ const Icon = styled(FontAwesomeIcon)`
 	}
 `;
 
-function NavigatorBottom({ videoRef } : Props) {
+function NavigatorBottom({ videoRef, exercise, accuracy } : Props) {
 	const [current, setCurrent] = useState<number>(0);
 	const [duration, setDuration] = useState<number>(0);
 	const [playing, setPlaying] = useState<boolean>(false);
@@ -156,7 +171,8 @@ function NavigatorBottom({ videoRef } : Props) {
 					<Icon icon={faPlay} size={'lg'} color={'#F2F5EA'} onClick={play} />
 				)
 			}
-			<NavTitle> 운동 명 </NavTitle>
+			<NavTitle> { exercise } </NavTitle>
+			<NavAccuracy> { (accuracy * 100).toFixed(1) } </NavAccuracy>
 			<NavTime> { getTime(current) } / { getTime(duration) } </NavTime>
 		</Bottom>
 	);
