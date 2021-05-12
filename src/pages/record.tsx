@@ -22,7 +22,7 @@ const Box = styled.div`
 	border: 5px solid #eeeeee;
 	overflow: auto;
 		
-	padding: 5px 15px 5px 15px;
+	padding: 10px 15px 10px 15px;
 	margin: 10px 0px 20px 20px;
 	overflow: auto;
 `;
@@ -30,6 +30,8 @@ const Box = styled.div`
 const Title = styled.div`
 	width: 920px;
 	padding-left: 20px;
+	
+	margin: 0px;
 	
 	font-weight: bold;
 `;
@@ -40,7 +42,46 @@ type TextProps = {
 
 const Text = styled.p`
 	text-align: center;
-	font-weight: ${ (props : TextProps) => props.weight }
+	font-weight: ${ (props : TextProps) => props.weight };
+	
+	margin: 0px;
+`;
+
+const SubBox = styled.div`
+	float: left;
+	
+	width: calc(100% - 10px);
+	height: 50px;
+	margin: 5px 5px 5px 5px;
+	
+	border: 1px solid #dddddd;
+	background: #eeeeee;
+`;
+
+const SubTitle = styled.div`
+	float: left;
+	width: calc(100% - 200px);
+	height: 20px;
+	padding: 14px 0px 5px 15px;
+	margin: 0px 0px 0px 0px;
+	
+	color: #000000;
+	font-size: 12pt;
+	font-weight: bold;
+	text-align: left;
+`;
+
+const SubText = styled.p`
+	float: left;
+	width: calc(150px);
+	height: 20px;
+	padding: 16px 0px 0px 15px;
+	margin: 0px 0px 0px 0px;
+	
+	color: #000000;
+	font-size: 10pt;
+	text-align: right;
+	overflow-y: auto;
 `;
 
 type PageProps = {
@@ -86,15 +127,34 @@ function Record({ db } : PageProps) {
 		return (
 			<div>
 				<Header text='운동 기록' />
-				<Box width = { '650px' }>
+				<Box width = { '650px' } height = { '23px' }>
 					<Text weight = {'bold'}> { routine['name'] } </Text>
 				</Box>
-				<Box width = { '210px' }>
+				<Box width = { '210px' } height = { '23px' }>
 					<Text> { moment(record['time']).format('YYYY-MM-DD HH:mm:ss') } </Text>
 				</Box>
 				<Title>진행한 운동</Title>
 				<Box width = { '920px' } height= { '50px' }>
-					<Text> 운동 </Text>
+					<SubBox>
+						<SubTitle>운동 명</SubTitle>
+						<SubText>0회</SubText>
+					</SubBox>
+					<SubBox>
+						<SubTitle>운동 명</SubTitle>
+						<SubText>0회</SubText>
+					</SubBox>
+					<SubBox>
+						<SubTitle>운동 명</SubTitle>
+						<SubText>0회</SubText>
+					</SubBox>
+					<SubBox>
+						<SubTitle>운동 명</SubTitle>
+						<SubText>0회</SubText>
+					</SubBox>
+					<SubBox>
+						<SubTitle>운동 명</SubTitle>
+						<SubText>0회</SubText>
+					</SubBox>
 				</Box>
 				<Button href={ '/records/1' } text = { '확인' } />
 			</div>

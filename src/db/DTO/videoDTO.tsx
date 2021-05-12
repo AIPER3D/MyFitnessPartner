@@ -46,8 +46,24 @@ class VideoDTO {
 		return true;
 	}
 
-	getVideo(id : number) {
-    	return { };
+	async getVideoById(id: number) {
+		if (!this.db) return null;
+		if (!this.db.collections.videos) return null;
+
+		const doc = await this.db.collections.videos
+			.find()
+			.where('video_id')
+			.eq(id)
+			.exec();
+
+		if (doc.length <= 0) return null;
+
+		const result : VideoDAO = {
+			id: doc[0].get('video_id'),
+			name: doc[0].get('video_name'),
+		};
+
+		return result;
 	}
 
 	async getVideosById(id: Array<Number>) {
