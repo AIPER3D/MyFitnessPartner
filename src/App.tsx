@@ -9,6 +9,7 @@ import {
 	Main,
 	Menu,
 
+	Video,
 	Videos,
 	VideoCreate,
 	Routines,
@@ -159,6 +160,9 @@ function App() {
 									</Route>
 									<Route path="/exerciseReady/:page">
 										<ExerciseReady db={ db }/>
+									</Route>
+									<Route path="/video/:id">
+										<Video db={ db } />
 									</Route>
 									<Route exact path="/videos/new">
 										<VideoCreate db={ db } />
