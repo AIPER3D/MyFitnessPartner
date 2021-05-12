@@ -1,10 +1,11 @@
 import Main from './main';
 import Menu from './menu';
 
-import VideoCreate from './videoCreate';
+import Video from './video';
 import Videos from './videos';
-import RoutineCreate from './routineCreate';
+import VideoCreate from './videoCreate';
 import Routines from './routines';
+import RoutineCreate from './routineCreate';
 import Record from './record';
 import Records from './records';
 
@@ -21,10 +22,11 @@ export {
 	Main,
 	Menu,
 
-	VideoCreate,
+	Video,
 	Videos,
-	RoutineCreate,
+	VideoCreate,
 	Routines,
+	RoutineCreate,
 	Record,
 	Records,
 
