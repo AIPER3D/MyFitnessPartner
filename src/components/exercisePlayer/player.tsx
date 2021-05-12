@@ -88,7 +88,7 @@ function Player({ routine, video, onEnded }: Props) {
 		const url = URL.createObjectURL(blob);
 
 		// 2. settings
-		videoRef.controls = false;
+		videoRef.controls = true;
 		videoRef.playsInline = true;
 		videoRef.src = url;
 		videoRef.volume = 0.2;
