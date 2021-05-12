@@ -1,8 +1,14 @@
 const { BrowserView, BrowserWindow, app, ipcMain } = require('electron');
+const tfjs = require('@tensorflow/tfjs-node');
 const path = require('path');
 const isDev = require('electron-is-dev');
 
+const fs = require('fs');
+const { createFFmpeg, fetchFile, createWorker } = require('@ffmpeg/ffmpeg');
+
 let win;
+
+let exerciseClassificationModel;
 
 function createWindow() {
 	win = new BrowserWindow({
@@ -45,7 +51,13 @@ require('electron-reload')(__dirname, {
 });
 */
 
-app.whenReady().then(createWindow);
+app.whenReady().then(async () => {
+	createWindow();
+
+	// 모델 로드
+	const handler = tfjs.io.fileSystem('./files/models/model.json');
+	exerciseClassificationModel = await tfjs.loadLayersModel(handler);
+});
 
 app.on('window-all-closed', () => {
 	app.quit();
@@ -186,3 +198,9 @@ function oneDimentionalKeypoints(keypoints) {
 	return oneDimention;
 }
 
+ipcMain.handle('exercise-classification', async (event, buffer) => {
+	buffer.shape.unshift(1);
+	const tensorBuffer = tfjs.tensor([buffer.values], buffer.shape, buffer.dtype);
+	const result = exerciseClassificationModel.predict(tensorBuffer);
+	return result.bufferSync();
+});
