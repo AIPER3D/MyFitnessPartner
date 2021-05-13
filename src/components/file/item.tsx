@@ -113,8 +113,8 @@ function Item({ db, data } : ItemProps) {
 		const url = URL.createObjectURL(blob);
 
 		const snapImage = async () => {
-			canvasElement.width = videoElement.videoWidth;
-			canvasElement.height = videoElement.videoHeight;
+			canvasElement.width = videoElement.videoWidth / 2;
+			canvasElement.height = videoElement.videoHeight / 2;
 
 			canvasElement.getContext('2d')?.drawImage(
 				videoElement,

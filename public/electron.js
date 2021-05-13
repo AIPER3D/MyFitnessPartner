@@ -198,9 +198,14 @@ function oneDimentionalKeypoints(keypoints) {
 	return oneDimention;
 }
 
-ipcMain.handle('exercise-classification', async (event, buffer) => {
-	buffer.shape.unshift(1);
-	const tensorBuffer = tfjs.tensor([buffer.values], buffer.shape, buffer.dtype);
-	const result = exerciseClassificationModel.predict(tensorBuffer);
-	return result.bufferSync();
+ipcMain.handle('exercise-classification', async (event, receivedBuffer) => {
+	receivedBuffer.shape.unshift(1);
+	const receivedTensorBuffer = tfjs.tensor([receivedBuffer.values], receivedBuffer.shape, receivedBuffer.dtype);
+	const result = exerciseClassificationModel.predict(receivedTensorBuffer);
+	const buffer = result.bufferSync();
+
+	receivedTensorBuffer.dispose();
+	result.dispose();
+
+	return buffer;
 });
