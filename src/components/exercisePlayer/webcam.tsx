@@ -57,6 +57,7 @@ function Webcam({ width, height }: Props) {
 		await capture();
 	}
 
+	let count = 0;
 	async function capture() {
 		if (webcamRef.current == null) return;
 		const webcam = webcamRef.current;
@@ -66,7 +67,7 @@ function Webcam({ width, height }: Props) {
 
 		// 2. inference iamge
 		const inferencedPoses = await poseNet.estimateMultiplePoses(image, {
-			flipHorizontal: false,
+			flipHorizontal: true,
 			maxDetections: 3,
 			scoreThreshold: 0.5,
 			nmsRadius: 20,
@@ -80,7 +81,8 @@ function Webcam({ width, height }: Props) {
 			});
 		});
 
-		if (inferencedPoses.length >= 1) {
+		if (inferencedPoses.length >= 1&&
+			count % 5 == 0) {
 			ipcRenderer.send('webcam-poses', inferencedPoses);
 		}
 
@@ -91,6 +93,7 @@ function Webcam({ width, height }: Props) {
 		await tf.nextFrame();
 
 		requestAnimationFrame(capture);
+		count++;
 	}
 
 	useEffect(() => {
@@ -149,7 +152,9 @@ function Webcam({ width, height }: Props) {
 const Wrapper = styled.div`
 	opacity: 0.8;
 `;
-const Video = styled.video``;
+const Video = styled.video`
+	transform: rotateY(180deg);
+`;
 
 const PixiStage = styled(Stage)`
 	position: absolute;
