@@ -88,7 +88,7 @@ function Player({ routine, video, onEnded }: Props) {
 		const url = URL.createObjectURL(blob);
 
 		// 2. settings
-		videoRef.controls = false;
+		videoRef.controls = true;
 		videoRef.playsInline = true;
 		videoRef.src = url;
 		videoRef.volume = 0.2;
@@ -111,6 +111,8 @@ function Player({ routine, video, onEnded }: Props) {
 	function end() {
 		console.log('끝');
 	}
+
+	let count = 0;
 
 	const capture = async () => {
 		if (videoRef == null) return;
@@ -140,7 +142,8 @@ function Player({ routine, video, onEnded }: Props) {
 			});
 		});
 
-		if (inferencedPoses.length >= 1) {
+		if (inferencedPoses.length >= 1 &&
+			count % 5 == 0) {
 			ipcRenderer.send('video-poses', inferencedPoses);
 		}
 
@@ -149,6 +152,7 @@ function Player({ routine, video, onEnded }: Props) {
 
 		// 5. recursion capture()
 		requestAnimationFrame(capture);
+		count++;
 	};
 
 	// draw keypoints of inferenced pose
