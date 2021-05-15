@@ -4,7 +4,7 @@ const isDev = require('electron-is-dev');
 
 const fs = require('fs');
 const tf = require('@tensorflow/tfjs');
-const { loadModel } = require('.//util/load-util.ts');
+const { loadModel } = require('./util/load-util.ts');
 
 let win;
 let exerciseClassificationModel;
