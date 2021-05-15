@@ -18,6 +18,7 @@ import Status from './status';
 type ItemProps = {
 	db: RxDatabase;
     data: Data;
+    onPredict: (tensorImage : any) => [string, string];
 };
 
 const Root = styled.div`
@@ -83,7 +84,7 @@ const Text = styled.p`
 `;
 
 
-function Item({ db, data } : ItemProps) {
+function Item({ db, data, onPredict } : ItemProps) {
 	const videoDTO = new VideoDTO();
 	const [id, setId] = useState<number>(videoDTO.getNewId());
 	const [thumb, setThumb] = useState<string>(progress);
@@ -187,16 +188,20 @@ function Item({ db, data } : ItemProps) {
 		async function getFrame(now : any, meta : any) {
 			if (meta.presentedFrames % 10 == 1) {
 				const data = (await tf.browser.fromPixelsAsync(videoElement)).resizeBilinear([224, 224]);
-				const result = await ipcRenderer.invoke('exercise-classification', data.bufferSync());
+				const result = onPredict(data);
 
 				console.log(result);
 
 				data.dispose();
-				result.dispose();
 			}
 
 			// 반복
-			videoElement.requestVideoFrameCallback(getFrame);
+			if (videoElement.currentTime > 0 &&
+				!videoElement.paused &&
+				!videoElement.ended &&
+				videoElement.readyState > 2) {
+				videoElement.requestVideoFrameCallback(getFrame);
+			}
 		}
 
 		// 1. 영상 분석 중

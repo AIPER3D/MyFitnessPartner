@@ -2,7 +2,7 @@ const fs = window.require('fs');
 import * as tf from '@tensorflow/tfjs';
 const path = window.require('path');
 
-export async function loadModel(modelPath : string) {
+export async function loadModel(modelPath : string) : Promise<tf.LayersModel> {
 	const basePath = path.dirname(modelPath);
 
 	const modelData = loadFile(modelPath, 'model.json');

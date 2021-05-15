@@ -5,6 +5,7 @@ import { RxDatabase } from 'rxdb';
 import { Item, Data } from './';
 import { useEffect } from 'react';
 import { loadModel } from '../../utils/load-utils';
+import * as tf from '@tensorflow/tfjs';
 
 
 type QueueProps = {
@@ -43,12 +44,39 @@ const Count = styled.p`
 `;
 
 function Queue({ db, data } : QueueProps) {
-	// const poseClassificationModel = loadModel('./files/models/exercise_classifier/d.json');
+	const [exerciseModel, setExerciseModel] = useState<tf.LayersModel>();
+
+	useEffect(() => {
+		(async () => {
+			setExerciseModel(await loadModel('./files/models/exercise_classifier/PoseClassification/model.json'));
+		})();
+	}, []);
+
+
+	function predict(tensorImage : any) : [string, string] {
+		if (exerciseModel != undefined && exerciseModel != null) {
+			tensorImage = tensorImage.expandDims();
+
+			console.log(tensorImage);
+
+			// 운동 자세 예측
+			const resultTensor = exerciseModel.predict(tensorImage) as tf.Tensor<tf.Rank>;
+			const resultArray = resultTensor.arraySync() as number[];
+			const maxValue = Math.max.apply(null, resultArray);
+			const maxIndex = resultArray.indexOf(maxValue);
+			// console.log(exerciseModel['metadata'].labels[maxIndex]);
+
+			resultTensor.dispose();
+		}
+
+		// 비정상적 조건일때
+		return ['', ''];
+	}
 
 	const arr = [];
 	for (let i = 0; i < data.length; i++) {
 		arr.push(
-			<Item key = { i } db= { db } data={ data[i] } />
+			<Item key = { i } db= { db } data={ data[i] } onPredict={ predict } />
 		);
 	}
 
