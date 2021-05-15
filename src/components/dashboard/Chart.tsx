@@ -1,6 +1,5 @@
 import '../../../node_modules/react-vis/dist/style.css';
-import { XYPlot, LineSeries, XAxis, YAxis, VerticalGridLines, HorizontalGridLines } from
-'react-vis';
+import { XYPlot, LineSeries, XAxis, YAxis, VerticalGridLines, HorizontalGridLines } from 'react-vis';
 
 function Chart() {
 	const Wdata = [
