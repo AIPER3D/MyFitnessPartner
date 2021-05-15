@@ -5,7 +5,7 @@ const path = window.require('path');
 export async function loadModel(modelPath : string) {
 	const basePath = path.dirname(modelPath);
 
-	const modelData = loadFile('src/model/exercise_classifier/firstChoose/model.json', 'model.json');
+	const modelData = loadFile(modelPath, 'model.json');
 	const weights = loadFile(path.join(basePath, 'weights.bin'), 'weights.bin');
 	const metadata = loadJson(path.join(basePath, 'metadata.json'));
 
