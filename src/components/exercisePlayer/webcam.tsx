@@ -5,10 +5,11 @@ import styled from 'styled-components';
 import * as tf from '@tensorflow/tfjs';
 import * as posenet from '@tensorflow-models/posenet';
 import { Stage, Sprite, Graphics } from '@inlet/react-pixi';
-import { Container } from 'pixi.js';
-import { useCallback } from 'react';
 import { useState } from 'react';
 import { drawKeypoints, drawSkeleton } from '../../utils/posenet-utils';
+import { loadModel } from '../../utils/load-utils';
+import { Tensor } from '@tensorflow/tfjs';
+import RepetitionCounter from '../../models/RepetitionCounter';
 
 type Props = {
 	width: number;
@@ -24,10 +25,12 @@ function Webcam({ width, height }: Props) {
 	const webcamRef = useRef<any>(null);
 
 	let poseNet: posenet.PoseNet;
-	let poseCounter : tf.LayersModel;
+	let poseClassification : tf.LayersModel;
 
-	const inputHeight = 256;
-	const inputWidth = 256;
+	let repetitionCounter : RepetitionCounter;
+
+	const inputHeight = 224;
+	const inputWidth = 224;
 
 	const widthScaleRatio = width / inputWidth;
 	const heightScaleRatio = height / inputHeight;
@@ -45,7 +48,11 @@ function Webcam({ width, height }: Props) {
 			quantBytes: 2,
 		});
 
-		poseCounter = await loadModel('src/model/poseCounter/squat-counter/model.json');
+		poseClassification = await loadModel('src/models/exercise_classifier/Squat/model.json');
+
+		repetitionCounter = new RepetitionCounter('SquatTrue', 0.9, 0.1);
+
+		console.log(poseClassification);
 	}
 
 	async function run() {
@@ -89,6 +96,7 @@ function Webcam({ width, height }: Props) {
 			ipcRenderer.send('webcam-poses', inferencedPoses);
 		}
 
+		console.log((poseClassification.predict(tf.expandDims(image, 0)) as tf.Tensor).dataSync());
 
 		// 4. set keypoints
 		setPose(inferencedPoses);
