@@ -4,7 +4,6 @@ const isDev = require('electron-is-dev');
 
 const fs = require('fs');
 const tf = require('@tensorflow/tfjs');
-const { loadModel } = require('./util/load-util.ts');
 
 let win;
 let exerciseClassificationModel;
@@ -54,7 +53,8 @@ app.whenReady().then(async () => {
 	createWindow();
 
 	// 모델 로드
-	exerciseClassificationModel = loadModel('./files/models/model.json');
+	// exerciseClassificationModel = loadModel('./files/models/exercise_classifier/firstChoose/model.json');
+	// console.log(exerciseClassificationModel);
 });
 
 app.on('window-all-closed', () => {

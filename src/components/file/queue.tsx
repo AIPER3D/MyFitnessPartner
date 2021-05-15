@@ -4,6 +4,7 @@ import { RxDatabase } from 'rxdb';
 
 import { Item, Data } from './';
 import { useEffect } from 'react';
+import { loadModel } from '../../utils/load-utils';
 
 
 type QueueProps = {
@@ -42,6 +43,8 @@ const Count = styled.p`
 `;
 
 function Queue({ db, data } : QueueProps) {
+	// const poseClassificationModel = loadModel('./files/models/exercise_classifier/d.json');
+
 	const arr = [];
 	for (let i = 0; i < data.length; i++) {
 		arr.push(
