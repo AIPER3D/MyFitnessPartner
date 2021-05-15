@@ -1,13 +1,12 @@
 const { BrowserView, BrowserWindow, app, ipcMain } = require('electron');
-const tfjs = require('@tensorflow/tfjs-node');
 const path = require('path');
 const isDev = require('electron-is-dev');
 
 const fs = require('fs');
-const { createFFmpeg, fetchFile, createWorker } = require('@ffmpeg/ffmpeg');
+const tf = require('@tensorflow/tfjs');
+const { loadModel } = require('.//util/load-util.ts');
 
 let win;
-
 let exerciseClassificationModel;
 
 function createWindow() {
@@ -55,19 +54,11 @@ app.whenReady().then(async () => {
 	createWindow();
 
 	// 모델 로드
-	const handler = tfjs.io.fileSystem('./files/models/model.json');
-	exerciseClassificationModel = await tfjs.loadLayersModel(handler);
+	exerciseClassificationModel = loadModel('./files/models/model.json');
 });
 
 app.on('window-all-closed', () => {
 	app.quit();
-});
-
-ipcMain.handle('tfjs-test', async (event, arg) => {
-	const tfjsn = require('@tensorflow/tfjs-node');
-	const handler = tfjsn.io.fileSystem('./files/models/model.json');
-	const model = await tfjsn.loadLayersModel(handler);
-	return JSON.stringify(model.toJSON());
 });
 
 ipcMain.handle('ping', (event, arg) => {
@@ -199,13 +190,17 @@ function oneDimentionalKeypoints(keypoints) {
 }
 
 ipcMain.handle('exercise-classification', async (event, receivedBuffer) => {
+	// 운동 자세 예측
 	receivedBuffer.shape.unshift(1);
-	const receivedTensorBuffer = tfjs.tensor([receivedBuffer.values], receivedBuffer.shape, receivedBuffer.dtype);
+	const receivedTensorBuffer = tf.tensor([receivedBuffer.values], receivedBuffer.shape, receivedBuffer.dtype);
 	const result = exerciseClassificationModel.predict(receivedTensorBuffer);
-	const buffer = result.bufferSync();
+
+	console.log(result);
 
 	receivedTensorBuffer.dispose();
 	result.dispose();
 
-	return buffer;
+	// 운동 상태 예측
+
+	return ['big', 'small'];
 });
