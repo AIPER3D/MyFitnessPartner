@@ -187,11 +187,9 @@ function Item({ db, data } : ItemProps) {
 		async function getFrame(now : any, meta : any) {
 			if (meta.presentedFrames % 10 == 1) {
 				const data = (await tf.browser.fromPixelsAsync(videoElement)).resizeBilinear([224, 224]);
-				const buffer = await ipcRenderer.invoke('exercise-classification', data.bufferSync());
-				const result = tf.tensor([buffer.values], buffer.shape, buffer.dtype);
+				const result = await ipcRenderer.invoke('exercise-classification', data.bufferSync());
 
-				// console.log({meta: meta, tf: data, result: result});
-				result.print();
+				console.log(result);
 
 				data.dispose();
 				result.dispose();

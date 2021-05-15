@@ -8,8 +8,7 @@ import { Stage, Sprite, Graphics } from '@inlet/react-pixi';
 import { Container } from 'pixi.js';
 import { useCallback } from 'react';
 import { useState } from 'react';
-import { drawKeypoints, drawSkeleton } from '../../util/posenet-utils';
-import { loadModel } from '../../util/load-utils';
+import { drawKeypoints, drawSkeleton } from '../../utils/posenet-utils';
 
 type Props = {
 	width: number;
