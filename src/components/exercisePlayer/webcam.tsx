@@ -9,6 +9,7 @@ import { Container } from 'pixi.js';
 import { useCallback } from 'react';
 import { useState } from 'react';
 import { drawKeypoints, drawSkeleton } from '../../util/posenet-utils';
+import { loadModel } from '../../util/load-utils';
 
 type Props = {
 	width: number;
@@ -23,7 +24,8 @@ function Webcam({ width, height }: Props) {
 	const elementRef = useRef<HTMLVideoElement>(null);
 	const webcamRef = useRef<any>(null);
 
-	let poseNet: any;
+	let poseNet: posenet.PoseNet;
+	let poseCounter : tf.LayersModel;
 
 	const inputHeight = 256;
 	const inputWidth = 256;
@@ -43,6 +45,8 @@ function Webcam({ width, height }: Props) {
 			multiplier: 1,
 			quantBytes: 2,
 		});
+
+		poseCounter = await loadModel('src/model/poseCounter/squat-counter/model.json');
 	}
 
 	async function run() {
@@ -74,8 +78,8 @@ function Webcam({ width, height }: Props) {
 		});
 
 		// 3. upscale keypoints to webcam resolution
-		inferencedPoses.forEach(({ score, keypoints }: { score: number, keypoints: [] }) => {
-			keypoints.map((keypoint: any) => {
+		inferencedPoses.forEach(( pose : posenet.Pose) => {
+			pose.keypoints.map((keypoint: any) => {
 				keypoint.position.x *= widthScaleRatio;
 				keypoint.position.y *= heightScaleRatio;
 			});
@@ -85,6 +89,7 @@ function Webcam({ width, height }: Props) {
 			count % 5 == 0) {
 			ipcRenderer.send('webcam-poses', inferencedPoses);
 		}
+
 
 		// 4. set keypoints
 		setPose(inferencedPoses);
