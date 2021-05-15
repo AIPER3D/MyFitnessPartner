@@ -9,7 +9,7 @@ import * as posenet from '@tensorflow-models/posenet';
 import * as tf from '@tensorflow/tfjs';
 
 import { Stage, Graphics } from '@inlet/react-pixi';
-import { drawKeypoints, drawSkeleton } from '../../../utils/posenet-utils';
+import { drawKeypoints, drawSkeleton } from '../../utils/posenet-utils';
 
 import { css } from '@emotion/react';
 import PuffLoader from 'react-spinners/PuffLoader';
