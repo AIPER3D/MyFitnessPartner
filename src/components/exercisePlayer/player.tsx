@@ -49,8 +49,6 @@ function Player({ routine, video, onEnded }: Props) {
 
 
 	useEffect(() => {
-		const result = ipcRenderer.invoke('tfjs-test', '');
-		console.log(result);
 		// 1. posenet load
 		(async () => {
 			poseNet = await posenet.load({

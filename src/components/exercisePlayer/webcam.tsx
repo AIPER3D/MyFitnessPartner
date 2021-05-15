@@ -5,10 +5,11 @@ import styled from 'styled-components';
 import * as tf from '@tensorflow/tfjs';
 import * as posenet from '@tensorflow-models/posenet';
 import { Stage, Sprite, Graphics } from '@inlet/react-pixi';
-import { Container } from 'pixi.js';
-import { useCallback } from 'react';
 import { useState } from 'react';
 import { drawKeypoints, drawSkeleton } from '../../utils/posenet-utils';
+import { loadModel } from '../../utils/load-utils';
+import { Tensor } from '@tensorflow/tfjs';
+import RepetitionCounter from '../../../files/models/RepetitionCounter';
 
 type Props = {
 	width: number;
@@ -23,10 +24,13 @@ function Webcam({ width, height }: Props) {
 	const elementRef = useRef<HTMLVideoElement>(null);
 	const webcamRef = useRef<any>(null);
 
-	let poseNet: any;
+	let poseNet: posenet.PoseNet;
+	let poseClassification : tf.LayersModel;
 
-	const inputHeight = 256;
-	const inputWidth = 256;
+	let repetitionCounter : RepetitionCounter;
+
+	const inputHeight = 224;
+	const inputWidth = 224;
 
 	const widthScaleRatio = width / inputWidth;
 	const heightScaleRatio = height / inputHeight;
@@ -43,6 +47,12 @@ function Webcam({ width, height }: Props) {
 			multiplier: 1,
 			quantBytes: 2,
 		});
+
+		poseClassification = await loadModel('files/models/exercise_classifier/Squat/model.json');
+
+		repetitionCounter = new RepetitionCounter('SquatTrue', 0.9, 0.1);
+
+		console.log(poseClassification);
 	}
 
 	async function run() {
@@ -74,8 +84,8 @@ function Webcam({ width, height }: Props) {
 		});
 
 		// 3. upscale keypoints to webcam resolution
-		inferencedPoses.forEach(({ score, keypoints }: { score: number, keypoints: [] }) => {
-			keypoints.map((keypoint: any) => {
+		inferencedPoses.forEach(( pose : posenet.Pose) => {
+			pose.keypoints.map((keypoint: any) => {
 				keypoint.position.x *= widthScaleRatio;
 				keypoint.position.y *= heightScaleRatio;
 			});
@@ -85,6 +95,8 @@ function Webcam({ width, height }: Props) {
 			count % 5 == 0) {
 			ipcRenderer.send('webcam-poses', inferencedPoses);
 		}
+
+		console.log((poseClassification.predict(tf.expandDims(image, 0)) as tf.Tensor).dataSync());
 
 		// 4. set keypoints
 		setPose(inferencedPoses);

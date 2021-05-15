@@ -25,5 +25,5 @@
   "include": [
     "src",
     "public/electron.js"
-  ]
+, "files/models"  ]
 }
