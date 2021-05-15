@@ -1,6 +1,6 @@
-const fs = window.require('fs');
-import * as tf from '@tensorflow/tfjs';
-const path = window.require('path');
+const fs = require('fs');
+const tf = require('@tensorflow/tfjs');
+const path = require('path');
 
 export async function loadModel(modelPath : string) {
 	const basePath = path.dirname(modelPath);
