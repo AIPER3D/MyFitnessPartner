@@ -9,7 +9,7 @@ import { useState } from 'react';
 import { drawKeypoints, drawSkeleton } from '../../utils/posenet-utils';
 import { loadModel } from '../../utils/load-utils';
 import { Tensor } from '@tensorflow/tfjs';
-import RepetitionCounter from '../../../files/models/RepetitionCounter';
+import RepetitionCounter from '../../utils/RepetitionCounter';
 
 type Props = {
 	width: number;
@@ -48,7 +48,7 @@ function Webcam({ width, height }: Props) {
 			quantBytes: 2,
 		});
 
-		poseClassification = await loadModel('files/models/exercise_classifier/Squat/model.json');
+		poseClassification = await loadModel('./files/models/exercise_classifier/Squat/model.json');
 
 		repetitionCounter = new RepetitionCounter('SquatTrue', 0.9, 0.1);
 
