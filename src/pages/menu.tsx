@@ -212,7 +212,7 @@ function Menu({ db } : PageProps) {
 						<MenuName>메인 화면</MenuName>
 					</Link>
 				</LI>
-				<LI value={route == 'videos' ? 'selected' : ''}>
+				<LI value={route == 'videos' || route == 'video' ? 'selected' : ''}>
 					<Link to="/videos/1">
 						<Icon>
 							<FontAwesomeIcon icon={ faVideo } size={'lg'} color={'#f2f5ea'}/>

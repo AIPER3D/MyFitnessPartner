@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import { RxDatabase } from 'rxdb';
 
 import { Item, Data } from './';
+import { useEffect } from 'react';
+
 
 type QueueProps = {
 	db: RxDatabase;

@@ -1,5 +1,8 @@
 const fs = window.require('fs');
-import React, {useState} from 'react';
+const tf = require('@tensorflow/tfjs');
+const { ipcRenderer } = window.require('electron');
+
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
 import { RxDatabase } from 'rxdb';
@@ -92,29 +95,36 @@ function Item({ db, data } : ItemProps) {
 	const [analysisStatus, setAnalysisStatus] = useState<number>(0);
 	const [submitStatus, setSubmitStatus] = useState<number>(0);
 
+	const videoElement : any = document.createElement('video');
+	const canvasElement : any = document.createElement('canvas');
+
 	videoDTO.setDB(db);
 
+	useEffect(() => {
+		return (() => {
+			videoElement.pause();
+		});
+	}, []);
+
 	// 운동 영상 업로드
-	data.reader.onload = (e) => {
+	data.reader.onload = async (e) => {
 		if (e.target == null || e.target.result == null) return;
 		const blob = new Blob([e.target.result], {type: data.file.type});
 		const url = URL.createObjectURL(blob);
 
-		const video = document.createElement('video');
-		const snapImage = () => {
-			const canvas : HTMLCanvasElement = document.createElement('canvas');
-			canvas.width = video.videoWidth;
-			canvas.height = video.videoHeight;
+		const snapImage = async () => {
+			canvasElement.width = videoElement.videoWidth / 2;
+			canvasElement.height = videoElement.videoHeight / 2;
 
-			canvas.getContext('2d')?.drawImage(
-				video,
+			canvasElement.getContext('2d')?.drawImage(
+				videoElement,
 				0,
 				0,
-				canvas.width,
-				canvas.height
+				canvasElement.width,
+				canvasElement.height
 			);
 
-			const image = canvas.toDataURL();
+			const image = canvasElement.toDataURL();
 			const success = image.length > 100000;
 
 			if (success) {
@@ -133,38 +143,38 @@ function Item({ db, data } : ItemProps) {
 				const vidValue = Buffer.from(e.target.result);
 				fs.writeFileSync('./files/videos/' + vidName, vidValue);
 				setUploadStatus(Status.SAVING_VIDEO);
-				analysis(blob, image);
+				await analysis(blob, image);
 			}
 			return success;
 		};
-		const timeupdate = () => {
-			if (snapImage()) {
-				video.removeEventListener('timeupdate', timeupdate);
-				video.pause();
+		const timeupdate = async () => {
+			if (await snapImage()) {
+				videoElement.removeEventListener('timeupdate', timeupdate);
 			}
 		};
 
-		video.addEventListener('loadeddata', function() {
-			if (snapImage()) {
-				video.removeEventListener('timeupdate', timeupdate);
+		videoElement.addEventListener('loadeddata', async function() {
+			if (await snapImage()) {
+				videoElement.removeEventListener('timeupdate', timeupdate);
 			}
 		});
-		video.addEventListener('timeupdate', timeupdate);
-		video.preload = 'metadata';
-		video.src = url;
+		videoElement.addEventListener('timeupdate', timeupdate);
+		videoElement.preload = 'metadata';
+		videoElement.src = url;
 
-		video.muted = true;
-		video.playsInline = true;
-		video.play()
+		videoElement.muted = true;
+		videoElement.playsInline = true;
+		videoElement.playbackRate = 5;
+		videoElement.play()
 			.then(() => {
 
 			})
-			.catch((e) => {
+			.catch((e : any) => {
 				console.log(e);
 				setUploadStatus(Status.UPLOADING_ERROR);
 			});
 	};
-	data.reader.onprogress = (e) => {
+	data.reader.onprogress = async (e) => {
 		if (e.lengthComputable) {
 			setCurrent(e.loaded);
 			setTotal(e.total);
@@ -173,13 +183,30 @@ function Item({ db, data } : ItemProps) {
 	};
 
 	// 운동 영상 분석
-	function analysis(video : Blob, thumbnail : string) {
+	async function analysis(video : Blob, thumbnail : string) {
+		async function getFrame(now : any, meta : any) {
+			if (meta.presentedFrames % 10 == 1) {
+				const data = (await tf.browser.fromPixelsAsync(videoElement)).resizeBilinear([224, 224]);
+				const result = await ipcRenderer.invoke('exercise-classification', data.bufferSync());
+
+				console.log(result);
+
+				data.dispose();
+				result.dispose();
+			}
+
+			// 반복
+			videoElement.requestVideoFrameCallback(getFrame);
+		}
+
+		// 1. 영상 분석 중
 		setAnalysisStatus(Status.ANALYZING);
 
-		setTimeout(() => {
-			setAnalysisStatus(Status.ANALYZING_SUCCES);
-			submit(video, thumbnail).then(() => { });
-		}, 3000);
+		// 2. 콜백
+		videoElement.requestVideoFrameCallback(getFrame);
+
+		// 3.
+		setAnalysisStatus(Status.ANALYZING_SUCCES);
 	}
 
 	// 운동 영상 등록

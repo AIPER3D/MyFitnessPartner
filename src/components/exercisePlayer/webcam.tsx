@@ -8,7 +8,7 @@ import { Stage, Sprite, Graphics } from '@inlet/react-pixi';
 import { Container } from 'pixi.js';
 import { useCallback } from 'react';
 import { useState } from 'react';
-import { drawKeypoints, drawSkeleton } from '../../util/posenet-utils';
+import { drawKeypoints, drawSkeleton } from '../../utils/posenet-utils';
 
 type Props = {
 	width: number;
@@ -23,7 +23,8 @@ function Webcam({ width, height }: Props) {
 	const elementRef = useRef<HTMLVideoElement>(null);
 	const webcamRef = useRef<any>(null);
 
-	let poseNet: any;
+	let poseNet: posenet.PoseNet;
+	let poseCounter : tf.LayersModel;
 
 	const inputHeight = 256;
 	const inputWidth = 256;
@@ -43,6 +44,8 @@ function Webcam({ width, height }: Props) {
 			multiplier: 1,
 			quantBytes: 2,
 		});
+
+		poseCounter = await loadModel('src/model/poseCounter/squat-counter/model.json');
 	}
 
 	async function run() {
@@ -57,6 +60,7 @@ function Webcam({ width, height }: Props) {
 		await capture();
 	}
 
+	let count = 0;
 	async function capture() {
 		if (webcamRef.current == null) return;
 		const webcam = webcamRef.current;
@@ -66,23 +70,25 @@ function Webcam({ width, height }: Props) {
 
 		// 2. inference iamge
 		const inferencedPoses = await poseNet.estimateMultiplePoses(image, {
-			flipHorizontal: false,
+			flipHorizontal: true,
 			maxDetections: 3,
 			scoreThreshold: 0.5,
 			nmsRadius: 20,
 		});
 
 		// 3. upscale keypoints to webcam resolution
-		inferencedPoses.forEach(({ score, keypoints }: { score: number, keypoints: [] }) => {
-			keypoints.map((keypoint: any) => {
+		inferencedPoses.forEach(( pose : posenet.Pose) => {
+			pose.keypoints.map((keypoint: any) => {
 				keypoint.position.x *= widthScaleRatio;
 				keypoint.position.y *= heightScaleRatio;
 			});
 		});
 
-		if (inferencedPoses.length >= 1) {
+		if (inferencedPoses.length >= 1&&
+			count % 5 == 0) {
 			ipcRenderer.send('webcam-poses', inferencedPoses);
 		}
+
 
 		// 4. set keypoints
 		setPose(inferencedPoses);
@@ -91,6 +97,7 @@ function Webcam({ width, height }: Props) {
 		await tf.nextFrame();
 
 		requestAnimationFrame(capture);
+		count++;
 	}
 
 	useEffect(() => {
@@ -149,7 +156,9 @@ function Webcam({ width, height }: Props) {
 const Wrapper = styled.div`
 	opacity: 0.8;
 `;
-const Video = styled.video``;
+const Video = styled.video`
+	transform: rotateY(180deg);
+`;
 
 const PixiStage = styled(Stage)`
 	position: absolute;
