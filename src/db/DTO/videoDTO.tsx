@@ -40,7 +40,7 @@ class VideoDTO {
 		await this. db.collections.videos.insert({
 			video_id: data['id'],
 			video_name: data['name'],
-			video_timeline: [],
+			video_timeline: data['timeline'],
 		});
 
 		return true;
@@ -61,6 +61,7 @@ class VideoDTO {
 		const result : VideoDAO = {
 			id: doc[0].get('video_id'),
 			name: doc[0].get('video_name'),
+			timeline: doc[0].get('video_timeline'),
 		};
 
 		return result;
@@ -81,6 +82,7 @@ class VideoDTO {
 			result.push({
 				id: doc[i].get('video_id'),
 				name: doc[i].get('video_name'),
+				timeline: doc[0].get('video_timeline'),
 			});
 		}
 
@@ -102,6 +104,7 @@ class VideoDTO {
 			result.push({
 				id: doc[i].get('video_id'),
 				name: doc[i].get('video_name'),
+				timeline: doc[0].get('video_timeline'),
 			});
 		}
 
@@ -121,6 +124,7 @@ class VideoDTO {
 			result.push({
 				id: doc[i].get('video_id'),
 				name: doc[i].get('video_name'),
+				timeline: doc[0].get('video_timeline'),
 			});
 		}
 
@@ -140,6 +144,7 @@ class VideoDTO {
     		result[doc[i].get('video_id')] = {
     			id: doc[i].get('video_id'),
     			name: doc[i].get('video_name'),
+				timeline: doc[0].get('video_timeline'),
     		};
     	}
 

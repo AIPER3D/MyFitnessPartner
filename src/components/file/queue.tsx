@@ -53,24 +53,21 @@ function Queue({ db, data } : QueueProps) {
 	}, []);
 
 
-	function predict(tensorImage : any) : [string, string] {
+	function predict(tensorImage : any) : string {
 		if (exerciseModel != undefined && exerciseModel != null) {
-			tensorImage = tensorImage.expandDims();
-
-			console.log(tensorImage);
-
 			// 운동 자세 예측
-			const resultTensor = exerciseModel.predict(tensorImage) as tf.Tensor<tf.Rank>;
-			const resultArray = resultTensor.arraySync() as number[];
-			const maxValue = Math.max.apply(null, resultArray);
-			const maxIndex = resultArray.indexOf(maxValue);
-			// console.log(exerciseModel['metadata'].labels[maxIndex]);
+			const exerciseTensor = exerciseModel.predict(tensorImage) as tf.Tensor<tf.Rank>;
+			const exerciseArray = (exerciseTensor.arraySync() as number[][])[0];
+			const exerciseMax = Math.max(...exerciseArray);
+			const exerciseIndex = exerciseArray.indexOf(exerciseMax);
+			const exerciseResult = (exerciseModel as any).metadata.labels[exerciseIndex];
 
-			resultTensor.dispose();
+			exerciseTensor.dispose();
+			return exerciseResult;
 		}
 
 		// 비정상적 조건일때
-		return ['', ''];
+		return '';
 	}
 
 	const arr = [];
