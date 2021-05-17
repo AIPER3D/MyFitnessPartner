@@ -3,9 +3,9 @@ import { RadialChart} from 'react-vis';
 
 function DoughnutChart() {
 	const data = [
-		{angle: 6, radius: 2, label: 'A', color: 'red', padAngle: 1},
-		{angle: 3, radius: 2, label: 'B', color: 'green', padAngle: 1},
-		{angle: 2, radius: 2, label: 'C', color: 'blue', padAngle: 1},
+		{angle: 6, radius: 2, label: 'A', color: 'red', padAngle: 10},
+		{angle: 3, radius: 2, label: 'B', color: 'green', padAngle: 10},
+		{angle: 2, radius: 2, label: 'C', color: 'blue', padAngle: 10},
 	];
 
 
