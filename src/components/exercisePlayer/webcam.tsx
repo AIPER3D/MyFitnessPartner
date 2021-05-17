@@ -7,9 +7,9 @@ import * as posenet from '@tensorflow-models/posenet';
 import { Stage, Sprite, Graphics } from '@inlet/react-pixi';
 import { useState } from 'react';
 import { drawKeypoints, drawSkeleton } from '../../utils/posenet-utils';
-import { loadModel } from '../../utils/load-utils';
-import { Tensor } from '@tensorflow/tfjs';
+import { loadModel, loadTMPose } from '../../utils/load-utils';
 import RepetitionCounter from '../../utils/RepetitionCounter';
+import * as tmPose from '@teachablemachine/pose';
 
 type Props = {
 	width: number;
@@ -24,13 +24,17 @@ function Webcam({ width, height }: Props) {
 	const elementRef = useRef<HTMLVideoElement>(null);
 	const webcamRef = useRef<any>(null);
 
-	let poseNet: posenet.PoseNet;
-	let poseClassification : tf.LayersModel;
+	const requestRef = useRef<number>();
+
+	// let poseNet: posenet.PoseNet;
+	// let poseClassification : tf.LayersModel;
+
+	let poseNet : tmPose.CustomPoseNet;
 
 	let repetitionCounter : RepetitionCounter;
 
-	const inputHeight = 224;
-	const inputWidth = 224;
+	const inputHeight = 257;
+	const inputWidth = 257;
 
 	const widthScaleRatio = width / inputWidth;
 	const heightScaleRatio = height / inputHeight;
@@ -40,19 +44,19 @@ function Webcam({ width, height }: Props) {
 	const [isPlaying, setPlaying] = useState<boolean>(true);
 
 	async function load() {
-		poseNet = await posenet.load({
-			architecture: 'MobileNetV1',
-			outputStride: 16,
-			inputResolution: { width: inputWidth, height: inputHeight },
-			multiplier: 1,
-			quantBytes: 2,
-		});
+		// poseNet = await posenet.load({
+		// 	architecture: 'MobileNetV1',
+		// 	outputStride: 16,
+		// 	inputResolution: { width: inputWidth, height: inputHeight },
+		// 	multiplier: 1,
+		// 	quantBytes: 2,
+		// });
 
-		poseClassification = await loadModel('./files/models/exercise_classifier/Squat/model.json');
+		poseNet = await loadTMPose('files/models/exercise_classifier/Squat/model.json');
 
-		repetitionCounter = new RepetitionCounter('SquatTrue', 0.9, 0.1);
+		// poseClassification = await loadModel('./files/models/exercise_classifier/Squat/model.json');
 
-		console.log(poseClassification);
+		repetitionCounter = new RepetitionCounter(poseNet.getMetadata().labels[0], 0.9, 0.1);
 	}
 
 	async function run() {
@@ -64,7 +68,7 @@ function Webcam({ width, height }: Props) {
 			resizeWidth: inputWidth,
 		});
 
-		await capture();
+		requestRef.current = requestAnimationFrame(capture);
 	}
 
 	let count = 0;
@@ -75,37 +79,50 @@ function Webcam({ width, height }: Props) {
 		// 1. caputer iamge
 		const image = await webcam.capture();
 
-		// 2. inference iamge
-		const inferencedPoses = await poseNet.estimateMultiplePoses(image, {
-			flipHorizontal: true,
-			maxDetections: 3,
-			scoreThreshold: 0.5,
-			nmsRadius: 20,
-		});
+		// 2. estimate pose
+		const {pose, posenetOutput} = await poseNet.estimatePose(image, true);
 
-		// 3. upscale keypoints to webcam resolution
-		inferencedPoses.forEach(( pose : posenet.Pose) => {
-			pose.keypoints.map((keypoint: any) => {
-				keypoint.position.x *= widthScaleRatio;
-				keypoint.position.y *= heightScaleRatio;
-			});
-		});
+		// pose.keypoints.slice(0, 4).forEach( (keypoint) => {
+		// 	if (keypoint.score < 0.3) {
+		// 		requestAnimationFrame(capture);
+		// 		return;
+		// 	}
+		// });
 
-		if (inferencedPoses.length >= 1&&
-			count % 5 == 0) {
-			ipcRenderer.send('webcam-poses', inferencedPoses);
+		// 3. pose classification
+		const result = await poseNet.predict(posenetOutput);
+
+		// 4. pose counting
+		console.log(repetitionCounter.count(result));
+
+		if (!pose) {
+			requestRef.current = requestAnimationFrame(capture);
+			return;
 		}
 
-		console.log((poseClassification.predict(tf.expandDims(image, 0)) as tf.Tensor).dataSync());
+		pose.keypoints.map( (keypoint : any) => {
+			keypoint.position.x *= widthScaleRatio;
+			keypoint.position.y *= heightScaleRatio;
+		});
+
+
+		// if (inferencedPoses.length >= 1&&
+		// 	count % 5 == 0) {
+		// 	ipcRenderer.send('webcam-poses', inferencedPoses);
+		// }
+
+		if (count % 5 == 0) {
+			ipcRenderer.send('webcam-poses', pose);
+		}
 
 		// 4. set keypoints
-		setPose(inferencedPoses);
+		setPose([pose]);
 
 		image.dispose();
 		await tf.nextFrame();
-
-		requestAnimationFrame(capture);
 		count++;
+
+		requestRef.current = requestAnimationFrame(capture);
 	}
 
 	useEffect(() => {
@@ -115,9 +132,11 @@ function Webcam({ width, height }: Props) {
 			});
 
 		return () => {
-
+			if (requestRef.current) {
+				cancelAnimationFrame(requestRef.current);
+			}
 		};
-	}, [elementRef]);
+	}, []);
 
 	const draw = React.useCallback( (graphics) => {
 		graphics.clear();
