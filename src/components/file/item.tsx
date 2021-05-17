@@ -2,7 +2,7 @@ const fs = window.require('fs');
 const tf = require('@tensorflow/tfjs');
 const { ipcRenderer } = window.require('electron');
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
 import { RxDatabase } from 'rxdb';
@@ -18,7 +18,7 @@ import Status from './status';
 type ItemProps = {
 	db: RxDatabase;
     data: Data;
-    onPredict: (tensorImage : any) => [string, string];
+    onPredict: (tensorImage : any) => string;
 };
 
 const Root = styled.div`
@@ -86,11 +86,12 @@ const Text = styled.p`
 
 function Item({ db, data, onPredict } : ItemProps) {
 	const videoDTO = new VideoDTO();
-	const [id, setId] = useState<number>(videoDTO.getNewId());
+	const id = videoDTO.getNewId();
 	const [thumb, setThumb] = useState<string>(progress);
 
 	const [current, setCurrent] = useState<number>(0);
 	const [total, setTotal] = useState<number>(0);
+	const [analysisPer, setAnalysisPer] = useState<number>(0);
 
 	const [uploadStatus, setUploadStatus] = useState<number>(0);
 	const [analysisStatus, setAnalysisStatus] = useState<number>(0);
@@ -98,6 +99,10 @@ function Item({ db, data, onPredict } : ItemProps) {
 
 	const videoElement : any = document.createElement('video');
 	const canvasElement : any = document.createElement('canvas');
+
+	const timelineArray: any[] = [];
+	const exerciseArray : string[] = [];
+	const timeArray : [number, number] = [0, 0];
 
 	videoDTO.setDB(db);
 
@@ -114,6 +119,7 @@ function Item({ db, data, onPredict } : ItemProps) {
 		const url = URL.createObjectURL(blob);
 
 		const snapImage = async () => {
+			setUploadStatus(Status.SAVING_THUMBNAIL);
 			canvasElement.width = videoElement.videoWidth / 2;
 			canvasElement.height = videoElement.videoHeight / 2;
 
@@ -126,7 +132,7 @@ function Item({ db, data, onPredict } : ItemProps) {
 			);
 
 			const image = canvasElement.toDataURL();
-			const success = image.length > 100000;
+			const success = image.length > 10000;
 
 			if (success) {
 				if (e.target == null || e.target.result == null) {
@@ -138,12 +144,13 @@ function Item({ db, data, onPredict } : ItemProps) {
 				const thumbName = id + '.im';
 				fs.writeFileSync('./files/thumbnails/' + thumbName, image);
 				setThumb(image);
-				setUploadStatus(Status.SAVING_THUMBNAIL);
 
+				setUploadStatus(Status.SAVING_VIDEO);
 				const vidName = id + '.vd';
 				const vidValue = Buffer.from(e.target.result);
 				fs.writeFileSync('./files/videos/' + vidName, vidValue);
-				setUploadStatus(Status.SAVING_VIDEO);
+
+				setUploadStatus(Status.UPLOADING_SUCCES);
 				await analysis(blob, image);
 			}
 			return success;
@@ -165,7 +172,7 @@ function Item({ db, data, onPredict } : ItemProps) {
 
 		videoElement.muted = true;
 		videoElement.playsInline = true;
-		videoElement.playbackRate = 5;
+		videoElement.playbackRate = 0.1;
 		videoElement.play()
 			.then(() => {
 
@@ -186,41 +193,121 @@ function Item({ db, data, onPredict } : ItemProps) {
 	// 운동 영상 분석
 	async function analysis(video : Blob, thumbnail : string) {
 		async function getFrame(now : any, meta : any) {
-			if (meta.presentedFrames % 10 == 1) {
-				const data = (await tf.browser.fromPixelsAsync(videoElement)).resizeBilinear([224, 224]);
-				const result = onPredict(data);
+			function getCount(array : any) {
+				return array.reduce((pv : any, cv : any) => {
+					pv[cv] = (pv[cv] || 0) + 1;
+					return pv;
+				}, {});
+			}
+			videoElement.pause();
 
-				console.log(result);
+			const posCenter = [meta.width / 2, meta.height / 2];
+			const posSize = (meta.width > meta.height ? meta.height : meta.width) / 2;
+			const posBox = [posCenter[1]-posSize, posCenter[0]-posSize, posCenter[1]+posSize, posCenter[0]+posSize];
+			const posNormalized = [
+				posBox[0]/meta.height,
+				posBox[1]/meta.width,
+				posBox[2]/meta.height,
+				posBox[3]/meta.width,
+			];
 
-				data.dispose();
+			const tensor = await tf.browser.fromPixelsAsync(videoElement);
+			const expandedTensor = tensor.expandDims();
+			const resizedTensor = tf.image.cropAndResize(expandedTensor, [posNormalized], [0], [224, 224]);
+
+			const result = onPredict(resizedTensor);
+
+			// exerciseArray가 비어있는 상태
+			if (exerciseArray.length <= 0) {
+				// 시작시간 설정
+				timeArray[0] = timeArray[1];
 			}
 
+			// 결과를 배열에 추가
+			exerciseArray.push(result);
+
+			// 가장 마지막 시간을 종료 시간으로 설정
+			if (meta.mediaTime > timeArray[1]) {
+				timeArray[1] = meta.mediaTime;
+			}
+
+			// exerciseArray가 가득찬 상태
+			if (exerciseArray.length >= 10) {
+				// 빈도 측정
+				const count = getCount(exerciseArray);
+				const sortedCount = Object.keys(count).sort(function(a, b) {
+					return count[a]-count[b];
+				});
+				const maxKey = sortedCount[sortedCount.length - 1];
+
+				// 마무리
+				if (timelineArray.length > 0 && timelineArray[timelineArray.length - 1]['name'] == maxKey) {
+					timelineArray[timelineArray.length - 1]['end'] = timeArray[1];
+				} else {
+					timelineArray.push({
+						name: maxKey,
+						start: timeArray[0],
+						end: timeArray[1],
+					});
+				}
+
+				// 비우기
+				for (let i = exerciseArray.length; i > 0; i--) {
+					exerciseArray.pop();
+				}
+			}
+
+			// 분석 수치 입력
+			setAnalysisPer(Math.round(videoElement.currentTime / videoElement.duration * 100));
 			// 반복
-			if (videoElement.currentTime > 0 &&
-				!videoElement.paused &&
-				!videoElement.ended &&
-				videoElement.readyState > 2) {
-				videoElement.requestVideoFrameCallback(getFrame);
+			if (!videoElement.ended &&
+				(videoElement.duration - videoElement.currentTime) > 0.5) {
+				videoElement.play()
+					.then(() => {
+						videoElement.requestVideoFrameCallback(getFrame);
+					})
+					.catch((e : any) => {
+						setTimeout(() => {
+							videoElement.play()
+								.then(() => {
+									videoElement.requestVideoFrameCallback(getFrame);
+								})
+								.catch((e : any) => {
+									console.log(e);
+									setUploadStatus(Status.ANALYZING_FAIL);
+								});
+						}, 1000);
+					});
+			} else {
+				setAnalysisStatus(Status.ANALYZING_SUCCES);
+				console.log(timelineArray);
+				await submit();
 			}
 		}
 
-		// 1. 영상 분석 중
+		// 1. 영상 분석
 		setAnalysisStatus(Status.ANALYZING);
 
 		// 2. 콜백
-		videoElement.requestVideoFrameCallback(getFrame);
-
-		// 3.
-		setAnalysisStatus(Status.ANALYZING_SUCCES);
+		videoElement.playbackRate = 5;
+		videoElement.play()
+			.then(() => {
+				videoElement.requestVideoFrameCallback(getFrame);
+			})
+			.catch((e : any) => {
+				console.log(e);
+				setUploadStatus(Status.ANALYZING_FAIL);
+			});
 	}
 
 	// 운동 영상 등록
-	async function submit(video : Blob, thumbnail : string) {
+	async function submit() {
 		setSubmitStatus(Status.SUBMITTING);
 
 		const videoDAO : VideoDAO = {
 			id: id,
 			name: data.file.name,
+			timeline: timelineArray,
 		};
 
 		const result = await videoDTO.addVideo(videoDAO);
@@ -266,7 +353,7 @@ function Item({ db, data, onPredict } : ItemProps) {
 	if (analysisStatus == Status.ANALYZING) {
 		arr.push(<Line key={ 1 }>
 			<Image src={ progress16 } />
-			<Text>분석 중</Text>
+			<Text>분석 중 ({ analysisPer.toFixed(0) }%)</Text>
 		</Line>);
 	} else if (analysisStatus == Status.ANALYZING_SUCCES) {
 		arr.push(<Line key={ 1 }>
