@@ -18,7 +18,7 @@ import Status from './status';
 type ItemProps = {
 	db: RxDatabase;
     data: Data;
-    onPredict: (tensorImage : any) => string;
+    onPredict: (tensorImage : any) => Promise<string>;
 };
 
 const Root = styled.div`
@@ -194,9 +194,9 @@ function Item({ db, data, onPredict } : ItemProps) {
 	async function analysis(video : Blob, thumbnail : string) {
 		async function getFrame(now : any, meta : any) {
 			function getCount(array : any) {
-				return array.reduce((pv : any, cv : any) => {
-					pv[cv] = (pv[cv] || 0) + 1;
-					return pv;
+				return array.reduce((previousValue : any, currentValue : any) => {
+					previousValue[currentValue] = (previousValue[currentValue] || 0) + 1;
+					return previousValue;
 				}, {});
 			}
 			videoElement.pause();
@@ -215,7 +215,8 @@ function Item({ db, data, onPredict } : ItemProps) {
 			const expandedTensor = tensor.expandDims();
 			const resizedTensor = tf.image.cropAndResize(expandedTensor, [posNormalized], [0], [224, 224]);
 
-			const result = onPredict(resizedTensor);
+
+			const result = await onPredict(resizedTensor);
 
 			tensor.dispose();
 			expandedTensor.dispose();
@@ -236,13 +237,20 @@ function Item({ db, data, onPredict } : ItemProps) {
 			}
 
 			// exerciseArray가 가득찬 상태
-			if (exerciseArray.length >= 10) {
+			if (exerciseArray.length >= 20) {
 				// 빈도 측정
 				const count = getCount(exerciseArray);
 				const sortedCount = Object.keys(count).sort(function(a, b) {
 					return count[a]-count[b];
 				});
 				const maxKey = sortedCount[sortedCount.length - 1];
+
+
+				console.log({
+					start: timeArray[0],
+					end: timeArray[1],
+					result: count,
+				});
 
 				// 마무리
 				if (timelineArray.length > 0 && timelineArray[timelineArray.length - 1]['name'] == maxKey) {
