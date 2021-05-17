@@ -1,5 +1,5 @@
 export default class RepetitionCounter {
-	private className : string;
+	private targetClass : string;
 	private enterThreshold : number;
 	private exitThreshold : number;
 
@@ -7,8 +7,8 @@ export default class RepetitionCounter {
 
 	private _nRepeats : number;
 
-	constructor(className : string, enterThreshold : number, exitThreshold : number) {
-		this.className = className;
+	constructor(targetClass : string, enterThreshold : number, exitThreshold : number) {
+		this.targetClass = targetClass;
 		this.enterThreshold = enterThreshold;
 		this.exitThreshold = exitThreshold;
 
@@ -20,12 +20,39 @@ export default class RepetitionCounter {
 		return this._nRepeats;
 	}
 
+	/*
+
+		[
+			{
+				className : squatTrue,
+				score : 0.xx
+			},
+			{
+				className : squatDown,
+				score : 0.xx
+			},
+		]
+
+		{
+			sqautTrue : 0.xx,
+			sqautDown : 0.xx
+		}
+
+	*/
+
 	public count(poseClassification : any) : number {
 		let poseConfidence = 0.0;
 
-		if (poseClassification.has(this.className)) {
-			poseConfidence = poseClassification[this.className];
-		}
+		// targetClass의 score로 초기화
+		// if (poseClassification  this.targetClass) {
+		// 	poseConfidence = poseClassification[this.targetClass];
+		// }
+		poseClassification.forEach( ({className, probability} : {className : string, probability : number}) => {
+			if (className == this.targetClass) {
+				poseConfidence = probability;
+				return;
+			}
+		});
 
 		if (!this.poseEntered) {
 			this.poseEntered = poseConfidence > this.enterThreshold;
