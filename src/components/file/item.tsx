@@ -99,7 +99,6 @@ function Item({ db, data, onPredict } : ItemProps) {
 
 	const videoElement : any = document.createElement('video');
 	const canvasElement : any = document.createElement('canvas');
-	const ccc = useRef<HTMLCanvasElement | null>(null);
 
 	const timelineArray: any[] = [];
 	const exerciseArray : string[] = [];
@@ -212,19 +211,11 @@ function Item({ db, data, onPredict } : ItemProps) {
 				posBox[3]/meta.width,
 			];
 
-			const tensor = (await tf.browser.fromPixelsAsync(videoElement)).resizeBilinear([224, 224]);
+			const tensor = (await tf.browser.fromPixelsAsync(videoElement));
 			const expandedTensor = tensor.expandDims();
 			const resizedTensor = tf.image.cropAndResize(expandedTensor, [posNormalized], [0], [224, 224]);
 
-			const downTensor = resizedTensor.squeeze(0).div(255);
-			await tf.browser.toPixels(downTensor, ccc.current);
-			downTensor.dispose();
-
 			const result = onPredict(resizedTensor);
-
-			// const tensor = (await tf.browser.fromPixelsAsync(videoElement)).resizeNearestNeighbor([224, 224]);
-			// const expandedTensor = tensor.expandDims();
-			// const result = onPredict(expandedTensor);
 
 			tensor.dispose();
 			expandedTensor.dispose();
@@ -401,7 +392,6 @@ function Item({ db, data, onPredict } : ItemProps) {
 
 	return (
 		<Root>
-			<canvas ref = { ccc } />
 			<Thumbnail src={ thumb }/>
 			<Title> { data.file.name } </Title>
 			{ arr }
