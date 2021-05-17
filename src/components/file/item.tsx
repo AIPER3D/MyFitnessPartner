@@ -99,7 +99,7 @@ function Item({ db, data, onPredict } : ItemProps) {
 
 	const videoElement : any = document.createElement('video');
 	const canvasElement : any = document.createElement('canvas');
-	const ccc = useRef<HTMLCanvasElement | null>(null);
+	// const ccc = useRef<HTMLCanvasElement | null>(null);
 
 	const timelineArray: any[] = [];
 	const exerciseArray : string[] = [];
@@ -222,9 +222,9 @@ function Item({ db, data, onPredict } : ItemProps) {
 			const concatTensor = meanTensor.concat([meanTensor, meanTensor], 3);
 
 			// (테스트) 출력
-			const downTensor = concatTensor.squeeze(0).div(255);
-			await tf.browser.toPixels(downTensor, ccc.current);
-			concatTensor.dispose();
+			// const downTensor = concatTensor.squeeze(0).div(255);
+			// await tf.browser.toPixels(downTensor, ccc.current);
+			// downTensor.dispose();
 
 			const result = onPredict(concatTensor);
 
@@ -232,8 +232,8 @@ function Item({ db, data, onPredict } : ItemProps) {
 			expandedTensor.dispose();
 			resizedTensor.dispose();
 
-			downTensor.dispose();
 			meanTensor.dispose();
+			concatTensor.dispose();
 
 			// exerciseArray가 비어있는 상태
 			if (exerciseArray.length <= 0) {
@@ -403,10 +403,9 @@ function Item({ db, data, onPredict } : ItemProps) {
 		</Line>);
 	}
 
-
+    // <canvas ref = { ccc } />
 	return (
 		<Root>
-			<canvas ref = { ccc } />
 			<Thumbnail src={ thumb }/>
 			<Title> { data.file.name } </Title>
 			{ arr }
