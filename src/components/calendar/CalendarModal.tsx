@@ -6,6 +6,7 @@ import CalendarEditableBox from './CalendarEditableBox';
 import './CalendarModal.scss';
 import EditableBoxList from './EditableBoxList';
 
+
 type Props = {
     open: Boolean;
     close: () => void;

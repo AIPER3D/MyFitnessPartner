@@ -4,6 +4,8 @@ import { RxDatabase } from 'rxdb';
 import { MemoDTO } from '../../db/DTO/memoDTO';
 import { MemoDAO } from '../../db/DAO/memoDAO';
 import { ThemeConsumer } from 'styled-components';
+import { faSave } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 type Props = {
 	memo: MemoDAO;
 	onRefresh: ()=>void;
@@ -28,6 +30,10 @@ function CalendarEditableBox({ memo, onRefresh, db } : Props) {
 	};
 	const editSave = () => {
 		setEditable(false);
+
+		if (text === '') {
+			setText('Memo');
+		}
 		onChangeValue();
 		onRefresh();
 	};
@@ -102,7 +108,8 @@ function CalendarEditableBox({ memo, onRefresh, db } : Props) {
 								</div>
 							)}
 					</label>
-					<button className="btn btn-dark" onClick={editSave}>save</button>
+					<FontAwesomeIcon className="save_button" icon={ faSave } size={'2x'}
+						color={'#415b79'} onClick={editSave}/>
 					<span className="remove_button" onClick={onRemove}> &times; </span>
 				</div>
 			) : (

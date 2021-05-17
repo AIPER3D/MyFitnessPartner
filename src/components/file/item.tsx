@@ -99,6 +99,7 @@ function Item({ db, data, onPredict } : ItemProps) {
 
 	const videoElement : any = document.createElement('video');
 	const canvasElement : any = document.createElement('canvas');
+	// const ccc = useRef<HTMLCanvasElement | null>(null);
 
 	const timelineArray: any[] = [];
 	const exerciseArray : string[] = [];
@@ -211,6 +212,7 @@ function Item({ db, data, onPredict } : ItemProps) {
 				posBox[3]/meta.width,
 			];
 
+			// 리사이즈
 			const tensor = (await tf.browser.fromPixelsAsync(videoElement));
 			const expandedTensor = tensor.expandDims();
 			const resizedTensor = tf.image.cropAndResize(expandedTensor, [posNormalized], [0], [224, 224]);
@@ -397,7 +399,7 @@ function Item({ db, data, onPredict } : ItemProps) {
 		</Line>);
 	}
 
-
+	// <canvas ref = { ccc } />
 	return (
 		<Root>
 			<Thumbnail src={ thumb }/>
