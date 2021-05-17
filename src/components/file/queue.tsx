@@ -62,6 +62,8 @@ function Queue({ db, data } : QueueProps) {
 			const exerciseIndex = exerciseArray.indexOf(exerciseMax);
 			const exerciseResult = (exerciseModel as any).metadata.labels[exerciseIndex];
 
+			console.log(exerciseArray);
+
 			exerciseTensor.dispose();
 			return exerciseResult;
 		}
