@@ -48,12 +48,12 @@ function CalendarModal({open, close, header, db, children}: Props) {
 				<section>
 					<header>
 						{header}
-						<button className="add" onClick={handleAdd}> &#43; </button>
 						<button className="close" onClick={close}> &times; </button>
 					</header>
 					<main>
 						{children}
 						<EditableBoxList memos={memo} onRefresh={onRefresh} db={db}/>
+						<button className="add" onClick={handleAdd}> &#43; </button>
 					</main>
 					<footer>
 						<button className="close" onClick={close}> close </button>

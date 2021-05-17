@@ -41,20 +41,24 @@
     color: rgba(0, 0, 0, 0.705);
     background-color: transparent;
 }
-.modal > section > header button.add {
-    position: absolute;
-    top: 15px;
-    right: 15px;
+.modal > section > main button.add {
     width: 30px;
-    padding-right: 50px;
     font-size: 21px;
     font-weight: 700;
     text-align: center;
     color: rgba(0, 0, 0, 0.705);
     background-color: transparent;
+
+    &:hover{
+        background-color: rgba(182, 207, 211, 0.863);
+    }
+    &:active {
+        background-color: rgb(182, 207, 211);
+    }
 }
 .modal > section > main {
     padding: 16px;
+    background-color: #ffffff;
     border-bottom: 1px solid #dee2e6;
     border-top: 1px solid #dee2e6;
 }
