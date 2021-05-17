@@ -2,6 +2,20 @@ const fs = window.require('fs');
 import * as tf from '@tensorflow/tfjs';
 const path = window.require('path');
 
+import * as tmPose from '@teachablemachine/pose';
+
+export async function loadTMPose(modelPath: string) : Promise<tmPose.CustomPoseNet> {
+	const basePath = path.dirname(modelPath);
+
+	const modelData = loadFile(modelPath, 'model.json');
+	const weights = loadFile(path.join(basePath, 'weights.bin'), 'weights.bin');
+	const metadata = loadFile(path.join(basePath, 'metadata.json'), 'metadata.json');
+
+	const model : any = await tmPose.loadFromFiles(modelData, weights, metadata);
+
+	return model;
+}
+
 export async function loadModel(modelPath : string) : Promise<tf.LayersModel> {
 	const basePath = path.dirname(modelPath);
 

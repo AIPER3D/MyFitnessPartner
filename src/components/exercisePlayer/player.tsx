@@ -30,6 +30,8 @@ function Player({ routine, video, onEnded }: Props) {
 		routineName: routine['name'],
 	};
 
+	const requestRef = useRef<number>();
+
 	const [isLoading, setLoading] = useState<boolean>(true);
 	const [videoRef, setVideoRef] = useState<HTMLVideoElement | null>(null);
 	const [seq, setSeq] = useState<number>(0);
@@ -97,7 +99,7 @@ function Player({ routine, video, onEnded }: Props) {
 		await videoRef.play();
 
 		// 5. capture image and detect pose while video playing
-		await capture();
+		requestRef.current = requestAnimationFrame(capture);
 
 		// 5. when video ended play next video
 		videoRef.addEventListener('ended', () => {
@@ -120,7 +122,7 @@ function Player({ routine, video, onEnded }: Props) {
 		videoRef.height = inputHeight;
 
 		if (poseNet == null) {
-			requestAnimationFrame(capture);
+			requestRef.current = requestAnimationFrame(capture);
 			return;
 		}
 
@@ -144,13 +146,13 @@ function Player({ routine, video, onEnded }: Props) {
 			count % 5 == 0) {
 			ipcRenderer.send('video-poses', inferencedPoses);
 		}
+		count++;
 
 		// 4. set keypoints and skelecton
 		setPose(inferencedPoses);
 
 		// 5. recursion capture()
-		requestAnimationFrame(capture);
-		count++;
+		requestRef.current = requestAnimationFrame(capture);
 	};
 
 	// draw keypoints of inferenced pose
