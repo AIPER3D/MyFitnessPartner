@@ -217,6 +217,10 @@ function Item({ db, data, onPredict } : ItemProps) {
 
 			const result = onPredict(resizedTensor);
 
+			tensor.dispose();
+			expandedTensor.dispose();
+			resizedTensor.dispose();
+
 			// exerciseArray가 비어있는 상태
 			if (exerciseArray.length <= 0) {
 				// 시작시간 설정
