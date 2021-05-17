@@ -19,36 +19,14 @@ const VideoSchema = {
 			'items': {
 				'type': 'object',
 				'properties': {
-					'posd_2d': {
-						'type': 'array',
-						'items': {
-							'type': 'object',
-							'properties': {
-								'x': {
-									'type': 'number',
-								},
-								'y': {
-									'type': 'number',
-								},
-							},
-						},
+					'name': {
+						'type': 'string',
 					},
-					'posd_3d': {
-						'type': 'array',
-						'items': {
-							'type': 'object',
-							'properties': {
-								'x': {
-									'type': 'number',
-								},
-								'y': {
-									'type': 'number',
-								},
-								'z': {
-									'type': 'number',
-								},
-							},
-						},
+					'start': {
+						'type': 'number',
+					},
+					'end': {
+						'type': 'number',
 					},
 				},
 			},

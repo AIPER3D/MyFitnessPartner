@@ -132,7 +132,7 @@ function Video({ db } : PageProps) {
 	const [video, setVideo] = useState<VideoDAO | null>(null);
 	const [name, setName] = useState<string>('');
 	const [thumbnail, setThumbnail] = useState<string>(dummy);
-
+	const timeline : Object[] = [];
 	useEffect(() => {
 		videoDTO.setDB(db);
 		load();
@@ -165,6 +165,17 @@ function Video({ db } : PageProps) {
 			</div>
 		);
 	} else {
+		const arr = [];
+		console.log(video['timeline']);
+		for (let i = 0; i < video.timeline.length; i++) {
+			arr.push(
+				<SubBox key = { i }>
+					<SubTitle>{video['timeline'][i]['name']}</SubTitle>
+					<SubText>{video['timeline'][i]['start']} - {video['timeline'][i]['end']}</SubText>
+				</SubBox>
+			);
+		}
+
 		return (
 			<div>
 				<Header text='영상 정보' />
@@ -177,38 +188,7 @@ function Video({ db } : PageProps) {
 					<SubImage src={ thumbnail } width= { '430px' } />
 				</Box>
 				<Box width = { '430px' } height= { '300px' }>
-					<SubBox>
-						<SubTitle>운동 명</SubTitle>
-						<SubText>00:00 - 00:00</SubText>
-					</SubBox>
-					<SubBox>
-						<SubTitle>운동 명</SubTitle>
-						<SubText>00:00 - 00:00</SubText>
-					</SubBox>
-					<SubBox>
-						<SubTitle>운동 명</SubTitle>
-						<SubText>00:00 - 00:00</SubText>
-					</SubBox>
-					<SubBox>
-						<SubTitle>운동 명</SubTitle>
-						<SubText>00:00 - 00:00</SubText>
-					</SubBox>
-					<SubBox>
-						<SubTitle>운동 명</SubTitle>
-						<SubText>00:00 - 00:00</SubText>
-					</SubBox>
-					<SubBox>
-						<SubTitle>운동 명</SubTitle>
-						<SubText>00:00 - 00:00</SubText>
-					</SubBox>
-					<SubBox>
-						<SubTitle>운동 명</SubTitle>
-						<SubText>00:00 - 00:00</SubText>
-					</SubBox>
-					<SubBox>
-						<SubTitle>운동 명</SubTitle>
-						<SubText>00:00 - 00:00</SubText>
-					</SubBox>
+					{ arr }
 				</Box>
 				<Button href={ '/videos/1' } text = { '확인' } />
 			</div>
