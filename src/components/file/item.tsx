@@ -99,6 +99,7 @@ function Item({ db, data, onPredict } : ItemProps) {
 
 	const videoElement : any = document.createElement('video');
 	const canvasElement : any = document.createElement('canvas');
+	const ccc = useRef<HTMLCanvasElement | null>(null);
 
 	const timelineArray: any[] = [];
 	const exerciseArray : string[] = [];
@@ -211,15 +212,28 @@ function Item({ db, data, onPredict } : ItemProps) {
 				posBox[3]/meta.width,
 			];
 
+			// 리사이즈
 			const tensor = (await tf.browser.fromPixelsAsync(videoElement));
 			const expandedTensor = tensor.expandDims();
 			const resizedTensor = tf.image.cropAndResize(expandedTensor, [posNormalized], [0], [224, 224]);
 
-			const result = onPredict(resizedTensor);
+			// 그레이스케일
+			const meanTensor = resizedTensor.mean(3, true);
+			const concatTensor = meanTensor.concat([meanTensor, meanTensor], 3);
+
+			// (테스트) 출력
+			const downTensor = concatTensor.squeeze(0).div(255);
+			await tf.browser.toPixels(downTensor, ccc.current);
+			concatTensor.dispose();
+
+			const result = onPredict(concatTensor);
 
 			tensor.dispose();
 			expandedTensor.dispose();
 			resizedTensor.dispose();
+
+			downTensor.dispose();
+			meanTensor.dispose();
 
 			// exerciseArray가 비어있는 상태
 			if (exerciseArray.length <= 0) {
@@ -392,6 +406,7 @@ function Item({ db, data, onPredict } : ItemProps) {
 
 	return (
 		<Root>
+			<canvas ref = { ccc } />
 			<Thumbnail src={ thumb }/>
 			<Title> { data.file.name } </Title>
 			{ arr }
