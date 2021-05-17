@@ -4,8 +4,10 @@ import { RxDatabase } from 'rxdb';
 
 import { Item, Data } from './';
 import { useEffect } from 'react';
-import { loadModel } from '../../utils/load-utils';
+import { loadModel, loadTMPose } from '../../utils/load-utils';
 import * as tf from '@tensorflow/tfjs';
+import { CustomPoseNet } from '@teachablemachine/pose';
+import { tensorToImage } from '../../utils/video-util';
 
 
 type QueueProps = {
@@ -44,28 +46,39 @@ const Count = styled.p`
 `;
 
 function Queue({ db, data } : QueueProps) {
-	const [exerciseModel, setExerciseModel] = useState<tf.LayersModel>();
+	// const [exerciseModel, setExerciseModel] = useState<tf.LayersModel>();
+	const [exerciseModel, setExerciseModel] = useState<CustomPoseNet>();
 
 	useEffect(() => {
 		(async () => {
-			setExerciseModel(await loadModel('./files/models/exercise_classifier/PoseClassification/model.json'));
+			// setExerciseModel(await loadModel('files/models/exercise_classifier/tm-my-image-model/model.json'));
+			setExerciseModel(await loadTMPose('files/models/poseClassification-posenet-epoch10/model.json'));
 		})();
 	}, []);
 
 
-	function predict(tensorImage : any) : string {
+	async function predict(tensorImage : any) : Promise<string> {
 		if (exerciseModel != undefined && exerciseModel != null) {
+			const image = tensorToImage(tensorImage);
+
+			const {pose, posenetOutput} = await exerciseModel.estimatePose(image);
+
 			// 운동 자세 예측
-			const exerciseTensor = exerciseModel.predict(tensorImage) as tf.Tensor<tf.Rank>;
-			const exerciseArray = (exerciseTensor.arraySync() as number[][])[0];
-			const exerciseMax = Math.max(...exerciseArray);
-			const exerciseIndex = exerciseArray.indexOf(exerciseMax);
-			const exerciseResult = (exerciseModel as any).metadata.labels[exerciseIndex];
+			// const exerciseTensor = exerciseModel.predict(posenetOutput) as tf.Tensor<tf.Rank>;
+			// const exerciseArray = (exerciseTensor.arraySync() as number[][])[0];
+			// const exerciseMax = Math.max(...exerciseArray);
+			// const exerciseIndex = exerciseArray.indexOf(exerciseMax);
+			// const exerciseResult = (exerciseModel as any).metadata.labels[exerciseIndex];
 
-			console.log(exerciseArray);
+			const exerciseTensor = await exerciseModel.predict(posenetOutput);
 
-			exerciseTensor.dispose();
-			return exerciseResult;
+			// 최대값
+			var maxClass = exerciseTensor.reduce( function(previous, current) {
+				return previous.probability > current.probability ? previous:current;
+			});
+
+			// exerciseTensor.dispose();
+			return maxClass.className;
 		}
 
 		// 비정상적 조건일때
