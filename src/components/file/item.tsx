@@ -403,7 +403,7 @@ function Item({ db, data, onPredict } : ItemProps) {
 		</Line>);
 	}
 
-    // <canvas ref = { ccc } />
+	// <canvas ref = { ccc } />
 	return (
 		<Root>
 			<Thumbnail src={ thumb }/>
