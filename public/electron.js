@@ -83,10 +83,14 @@ ipcMain.on('video-poses', (event, poses) => {
 	webcamPose = null;
 });
 
-ipcMain.on('webcam-poses', (event, poses) => {
-	webcamPose = poses.reduce((previous, current) => {
-		return previous > current ? previous : current;
-	});
+// ipcMain.on('webcam-poses', (event, poses) => {
+// 	webcamPose = poses.reduce((previous, current) => {
+// 		return previous > current ? previous : current;
+// 	});
+// });
+
+ipcMain.on('webcam-poses', (event, pose) => {
+	webcamPose = pose;
 });
 
 function compareKeypoints() {
