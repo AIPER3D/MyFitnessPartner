@@ -26,6 +26,7 @@ import {
 	New,
 	Reset,
 } from './pages';
+import Dashboard from './components/dashboard/dashboard';
 
 declare global {
 	interface Window {
@@ -52,6 +53,17 @@ const ContainerWithoutMenu = styled.div`
 	
 	margin: 0px;
 	padding: 0px;
+`;
+
+const ContainerWithMenuUnlimit = styled.div`
+	position: fixed;
+	left: 250px; 
+	width: calc(100vw - 250px);
+	height: calc(100vh);
+	overflow: auto;
+		
+	margin: 0;
+	padding: 0;
 `;
 
 const Body = styled.div`
@@ -182,12 +194,19 @@ function App() {
 									<Route path="/records/:page">
 										<Records db={ db } />
 									</Route>
-									<Route path="/">
+									<Route exact path="/">
 										<Main db={ db } />
 									</Route>
 								</Switch>
 							</Body>
 						</ContainerWithMenu>
+						<Switch>
+							<Route exact path="/dashboard">
+								<ContainerWithMenuUnlimit>
+									<Dashboard db={ db } />
+								</ContainerWithMenuUnlimit>
+							</Route>
+						</Switch>
 					</Route>
 					<Route path="/">
 						<Menu db = { db } />

@@ -3,7 +3,7 @@ import styled, { css } from 'styled-components';
 import { Link, useParams } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faVideo, faList, faClipboard } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faVideo, faList, faClipboard, faChartPie } from '@fortawesome/free-solid-svg-icons';
 
 import { RxDatabase } from 'rxdb';
 import { UserDTO } from '../db/DTO';
@@ -210,6 +210,14 @@ function Menu({ db } : PageProps) {
 							<FontAwesomeIcon icon={ faHome } size={'lg'} color={'#f2f5ea'}/>
 						</Icon>
 						<MenuName>메인 화면</MenuName>
+					</Link>
+				</LI>
+				<LI value={route == 'dashboard' ? 'selected' : ''}>
+					<Link to="/dashboard">
+						<Icon>
+							<FontAwesomeIcon icon={ faChartPie } size={'lg'} color={'#f2f5ea'}/>
+						</Icon>
+						<MenuName>대시보드</MenuName>
 					</Link>
 				</LI>
 				<LI value={route == 'videos' || route == 'video' ? 'selected' : ''}>

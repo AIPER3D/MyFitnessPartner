@@ -2,7 +2,7 @@ import { RxDatabase } from 'rxdb';
 import React, {useEffect, useState} from 'react';
 import './dashboard.scss';
 import Chart from './Chart';
-
+import DoughnutChart from './DoughnutChart';
 type DashBoardProps = {
 	db : RxDatabase;
 }
@@ -48,22 +48,22 @@ function Dashboard({db}: DashBoardProps) {
 					<div className="card">
 						<i className="fas fa-fire-alt fa-2x text-sunset"></i>
 						<div className="card_inner">
-							<p className="text-primary-p"> 당신의 하루평균 소모열량 </p>
-							<span className="font-bold text-title"> {yourCalory} Kcal</span>
+							<p className="text-primary-p"> 하루평균 <br /> 소모열량 </p>
+							<span className="font-bold text-title"> {yourCalory()} Kcal</span>
 						</div>
 					</div>
 					<div className="card">
-						<i className="far fa-clock fa-2x text-lightblue"></i>
+						<i className="far fa-clock fa-2x text-dark"></i>
 						<div className="card_inner">
 							<p className="text-primary-p"> 오늘 운동시간 </p>
-							<span className="font-bold text-title"> {yourExerciseTime} 분</span>
+							<span className="font-bold text-title"> {yourExerciseTime()} 분</span>
 						</div>
 					</div>
 					<div className="card">
 						<i className="fa fa-calendar fa-2x text-red"></i>
 						<div className="card_inner">
 							<p className="text-primary-p"> 총 운동 날짜 </p>
-							<span className="font-bold text-title"> {yourExerciseDay} 분</span>
+							<span className="font-bold text-title"> {yourExerciseDay()} 일</span>
 						</div>
 					</div>
 				</div>
@@ -82,11 +82,18 @@ function Dashboard({db}: DashBoardProps) {
 								<h1>운동 정보 일람</h1>
 							</div>
 						</div>
-						<div className="chart_exerciseInfo_cards">
-							{ mostExercise }
+						<div className="charts_exerciseInfo_cards">
+							{ mostExercise() }
 						</div>
 					</div>
-					.charts
+					<div className="charts_exerciseDoughnut">
+						<div className="charts_exerciseDoughnut_title">
+							<div>
+								<h1>운동 점유율</h1>
+							</div>
+						</div>
+						<DoughnutChart />
+					</div>
 				</div>
 			</div>
 		</main>

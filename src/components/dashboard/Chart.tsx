@@ -18,7 +18,9 @@ function Chart() {
 				<HorizontalGridLines />
 				<XAxis />
 				<YAxis />
-				<LineSeries data={Wdata}/>
+				<LineSeries data={Wdata} color='red'/>
+				<LineSeries data={Wdata} color="purple"/>
+				<LineSeries data={Wdata} color='yellow'/>
 			</XYPlot>
 		</div>
 	);
