@@ -8,6 +8,7 @@ import { loadModel, loadTMPose } from '../../utils/load-utils';
 import * as tf from '@tensorflow/tfjs';
 import { CustomPoseNet } from '@teachablemachine/pose';
 import { tensorToImage } from '../../utils/video-util';
+import { timer } from '../../utils/bench-util';
 
 
 type QueueProps = {
@@ -56,12 +57,24 @@ function Queue({ db, data } : QueueProps) {
 		})();
 	}, []);
 
-
 	async function predict(tensorImage : any) : Promise<string> {
 		if (exerciseModel != undefined && exerciseModel != null) {
 			const image = tensorToImage(tensorImage);
 
-			const {pose, posenetOutput} = await exerciseModel.estimatePose(image);
+			const {
+				heatmapScores,
+				offsets,
+				displacementFwd,
+				displacementBwd,
+				padding,
+			} = await exerciseModel.estimatePoseOutputs(image);
+
+			const posenetOutput = exerciseModel.poseOutputsToAray(
+				heatmapScores,
+				offsets,
+				displacementFwd,
+				displacementBwd
+			);
 
 			// 운동 자세 예측
 			// const exerciseTensor = exerciseModel.predict(posenetOutput) as tf.Tensor<tf.Rank>;
