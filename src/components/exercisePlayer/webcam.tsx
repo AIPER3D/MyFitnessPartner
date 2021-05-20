@@ -78,8 +78,8 @@ function Webcam({ width, height }: Props) {
 
 		// 1. caputer iamge
 		const image = await webcam.capture();
-
 		// 2. estimate pose
+		if (image == null) return;
 		const {pose, posenetOutput} = await poseNet.estimatePose(image, true);
 
 		// pose.keypoints.slice(0, 4).forEach( (keypoint) => {
@@ -132,6 +132,7 @@ function Webcam({ width, height }: Props) {
 			});
 
 		return () => {
+			webcamRef.current.stop();
 			if (requestRef.current) {
 				cancelAnimationFrame(requestRef.current);
 			}
