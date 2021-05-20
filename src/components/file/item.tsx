@@ -14,11 +14,13 @@ import progress from './images/progress.gif';
 import progress16 from './images/progress16.gif';
 import check16 from './images/check16.png';
 import Status from './status';
+import { getCount, getSquareBound } from '../../utils/posenet-utils';
+import { timer } from '../../utils/bench-util';
 
 type ItemProps = {
 	db: RxDatabase;
     data: Data;
-    onPredict: (tensorImage : any) => string;
+    onPredict: (tensorImage : any) => Promise<string>;
 };
 
 const Root = styled.div`
@@ -99,6 +101,8 @@ function Item({ db, data, onPredict } : ItemProps) {
 
 	const videoElement : any = document.createElement('video');
 	const canvasElement : any = document.createElement('canvas');
+	const ctx : any = canvasElement.getContext('2d');
+	// const ccc = useRef<HTMLCanvasElement | null>(null);
 
 	const timelineArray: any[] = [];
 	const exerciseArray : string[] = [];
@@ -123,7 +127,7 @@ function Item({ db, data, onPredict } : ItemProps) {
 			canvasElement.width = videoElement.videoWidth / 2;
 			canvasElement.height = videoElement.videoHeight / 2;
 
-			canvasElement.getContext('2d')?.drawImage(
+			ctx.drawImage(
 				videoElement,
 				0,
 				0,
@@ -193,29 +197,18 @@ function Item({ db, data, onPredict } : ItemProps) {
 	// 운동 영상 분석
 	async function analysis(video : Blob, thumbnail : string) {
 		async function getFrame(now : any, meta : any) {
-			function getCount(array : any) {
-				return array.reduce((pv : any, cv : any) => {
-					pv[cv] = (pv[cv] || 0) + 1;
-					return pv;
-				}, {});
-			}
 			videoElement.pause();
 
-			const posCenter = [meta.width / 2, meta.height / 2];
-			const posSize = (meta.width > meta.height ? meta.height : meta.width) / 2;
-			const posBox = [posCenter[1]-posSize, posCenter[0]-posSize, posCenter[1]+posSize, posCenter[0]+posSize];
-			const posNormalized = [
-				posBox[0]/meta.height,
-				posBox[1]/meta.width,
-				posBox[2]/meta.height,
-				posBox[3]/meta.width,
-			];
+			// 1. get sqaure bounding box
+			const boundingBox = getSquareBound(meta.width, meta.height);
 
+			// 2. resize image
 			const tensor = (await tf.browser.fromPixelsAsync(videoElement));
 			const expandedTensor = tensor.expandDims();
-			const resizedTensor = tf.image.cropAndResize(expandedTensor, [posNormalized], [0], [224, 224]);
+			const resizedTensor = tf.image.cropAndResize(expandedTensor, [boundingBox], [0], [224, 224]);
 
-			const result = onPredict(resizedTensor);
+			// 3. inference image
+			const result = await onPredict(resizedTensor);
 
 			tensor.dispose();
 			expandedTensor.dispose();
@@ -236,13 +229,21 @@ function Item({ db, data, onPredict } : ItemProps) {
 			}
 
 			// exerciseArray가 가득찬 상태
-			if (exerciseArray.length >= 10) {
+			if (exerciseArray.length >= 20) {
 				// 빈도 측정
+
 				const count = getCount(exerciseArray);
+
 				const sortedCount = Object.keys(count).sort(function(a, b) {
 					return count[a]-count[b];
 				});
 				const maxKey = sortedCount[sortedCount.length - 1];
+
+				// console.log({
+				// 	start: timeArray[0],
+				// 	end: timeArray[1],
+				// 	result: count,
+				// });
 
 				// 마무리
 				if (timelineArray.length > 0 && timelineArray[timelineArray.length - 1]['name'] == maxKey) {
@@ -293,7 +294,7 @@ function Item({ db, data, onPredict } : ItemProps) {
 		setAnalysisStatus(Status.ANALYZING);
 
 		// 2. 콜백
-		videoElement.playbackRate = 5;
+		videoElement.playbackRate = 16;
 		videoElement.play()
 			.then(() => {
 				videoElement.requestVideoFrameCallback(getFrame);
@@ -389,7 +390,7 @@ function Item({ db, data, onPredict } : ItemProps) {
 		</Line>);
 	}
 
-
+	// <canvas ref = { ccc } />
 	return (
 		<Root>
 			<Thumbnail src={ thumb }/>

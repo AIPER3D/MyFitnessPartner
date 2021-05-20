@@ -5,6 +5,27 @@ const COLOR = 'aqua';
 const BOUNDING_BOX_COLOR = 'red';
 const LINE_WIDTH = 2;
 
+export function getCount(array : any) {
+	return array.reduce((previousValue : any, currentValue : any) => {
+		previousValue[currentValue] = (previousValue[currentValue] || 0) + 1;
+		return previousValue;
+	}, {});
+}
+
+// get square box position
+export function getSquareBound(width : number, height : number) {
+	const posCenter = [width / 2, height / 2];
+	const posSize = (width > height ? height : width) / 2;
+	const posBox = [posCenter[1]-posSize, posCenter[0]-posSize, posCenter[1]+posSize, posCenter[0]+posSize];
+	const posNormalized = [
+		posBox[0]/height,
+		posBox[1]/width,
+		posBox[2]/height,
+		posBox[3]/width,
+	];
+
+	return posNormalized;
+}
 
 export function drawKeypoints(graphics: any, keypoints: any, minConfidence: number) {
 	for (let i = 0; i < keypoints.length; i++) {
