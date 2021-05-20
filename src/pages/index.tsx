@@ -1,5 +1,5 @@
 import Menu from './menu';
-
+import Main from './main';
 import Video from './video';
 import Videos from './videos';
 import VideoCreate from './videoCreate';
@@ -19,7 +19,7 @@ import Reset from './reset';
 
 export {
 	Menu,
-
+	Main,
 	Video,
 	Videos,
 	VideoCreate,
