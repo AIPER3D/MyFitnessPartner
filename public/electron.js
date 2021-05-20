@@ -115,11 +115,7 @@ function compareKeypoints() {
 
 		const keypointsSimilarity = similarity(videoKeypointsArray, webcamKeypointsArray);
 
-		return {
-			similarity: keypointsSimilarity,
-			array1: videoKeypointsArray,
-			array2: webcamKeypointsArray,
-		};
+		return keypointsSimilarity;
 	}
 
 	return 0;
