@@ -7,7 +7,7 @@ type Props = {
 };
 
 type NeedleProps = {
-    value: number;
+    value: any;
 };
 
 const Meter = styled.div`
@@ -36,7 +36,7 @@ const Speedo = styled.div`
 `;
 
 const Face = styled.div`
-    width: 80px;+
+    width: 80px;
     height: 80px;
     border: solid 40px #fff;
     border-radius: 50%;
@@ -89,11 +89,11 @@ function NavigatorMeter({ exercise, accuracy } : Props) {
 		<Meter>
 			<Speedo>
 				<Face>
-					<Needle value = { accuracy } />
+					<Needle value = { (accuracy*100).toFixed(0) } />
 				</Face>
 			</Speedo>
 			<Name>{ exercise }</Name>
-			<Acc>{ accuracy.toFixed(0) }</Acc>
+			<Acc>{ (accuracy*100).toFixed(0) }</Acc>
 		</Meter>
 	);
 }
