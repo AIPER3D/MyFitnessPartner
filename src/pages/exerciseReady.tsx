@@ -30,7 +30,7 @@ interface Param {
 }
 
 function ExerciseReady({ db } : PageProps) {
-	const perPage = 3;
+	const perPage = 5;
 	const history = useHistory();
 	const { page } = useParams<Param>();
 
@@ -41,7 +41,7 @@ function ExerciseReady({ db } : PageProps) {
 	useEffect(() => {
 		routineDTO.setDB(db);
 		select();
-	}, [db]);
+	}, [db, page]);
 
 	async function select() {
 		const skipContent = ((Number(page) - 1) * perPage);
