@@ -127,9 +127,9 @@ function Player({ routine, video, onEnded }: Props) {
 			setSeq(seq + 1);
 		});
 
-		videoRef.addEventListener('loadeddata', () => {
-			setLoading(false);
+		setLoading(false);
 
+		videoRef.addEventListener('loadeddata', () => {
 			// 5. capture image and detect pose while video playing
 			requestRef.current = requestAnimationFrame(capture);
 		});
