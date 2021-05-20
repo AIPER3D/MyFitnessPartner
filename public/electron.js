@@ -105,16 +105,20 @@ function compareKeypoints() {
 		const resizedWebcamKeypoints = resizeKeypoints(webcamBoundingBox, webcamPose.keypoints);
 
 		// 3. normalize keypoints
-		const normalizedVideoKeypoints = normalizeKeypoints(videoBoundingBox, resizedVideoKeypoints);
-		const normalizedWebcamKeypoints = normalizeKeypoints(webcamBoundingBox, resizedWebcamKeypoints);
+		// const normalizedVideoKeypoints = normalizeKeypoints(videoBoundingBox, resizedVideoKeypoints);
+		// const normalizedWebcamKeypoints = normalizeKeypoints(webcamBoundingBox, resizedWebcamKeypoints);
 
 		// 4. keypoints to one dimentonal array
-		const videoKeypointsArray = oneDimentionalKeypoints(normalizedVideoKeypoints);
-		const webcamKeypointsArray = oneDimentionalKeypoints(normalizedWebcamKeypoints);
+		const videoKeypointsArray = oneDimentionalKeypoints(resizedVideoKeypoints);
+		const webcamKeypointsArray = oneDimentionalKeypoints(resizedWebcamKeypoints);
 
 		const keypointsSimilarity = similarity(videoKeypointsArray, webcamKeypointsArray);
 
-		return keypointsSimilarity;
+		return {
+			similarity: keypointsSimilarity,
+			array1: videoKeypointsArray,
+			array2: webcamKeypointsArray,
+		};
 	}
 
 	return null;
