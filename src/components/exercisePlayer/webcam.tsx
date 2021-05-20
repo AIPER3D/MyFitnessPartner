@@ -56,7 +56,7 @@ function Webcam({ width, height }: Props) {
 
 		// poseClassification = await loadModel('./files/models/exercise_classifier/Squat/model.json');
 
-		repetitionCounter = new RepetitionCounter(poseNet.getMetadata().labels[0], 0.9, 0.1);
+		repetitionCounter = new RepetitionCounter(poseNet.getMetadata().labels[0], 0.8, 0.2);
 	}
 
 	async function run() {
