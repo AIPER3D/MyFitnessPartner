@@ -77,15 +77,14 @@ function Player({ routine, video, onEnded }: Props) {
 		}
 
 		ipcRenderer.on('pose-similarity', (event : any, args : any) => {
-			console.log(args);
-			setPoseSimilarity(Math.abs(args.similarity));
+			setPoseSimilarity(Math.abs(args));
 			// console.log(args);
 		});
 
 		return () => {
-			if (requestRef.current) {
-				cancelAnimationFrame(requestRef.current);
-			}
+			// if (requestRef.current) {
+			// 	cancelAnimationFrame(requestRef.current);
+			// }
 		};
 	}, [videoRef, length, seq]);
 
@@ -180,7 +179,6 @@ function Player({ routine, video, onEnded }: Props) {
 
 		if (inferencedPoses.length >= 1 &&
 			count % 5 == 0) {
-			console.log(inferencedPoses);
 			ipcRenderer.send('video-poses', inferencedPoses);
 		}
 		count++;
