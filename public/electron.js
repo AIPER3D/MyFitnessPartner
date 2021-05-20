@@ -69,6 +69,8 @@ ipcMain.handle('ping', (event, arg) => {
 let videoPose;
 let webcamPose;
 
+let sim;
+
 ipcMain.on('video-poses', (event, poses) => {
 	videoPose = poses.reduce((previous, current) => {
 		return previous > current ? previous : current;
@@ -76,8 +78,8 @@ ipcMain.on('video-poses', (event, poses) => {
 
 	videoPose.keypoints = videoPose.keypoints.slice(5);
 
-	const similarity = compareKeypoints();
-	event.sender.send('pose-similarity', similarity);
+	sim = compareKeypoints();
+	event.sender.send('pose-similarity', sim);
 
 	videoPose = null;
 	webcamPose = null;
@@ -118,7 +120,11 @@ function compareKeypoints() {
 		return keypointsSimilarity;
 	}
 
-	return 0;
+	return lerp(sim, 0, 0.01);
+}
+
+function lerp(start, end, amount) {
+	return (1-amount)*start+amount*end;
 }
 
 function similarity(A, B) {
