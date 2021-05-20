@@ -9,7 +9,7 @@ import * as posenet from '@tensorflow-models/posenet';
 import * as tf from '@tensorflow/tfjs';
 
 import { Stage, Graphics } from '@inlet/react-pixi';
-import { drawKeypoints, drawSkeleton } from '../../utils/posenet-utils';
+import { drawKeypoints, drawSkeleton, getSquareBound } from '../../utils/posenet-utils';
 
 import { css } from '@emotion/react';
 import PuffLoader from 'react-spinners/PuffLoader';
@@ -71,7 +71,8 @@ function Player({ routine, video, onEnded }: Props) {
 		}
 
 		ipcRenderer.on('pose-similarity', (event : any, args : any) => {
-			setPoseSimilarity(Math.abs(args));
+			console.log(args);
+			setPoseSimilarity(Math.abs(args.similarity));
 			// console.log(args);
 		});
 	}, [videoRef, seq]);
@@ -117,14 +118,21 @@ function Player({ routine, video, onEnded }: Props) {
 	const capture = async () => {
 		if (videoRef == null) return;
 
-		// 1. resize video element
-		videoRef.width = inputWidth;
-		videoRef.height = inputHeight;
-
 		if (poseNet == null) {
 			requestRef.current = requestAnimationFrame(capture);
 			return;
 		}
+		// 1. resize video element
+		videoRef.width = inputWidth;
+		videoRef.height = inputHeight;
+
+		// // 1. get tensor from video element
+		// const tensor = (await tf.browser.fromPixelsAsync(videoRef));
+
+		// // 2. resize tensor
+		// const boundingBox = getSquareBound(videoRef.width, videoRef.height);
+		// const expandedTensor : tf.Tensor<tf.Rank.R4> = tensor.expandDims();
+		// const resizedTensor = tf.image.cropAndResize(expandedTensor, [boundingBox], [0], [224, 224]);
 
 		// 2. inference iamge
 		const inferencedPoses = await poseNet.estimateMultiplePoses(videoRef, {
