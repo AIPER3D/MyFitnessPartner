@@ -37,8 +37,7 @@ function Player({ routine, video, onEnded }: Props) {
 	const [seq, setSeq] = useState<number>(0);
 
 	const [poseLabel, setPoseLabel] = useState<string>('');
-	const [poseStart, setPoseStart] = useState<number>(0);
-	const [poseEnd, setPoseEnd] = useState<number>(0);
+	const [poseTime, setPoseTime] = useState<number>(0);
 	const [poseSimilarity, setPoseSimilarity] = useState<any>(0);
 
 	const inputWidth = 256;
@@ -82,7 +81,7 @@ function Player({ routine, video, onEnded }: Props) {
 				cancelAnimationFrame(requestRef.current);
 			}
 		};
-	}, [videoRef, length, seq, isLoading]);
+	}, [videoRef, length, seq]);
 
 	// load video and model
 	async function load(seq: number) {
@@ -107,16 +106,20 @@ function Player({ routine, video, onEnded }: Props) {
 		if (seq == 0) {
 			videoRef.addEventListener('timeupdate', () => {
 				for (let i = 0; i < video[routine['videos'][seq]]['timeline'].length; i++) {
-					if (videoRef.currentTime >= video[routine['videos'][seq]]['timeline'][i]['start'] &&
-						videoRef.currentTime <= video[routine['videos'][seq]]['timeline'][i]['end']) {
-						setPoseLabel(video[routine['videos'][seq]]['timeline'][i]['name']);
-						setPoseStart(video[routine['videos'][seq]]['timeline'][i]['start']);
-						setPoseEnd(video[routine['videos'][seq]]['timeline'][i]['end']);
+					const name = video[routine['videos'][seq]]['timeline'][i]['name'];
+					const start = video[routine['videos'][seq]]['timeline'][i]['start'];
+					const end = video[routine['videos'][seq]]['timeline'][i]['end'];
+
+					if (videoRef.currentTime >= start &&
+						videoRef.currentTime <= end &&
+						poseLabel != name) {
+						setPoseLabel(name);
+						setPoseTime((videoRef.currentTime - start) / (end - start));
 					}
 				}
 			});
 		}
-		setLoading(false);
+
 
 		// 5. when video ended play next video
 		videoRef.addEventListener('ended', () => {
@@ -125,6 +128,8 @@ function Player({ routine, video, onEnded }: Props) {
 		});
 
 		videoRef.addEventListener('loadeddata', () => {
+			setLoading(false);
+
 			// 5. capture image and detect pose while video playing
 			requestRef.current = requestAnimationFrame(capture);
 		});
@@ -227,7 +232,7 @@ function Player({ routine, video, onEnded }: Props) {
 
 						<NavigatorMeter
 							exercise={ poseLabel }
-							time={ videoRef != null ? (videoRef.currentTime - poseStart) / (poseEnd - poseStart) : 0 }
+							time={ poseTime }
 							accuracy={ poseSimilarity }
 						/>
 
