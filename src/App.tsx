@@ -6,8 +6,9 @@ import { createRxDatabase, addRxPlugin, RxDatabase } from 'rxdb';
 
 import { UserSchema, MemoSchema, VideoSchema, RoutineSchema, RecordSchema } from './db/schema';
 import {
-	Menu,
 	Main,
+	Menu,
+
 	Video,
 	Videos,
 	VideoCreate,
@@ -207,15 +208,15 @@ function App() {
 							</Route>
 						</Switch>
 					</Route>
+					<Route path="/">
+						<Menu db = { db } />
+						<ContainerWithMenu>
+							<Body>
+								<Main db={ db } />
+							</Body>
+						</ContainerWithMenu>
+					</Route>
 				</Switch>
-				<Route path="/">
-					<Menu db = { db } />
-					<ContainerWithMenu>
-						<Body>
-							<Main db={ db } />
-						</Body>
-					</ContainerWithMenu>
-				</Route>
 			</Router>
 		);
 	} else {
