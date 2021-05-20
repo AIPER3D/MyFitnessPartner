@@ -30,7 +30,7 @@ interface Param {
 }
 
 function ExerciseReady({ db } : PageProps) {
-	const perPage = 3;
+	const perPage = 5;
 	const history = useHistory();
 	const { page } = useParams<Param>();
 

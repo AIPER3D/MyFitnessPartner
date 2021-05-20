@@ -27,7 +27,7 @@ function Exercise2({ db } : PageProps) {
 	const videoDTO = new VideoDTO();
 
 	const [routine, setRoutine] = useState<RoutineDAO | null>(null);
-	const [video, setVideo] = useState<VideoDAO[]>([]);
+	const [video, setVideo] = useState<any>(null);
 	const [redirect, setRedirect] = useState<number>(0);
 
 	useEffect(() => {
@@ -40,12 +40,10 @@ function Exercise2({ db } : PageProps) {
 	async function select() {
 		const routineData : RoutineDAO | null = await routineDTO.getRoutineById(Number(id));
 		if (routineData == null) return;
-
 		setRoutine(routineData);
 
-		const videoData : VideoDAO[] = await videoDTO.getVideosById(routineData.videos);
-		if (videoData.length <= 0) return;
-
+		const videoData : any = await videoDTO.getVideosById(routineData.videos);
+		if (videoData == { }) return;
 		setVideo(videoData);
 	}
 
@@ -59,7 +57,7 @@ function Exercise2({ db } : PageProps) {
 		return (
 			<Redirect to={ redirect > 0 ? '/record/' + redirect : '/' } />
 		);
-	} else if (routine == null || video.length <= 0) {
+	} else if (routine == null || video == null) {
 		return (
 			<Back />
 		);

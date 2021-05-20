@@ -3,6 +3,7 @@ import styled, { css } from 'styled-components';
 
 type Props = {
     exercise: string;
+    time: number;
     accuracy: number;
 };
 
@@ -69,8 +70,42 @@ const Name = styled.div`
     width: 160px;
     
     text-align: center;
+    color: #000;
+    font-weight: bold;
+`;
+
+type TimeProps = {
+	value: any;
+};
+
+const TimeBack = styled.div`
+	display: block;
+    position: absolute;
+    top: 10px;
+    width: 160px;
+    height: 25px;
+    
+    text-align: center;
     color: #ffffff;
     font-weight: bold;
+    
+    background: #ffffff;
+    border-radius: 1px;
+`;
+
+const Time = styled.div`
+	display: block;
+    position: absolute;
+    top: 10px;
+    width: ${ (props : TimeProps) => (props.value / 160 * 10000).toFixed(0) }px;
+    height: 25px;
+    
+    text-align: center;
+    color: #48ACF0;
+    font-weight: bold;
+    
+    background: #48ACF0;
+    border-radius: 1px;
 `;
 
 const Acc = styled.div`
@@ -84,16 +119,18 @@ const Acc = styled.div`
     font-size: 26px;
 `;
 
-function NavigatorMeter({ exercise, accuracy } : Props) {
+function NavigatorMeter({ exercise, accuracy, time } : Props) {
 	return (
 		<Meter>
 			<Speedo>
 				<Face>
-					<Needle value = { (accuracy*100).toFixed(0) } />
+					<Needle value = { (accuracy * 100).toFixed(0) } />
 				</Face>
 			</Speedo>
+			<TimeBack>.</TimeBack>
+			<Time value={ time }>.</Time>
 			<Name>{ exercise }</Name>
-			<Acc>{ (accuracy*100).toFixed(0) }</Acc>
+			<Acc>{ (accuracy * 100).toFixed(0) }</Acc>
 		</Meter>
 	);
 }
