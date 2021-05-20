@@ -2,7 +2,7 @@ const fs = window.require('fs');
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 
-import { NavigatorTop, NavigatorBottom, PIP } from './';
+import { NavigatorTop, NavigatorMeter, NavigatorBottom, PIP } from './';
 import { VideoDAO, RoutineDAO, RecordDAO } from '../../db/DAO';
 
 import * as posenet from '@tensorflow-models/posenet';
@@ -191,14 +191,17 @@ function Player({ routine, video, onEnded }: Props) {
 							seq={seq + 1}
 						/>
 
+						<NavigatorMeter
+							exercise={ poseLabel }
+							accuracy={ poseSimilarity }
+						/>
+
 						<PixiStage {...stageProps}>
 							<Graphics draw={draw} />
 						</PixiStage>
 
 						<NavigatorBottom
 							videoRef={videoRef}
-							exercise={ poseLabel }
-							accuracy={ poseSimilarity }
 						/>
 						<PIP />
 					</>
