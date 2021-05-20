@@ -1,4 +1,3 @@
-import Main from './main';
 import Menu from './menu';
 
 import Video from './video';
@@ -19,7 +18,6 @@ import New from './new';
 import Reset from './reset';
 
 export {
-	Main,
 	Menu,
 
 	Video,
