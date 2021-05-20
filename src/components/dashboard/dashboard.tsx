@@ -56,6 +56,22 @@ function Dashboard({db}: DashBoardProps) {
 		}
 		return cards;
 	}
+
+
+	function generateLegend() {
+		const legend = [];
+		const persent = [54.5, 27.2, 18.1];
+		for (let i =1; i < persent.length+1; i++) {
+			legend.push(
+				<div className={`legend${i}`}>
+					<span className="legend_color"> </span>
+					<span>{i} : {persent[i-1]}%</span>
+				</div>
+			);
+		}
+		return legend;
+	}
+
 	return (
 		<main>
 			<div className="main_container">
@@ -111,6 +127,9 @@ function Dashboard({db}: DashBoardProps) {
 						<div className="charts_exerciseDoughnut_title">
 							<div>
 								<h1>운동 점유율</h1>
+							</div>
+							<div className="charts_exerciseDoughnut_legend">
+								{generateLegend()}
 							</div>
 						</div>
 						<DoughnutChart />
