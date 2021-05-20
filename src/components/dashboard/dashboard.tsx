@@ -3,15 +3,36 @@ import React, {useEffect, useState} from 'react';
 import './dashboard.scss';
 import Chart from './Chart';
 import DoughnutChart from './DoughnutChart';
+import { RecordDTO } from '../../db/DTO/recordDTO';
+import { UserDTO } from '../../db/DTO/userDTO';
+import { UserDAO } from '../../db/DAO/userDAO';
+import { RecordDAO } from '../../db/DAO';
 type DashBoardProps = {
 	db : RxDatabase;
 }
 function Dashboard({db}: DashBoardProps) {
+	const recordDTO = new RecordDTO();
+	const [records, setRecords] = useState<RecordDAO[] | null>(null);
+	const userDTO = new UserDTO();
+	const [user, setUser] = useState<UserDAO | null>(null);
 	useEffect(()=>{
+		recordDTO.setDB(db);
+		userDTO.setDB(db);
+		getUser();
+		getRecord();
 	}, [db]);
 
+	async function getUser() {
+		setUser(await userDTO.getUser());
+	}
+
+	async function getRecord() {
+		setRecords(await recordDTO.getAllRecords());
+	}
 	function yourCalory() {
-		return 1300;
+		if (user) {
+			return (66.47 + (13.75 * user.weight) + (5* user.height) - (6.76 * 25)).toFixed(1);
+		}
 	}
 
 	function yourExerciseTime() {
@@ -48,7 +69,7 @@ function Dashboard({db}: DashBoardProps) {
 					<div className="card">
 						<i className="fas fa-fire-alt fa-2x text-sunset"></i>
 						<div className="card_inner">
-							<p className="text-primary-p"> 하루평균 <br /> 소모열량 </p>
+							<p className="text-primary-p"> 기초 <br /> 대사량 </p>
 							<span className="font-bold text-title"> {yourCalory()} Kcal</span>
 						</div>
 					</div>

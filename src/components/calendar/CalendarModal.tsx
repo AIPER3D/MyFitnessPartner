@@ -1,3 +1,4 @@
+import { Moment } from 'moment';
 import React, { useEffect, useState } from 'react';
 import { RxDatabase } from 'rxdb';
 import { MemoDAO } from '../../db/DAO/memoDAO';
@@ -10,7 +11,7 @@ import EditableBoxList from './EditableBoxList';
 type Props = {
     open: Boolean;
     close: () => void;
-    header: string;
+    header: Moment;
 	db: RxDatabase;
     children: React.ReactNode;
 }
@@ -29,7 +30,7 @@ function CalendarModal({open, close, header, db, children}: Props) {
 		const memo : MemoDAO =
 		{
 			memoId: new Date().getTime(),
-			memoDate: header,
+			memoDate: header.format('YYYYMMDD'),
 			memoType: 'memo',
 			memoValue: '',
 		};
@@ -40,7 +41,7 @@ function CalendarModal({open, close, header, db, children}: Props) {
 		setRefresh(!refresh);
 	};
 	async function generate() {
-		setMemo(await memoDTO.getMemo(header));
+		setMemo(await memoDTO.getMemo(header.format('YYYYMMDD')));
 	}
 
 	return (
@@ -48,7 +49,7 @@ function CalendarModal({open, close, header, db, children}: Props) {
 			{ open ? (
 				<section>
 					<header>
-						{header}
+						{header.format('YY년 MM월 DD일')}
 						<button className="close" onClick={close}> &times; </button>
 					</header>
 					<main>

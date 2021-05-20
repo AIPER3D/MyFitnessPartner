@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import './calendar.scss';
 import { MdChevronLeft, MdChevronRight } from 'react-icons/md';
-import moment, { Moment as MomentTypes } from 'moment';
+import moment, { Moment, Moment as MomentTypes } from 'moment';
 import CalendarModal from './CalendarModal';
 import { RxDatabase } from 'rxdb';
 import { MemoDTO } from '../../db/DTO/memoDTO';
@@ -13,18 +13,17 @@ type CalendarProps = {
 function Calendar({db} : CalendarProps) {
 	const [date, setDate] = useState<MomentTypes>(moment());
 	const [modalOpen, setModalOpen] = useState(false);
-	const [present, setPresent] = useState<string>('');
+	const [present, setPresent] = useState<Moment>(moment());
 	const [memoDTO, setMemoDTO] = useState<MemoDTO>(new MemoDTO());
 	useEffect(()=>{
 		memoDTO.setDB(db);
 	}, [db]);
-	const openModal= (day:string)=>{
+	const openModal= (day:Moment)=>{
 		setModalOpen(true);
 		setPresent(day);
 	};
 	const closeModal= ()=> {
 		setModalOpen(false);
-		setPresent('');
 	};
 	function handleMonthInc() {
 		setDate(date.clone().add(1, 'month'));
@@ -60,7 +59,7 @@ function Calendar({db} : CalendarProps) {
 							return (
 								<div className={`box  ${isSelected} ${isGrayed}`} key={i}>
 									<span className={`text`} onClick={
-										()=>openModal(current.format('YYYYMMDD'))}>
+										()=>openModal(current)}>
 										{current.format('D')}
 									</span>
 								</div>
