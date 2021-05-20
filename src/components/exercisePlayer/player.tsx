@@ -110,8 +110,7 @@ function Player({ routine, video, onEnded }: Props) {
 					const end = video[routine['videos'][seq]]['timeline'][i]['end'];
 
 					if (videoRef.currentTime >= start &&
-						videoRef.currentTime <= end &&
-						poseLabel != name) {
+						videoRef.currentTime <= end) {
 						setPoseLabel(name);
 						setPoseTime((videoRef.currentTime - start) / (end - start));
 					}

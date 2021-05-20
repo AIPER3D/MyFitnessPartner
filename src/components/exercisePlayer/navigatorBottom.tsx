@@ -103,8 +103,8 @@ const Icon = styled(FontAwesomeIcon)`
 `;
 
 function NavigatorBottom({ videoRef } : Props) {
-	const [current, setCurrent] = useState<number>(0);
-	const [duration, setDuration] = useState<number>(0);
+	const [time, setTime] = useState<string>('');
+	const [per, setPer] = useState<number>(0);
 	const [playing, setPlaying] = useState<boolean>(false);
 
 	function digit(n : number) : string {
@@ -145,12 +145,12 @@ function NavigatorBottom({ videoRef } : Props) {
 		if (videoRef == null) return;
 
 		videoRef.addEventListener('loadedmetadata', () => {
-			setDuration(videoRef.duration);
 			setPlaying(!videoRef.paused);
 		});
 		videoRef.addEventListener('timeupdate', () => {
 			if (videoRef == null) return;
-			setCurrent(videoRef.currentTime);
+			setTime(getTime(videoRef.currentTime) + ' / ' + getTime(videoRef.duration));
+			setPer(videoRef.currentTime / videoRef.duration);
 		});
 	}, [videoRef]);
 
@@ -158,7 +158,7 @@ function NavigatorBottom({ videoRef } : Props) {
 		<Bottom>
 			<ProgressBar>
 				<ProgressLight
-					width = { (current / duration * 100) + '%' }
+					width = { (per * 100) + '%' }
 				/>
 			</ProgressBar>
 			{ playing ?
@@ -169,7 +169,7 @@ function NavigatorBottom({ videoRef } : Props) {
 					<Icon icon={faPlay} size={'lg'} color={'#F2F5EA'} onClick={play} />
 				)
 			}
-			<NavTime> { getTime(current) } / { getTime(duration) } </NavTime>
+			<NavTime> { time } </NavTime>
 		</Bottom>
 	);
 }
