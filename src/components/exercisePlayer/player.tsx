@@ -81,7 +81,7 @@ function Player({ routine, video, onEnded }: Props) {
 			// 	cancelAnimationFrame(requestRef.current);
 			// }
 		};
-	}, [videoRef, length, seq, isLoading]);
+	}, [videoRef, length, seq]);
 
 	// load video and model
 	async function load(seq: number) {
@@ -115,7 +115,7 @@ function Player({ routine, video, onEnded }: Props) {
 				}
 			});
 		}
-		setLoading(false);
+
 
 		// 5. when video ended play next video
 		videoRef.addEventListener('ended', () => {
@@ -124,6 +124,8 @@ function Player({ routine, video, onEnded }: Props) {
 		});
 
 		videoRef.addEventListener('loadeddata', () => {
+			setLoading(false);
+
 			// 5. capture image and detect pose while video playing
 			requestRef.current = requestAnimationFrame(capture);
 		});
