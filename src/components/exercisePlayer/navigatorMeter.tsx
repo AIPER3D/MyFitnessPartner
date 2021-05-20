@@ -60,7 +60,7 @@ const Needle = styled.div`
     top: -36px;
     transform-origin: bottom;
     
-    transition: all 2s;
+    transition: all 1s;
     transform: rotate(${ (props : NeedleProps) => (props.value * 1.8) - 90 }deg);
 `;
 
@@ -82,7 +82,7 @@ const TimeBack = styled.div`
 	display: block;
     position: absolute;
     top: 10px;
-    width: 160px;
+    padding-left: 160px;
     height: 25px;
     
     text-align: center;
@@ -97,7 +97,7 @@ const Time = styled.div`
 	display: block;
     position: absolute;
     top: 10px;
-    width: ${ (props : TimeProps) => (props.value / 160 * 10000).toFixed(0) }px;
+    padding-left: ${ (props : TimeProps) => (props.value * 160).toFixed(0) }px;
     height: 25px;
     
     text-align: center;
@@ -106,6 +106,8 @@ const Time = styled.div`
     
     background: #48ACF0;
     border-radius: 1px;
+    
+    transition: all 1s;
 `;
 
 const Acc = styled.div`
@@ -127,8 +129,8 @@ function NavigatorMeter({ exercise, accuracy, time } : Props) {
 					<Needle value = { (accuracy * 100).toFixed(0) } />
 				</Face>
 			</Speedo>
-			<TimeBack>.</TimeBack>
-			<Time value={ time }>.</Time>
+			<TimeBack></TimeBack>
+			<Time value={ time }></Time>
 			<Name>{ exercise }</Name>
 			<Acc>{ (accuracy * 100).toFixed(0) }</Acc>
 		</Meter>
