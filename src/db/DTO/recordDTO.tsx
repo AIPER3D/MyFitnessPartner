@@ -94,6 +94,26 @@ class RecordDTO {
 
     	return result;
     }
+
+    async getAllRecords() {
+    	if (!this.db) return [];
+    	if (!this.db.collections.records) return [];
+
+    	const doc = await this.db.collections.records
+    		.find()
+    		.exec();
+
+    	const result : RecordDAO[] = [];
+    	for (let i = 0; i < doc.length; i++) {
+    		result.push({
+    			id: doc[i].get('record_id'),
+    			time: doc[i].get('record_time'),
+    			routineId: doc[i].get('routine_id'),
+    			routineName: doc[i].get('routine_name'),
+    		});
+    	}
+    	return result;
+    }
 }
 
 export { RecordDTO };
