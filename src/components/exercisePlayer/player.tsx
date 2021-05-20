@@ -73,13 +73,14 @@ function Player({ routine, video, onEnded }: Props) {
 		}
 
 		ipcRenderer.on('pose-similarity', (event : any, args : any) => {
+			lerp(poseSimilarity, Math.abs(args), 0.1);
 			setPoseSimilarity(Math.abs(args));
 		});
 
 		return () => {
-			// if (requestRef.current) {
-			// 	cancelAnimationFrame(requestRef.current);
-			// }
+			if (requestRef.current) {
+				cancelAnimationFrame(requestRef.current);
+			}
 		};
 	}, [videoRef, length, seq, isLoading]);
 
@@ -127,6 +128,10 @@ function Player({ routine, video, onEnded }: Props) {
 			// 5. capture image and detect pose while video playing
 			requestRef.current = requestAnimationFrame(capture);
 		});
+	}
+
+	function lerp(start : number, end: number, amount: number) {
+		return (1-amount)*start+amount*end;
 	}
 
 	function end() {
