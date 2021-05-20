@@ -50,18 +50,18 @@ function Player({ routine, video, onEnded }: Props) {
 
 	let poseNet: any;
 
+	(async () => {
+		poseNet = await posenet.load({
+			architecture: 'MobileNetV1',
+			outputStride: 16,
+			inputResolution: { width: inputWidth, height: inputHeight },
+			multiplier: 1,
+			quantBytes: 2,
+		});
+	})();
 
 	useEffect(() => {
 		// 1. posenet load
-		(async () => {
-			poseNet = await posenet.load({
-				architecture: 'MobileNetV1',
-				outputStride: 16,
-				inputResolution: { width: inputWidth, height: inputHeight },
-				multiplier: 1,
-				quantBytes: 2,
-			});
-		})();
 
 		// 2. when all task is ready, set loading false
 		if (videoRef == null) return;
@@ -72,14 +72,13 @@ function Player({ routine, video, onEnded }: Props) {
 		}
 
 		ipcRenderer.on('pose-similarity', (event : any, args : any) => {
-			lerp(poseSimilarity, Math.abs(args), 0.1);
 			setPoseSimilarity(Math.abs(args));
 		});
 
 		return () => {
-			if (requestRef.current) {
-				cancelAnimationFrame(requestRef.current);
-			}
+			// if (requestRef.current) {
+			// 	cancelAnimationFrame(requestRef.current);
+			// }
 		};
 	}, [videoRef, length, seq]);
 
@@ -120,6 +119,7 @@ function Player({ routine, video, onEnded }: Props) {
 			});
 		}
 
+		requestRef.current = requestAnimationFrame(capture);
 
 		// 5. when video ended play next video
 		videoRef.addEventListener('ended', () => {
@@ -128,11 +128,6 @@ function Player({ routine, video, onEnded }: Props) {
 		});
 
 		setLoading(false);
-
-		videoRef.addEventListener('loadeddata', () => {
-			// 5. capture image and detect pose while video playing
-			requestRef.current = requestAnimationFrame(capture);
-		});
 	}
 
 	function lerp(start : number, end: number, amount: number) {
