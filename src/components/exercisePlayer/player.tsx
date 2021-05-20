@@ -50,6 +50,7 @@ function Player({ routine, video, onEnded }: Props) {
 
 	let poseNet: any;
 
+	// 1. posenet load
 	(async () => {
 		poseNet = await posenet.load({
 			architecture: 'MobileNetV1',
@@ -61,8 +62,6 @@ function Player({ routine, video, onEnded }: Props) {
 	})();
 
 	useEffect(() => {
-		// 1. posenet load
-
 		// 2. when all task is ready, set loading false
 		if (videoRef == null) return;
 		if (seq < routine['videos'].length) {
@@ -99,9 +98,9 @@ function Player({ routine, video, onEnded }: Props) {
 		videoRef.src = url;
 		videoRef.volume = 0.2;
 
-
-		// 4. play video
+		// 3. play video
 		await videoRef.play();
+
 		if (seq == 0) {
 			videoRef.addEventListener('timeupdate', () => {
 				for (let i = 0; i < video[routine['videos'][seq]]['timeline'].length; i++) {
@@ -118,13 +117,21 @@ function Player({ routine, video, onEnded }: Props) {
 			});
 		}
 
-		requestRef.current = requestAnimationFrame(capture);
-
 		// 5. when video ended play next video
 		videoRef.addEventListener('ended', () => {
 			if (videoRef == null) return;
+
+			if (requestRef.current) {
+				cancelAnimationFrame(requestRef.current);
+			}
+
 			setSeq(seq + 1);
 		});
+
+		videoRef.addEventListener('loadeddata', () => {
+			requestRef.current = requestAnimationFrame(capture);
+		});
+
 
 		setLoading(false);
 	}
@@ -146,6 +153,7 @@ function Player({ routine, video, onEnded }: Props) {
 			requestRef.current = requestAnimationFrame(capture);
 			return;
 		}
+
 		// 1. resize video element
 		videoRef.width = inputWidth;
 		videoRef.height = inputHeight;
@@ -157,6 +165,7 @@ function Player({ routine, video, onEnded }: Props) {
 		// const boundingBox = getSquareBound(videoRef.width, videoRef.height);
 		// const expandedTensor : tf.Tensor<tf.Rank.R4> = tensor.expandDims();
 		// const resizedTensor = tf.image.cropAndResize(expandedTensor, [boundingBox], [0], [224, 224]);
+
 
 		// 2. inference iamge
 		const inferencedPoses = await poseNet.estimateMultiplePoses(videoRef, {
