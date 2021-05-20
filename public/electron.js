@@ -74,10 +74,10 @@ ipcMain.on('video-poses', (event, poses) => {
 		return previous > current ? previous : current;
 	});
 
+	videoPose.keypoints = videoPose.keypoints.slice(5);
+
 	const similarity = compareKeypoints();
-	if (similarity != null) {
-		event.sender.send('pose-similarity', similarity);
-	}
+	event.sender.send('pose-similarity', similarity);
 
 	videoPose = null;
 	webcamPose = null;
@@ -91,6 +91,7 @@ ipcMain.on('video-poses', (event, poses) => {
 
 ipcMain.on('webcam-poses', (event, pose) => {
 	webcamPose = pose;
+	webcamPose.keypoints.slice(5);
 });
 
 function compareKeypoints() {
@@ -105,12 +106,12 @@ function compareKeypoints() {
 		const resizedWebcamKeypoints = resizeKeypoints(webcamBoundingBox, webcamPose.keypoints);
 
 		// 3. normalize keypoints
-		// const normalizedVideoKeypoints = normalizeKeypoints(videoBoundingBox, resizedVideoKeypoints);
-		// const normalizedWebcamKeypoints = normalizeKeypoints(webcamBoundingBox, resizedWebcamKeypoints);
+		const normalizedVideoKeypoints = normalizeKeypoints(videoBoundingBox, resizedVideoKeypoints);
+		const normalizedWebcamKeypoints = normalizeKeypoints(webcamBoundingBox, resizedWebcamKeypoints);
 
 		// 4. keypoints to one dimentonal array
-		const videoKeypointsArray = oneDimentionalKeypoints(resizedVideoKeypoints);
-		const webcamKeypointsArray = oneDimentionalKeypoints(resizedWebcamKeypoints);
+		const videoKeypointsArray = oneDimentionalKeypoints(normalizedVideoKeypoints);
+		const webcamKeypointsArray = oneDimentionalKeypoints(normalizedWebcamKeypoints);
 
 		const keypointsSimilarity = similarity(videoKeypointsArray, webcamKeypointsArray);
 
@@ -121,7 +122,7 @@ function compareKeypoints() {
 		};
 	}
 
-	return null;
+	return 0;
 }
 
 function similarity(A, B) {
