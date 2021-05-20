@@ -54,7 +54,6 @@ function Player({ routine, video, onEnded }: Props) {
 
 
 	useEffect(() => {
-		setLength(Object.keys(video).length);
 		if (length <= 0) return;
 
 		// 1. posenet load
@@ -70,7 +69,7 @@ function Player({ routine, video, onEnded }: Props) {
 
 		// 2. when all task is ready, set loading false
 		if (videoRef == null) return;
-		if (seq < length) {
+		if (seq < routine['videos'].length) {
 			load(seq);
 		} else {
 			onEnded(record);
