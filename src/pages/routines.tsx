@@ -40,7 +40,7 @@ function Routines({ db } : PageProps) {
 	useEffect(() => {
 		routineDTO.setDB(db);
 		select();
-	}, [db]);
+	}, [db, page]);
 
 	async function select() {
 		const skipContent = ((Number(page) - 1) * perPage);
