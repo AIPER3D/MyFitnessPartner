@@ -77,7 +77,6 @@ function Player({ routine, video, onEnded }: Props) {
 
 		ipcRenderer.on('pose-similarity', (event : any, args : any) => {
 			setPoseSimilarity(Math.abs(args));
-			// console.log(args);
 		});
 
 		return () => {
@@ -104,7 +103,6 @@ function Player({ routine, video, onEnded }: Props) {
 		videoRef.src = url;
 		videoRef.volume = 0.2;
 
-		setLoading(false);
 
 		// 4. play video
 		await videoRef.play();
@@ -129,6 +127,8 @@ function Player({ routine, video, onEnded }: Props) {
 		});
 
 		videoRef.addEventListener('loadeddata', () => {
+			setLoading(false);
+
 			// 5. capture image and detect pose while video playing
 			requestRef.current = requestAnimationFrame(capture);
 		});
@@ -277,6 +277,8 @@ const colorCode = {
 
 const Container = styled.div`
 
+	background : #ffffff;
+
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -301,7 +303,7 @@ const Video = styled.video`
 	padding: 0px;
 	
 	overflow:hidden;
-	background-color: #000000;
+	background-color: #ffffff;
 `;
 
 export default Player;
