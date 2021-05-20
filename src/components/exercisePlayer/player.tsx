@@ -35,7 +35,6 @@ function Player({ routine, video, onEnded }: Props) {
 	const [isLoading, setLoading] = useState<boolean>(true);
 	const [videoRef, setVideoRef] = useState<HTMLVideoElement | null>(null);
 	const [seq, setSeq] = useState<number>(0);
-	const [length, setLength] = useState<number>(0);
 
 	const [poseLabel, setPoseLabel] = useState<string>('');
 	const [poseStart, setPoseStart] = useState<number>(0);
@@ -54,8 +53,6 @@ function Player({ routine, video, onEnded }: Props) {
 
 
 	useEffect(() => {
-		if (length <= 0) return;
-
 		// 1. posenet load
 		(async () => {
 			poseNet = await posenet.load({
