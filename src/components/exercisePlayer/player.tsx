@@ -75,6 +75,12 @@ function Player({ routine, video, onEnded }: Props) {
 			setPoseSimilarity(Math.abs(args.similarity));
 			// console.log(args);
 		});
+
+		return () => {
+			if (requestRef.current) {
+				cancelAnimationFrame(requestRef.current);
+			}
+		};
 	}, [videoRef, seq]);
 
 	// load video and model
@@ -99,13 +105,16 @@ function Player({ routine, video, onEnded }: Props) {
 		// 4. play video
 		await videoRef.play();
 
-		// 5. capture image and detect pose while video playing
-		requestRef.current = requestAnimationFrame(capture);
 
 		// 5. when video ended play next video
 		videoRef.addEventListener('ended', () => {
 			if (videoRef == null) return;
 			setSeq(seq + 1);
+		});
+
+		videoRef.addEventListener('loadeddata', () => {
+			// 5. capture image and detect pose while video playing
+			requestRef.current = requestAnimationFrame(capture);
 		});
 	}
 
@@ -150,8 +159,10 @@ function Player({ routine, video, onEnded }: Props) {
 			});
 		});
 
+
 		if (inferencedPoses.length >= 1 &&
 			count % 5 == 0) {
+			console.log(inferencedPoses);
 			ipcRenderer.send('video-poses', inferencedPoses);
 		}
 		count++;
