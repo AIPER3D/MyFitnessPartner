@@ -74,10 +74,10 @@ ipcMain.on('video-poses', (event, poses) => {
 		return previous > current ? previous : current;
 	});
 
+	videoPose.keypoints = videoPose.keypoints.slice(5);
+
 	const similarity = compareKeypoints();
-	if (similarity != null) {
-		event.sender.send('pose-similarity', similarity);
-	}
+	event.sender.send('pose-similarity', similarity);
 
 	videoPose = null;
 	webcamPose = null;
@@ -91,6 +91,7 @@ ipcMain.on('video-poses', (event, poses) => {
 
 ipcMain.on('webcam-poses', (event, pose) => {
 	webcamPose = pose;
+	webcamPose.keypoints.slice(5);
 });
 
 function compareKeypoints() {
@@ -117,7 +118,7 @@ function compareKeypoints() {
 		return keypointsSimilarity;
 	}
 
-	return null;
+	return 0;
 }
 
 function similarity(A, B) {

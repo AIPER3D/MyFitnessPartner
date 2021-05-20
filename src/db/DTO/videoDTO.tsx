@@ -68,8 +68,8 @@ class VideoDTO {
 	}
 
 	async getVideosById(id: Array<Number>) {
-		if (!this.db) return [];
-		if (!this.db.collections.videos) return [];
+		if (!this.db) return { };
+		if (!this.db.collections.videos) return { };
 
 		const doc = await this.db.collections.videos
 			.find()
@@ -77,15 +77,15 @@ class VideoDTO {
 			.in(id)
 			.exec();
 
-		const result : VideoDAO[] = [];
+		const result : any = { };
 		for (let i = 0; i < doc.length; i++) {
-			result.push({
+			const video : VideoDAO = {
 				id: doc[i].get('video_id'),
 				name: doc[i].get('video_name'),
 				timeline: doc[0].get('video_timeline'),
-			});
+			};
+			result[doc[i].get('video_id')] = video;
 		}
-
 		return result;
 	}
 

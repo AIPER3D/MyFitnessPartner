@@ -33,8 +33,8 @@ function Webcam({ width, height }: Props) {
 
 	let repetitionCounter : RepetitionCounter;
 
-	const inputHeight = 257;
-	const inputWidth = 257;
+	const inputHeight = 224;
+	const inputWidth = 224;
 
 	const widthScaleRatio = width / inputWidth;
 	const heightScaleRatio = height / inputHeight;
@@ -56,7 +56,7 @@ function Webcam({ width, height }: Props) {
 
 		// poseClassification = await loadModel('./files/models/exercise_classifier/Squat/model.json');
 
-		repetitionCounter = new RepetitionCounter(poseNet.getMetadata().labels[0], 0.9, 0.1);
+		repetitionCounter = new RepetitionCounter(poseNet.getMetadata().labels[0], 0.8, 0.2);
 	}
 
 	async function run() {
@@ -66,6 +66,7 @@ function Webcam({ width, height }: Props) {
 		webcamRef.current = await tf.data.webcam(element, {
 			resizeHeight: inputHeight,
 			resizeWidth: inputWidth,
+			centerCrop: true,
 		});
 
 		requestRef.current = requestAnimationFrame(capture);
@@ -78,8 +79,10 @@ function Webcam({ width, height }: Props) {
 
 		// 1. caputer iamge
 		const image = await webcam.capture();
-		// 2. estimate pose
+
 		if (image == null) return;
+
+		// 2. estimate pose
 		const {pose, posenetOutput} = await poseNet.estimatePose(image, true);
 
 		// pose.keypoints.slice(0, 4).forEach( (keypoint) => {
@@ -100,11 +103,10 @@ function Webcam({ width, height }: Props) {
 			return;
 		}
 
-		pose.keypoints.map( (keypoint : any) => {
-			keypoint.position.x *= widthScaleRatio;
-			keypoint.position.y *= heightScaleRatio;
-		});
-
+		// pose.keypoints.map( (keypoint : any) => {
+		// 	keypoint.position.x *= widthScaleRatio;
+		// 	keypoint.position.y *= heightScaleRatio;
+		// });
 
 		// if (inferencedPoses.length >= 1&&
 		// 	count % 5 == 0) {
