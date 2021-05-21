@@ -50,39 +50,44 @@ function Player({ routine, video, onEnded }: Props) {
 
 	let poseNet: any;
 
-	// 1. posenet load
-	(async () => {
-		poseNet = await posenet.load({
-			architecture: 'MobileNetV1',
-			outputStride: 16,
-			inputResolution: { width: inputWidth, height: inputHeight },
-			multiplier: 1,
-			quantBytes: 2,
-		});
-	})();
 
 	useEffect(() => {
+		// 1. posenet load
+		(async () => {
+			poseNet = await posenet.load({
+				architecture: 'MobileNetV1',
+				outputStride: 16,
+				inputResolution: { width: inputWidth, height: inputHeight },
+				multiplier: 1,
+				quantBytes: 2,
+			});
+		})();
+
 		// 2. when all task is ready, set loading false
-		if (videoRef == null) return;
+		// if (videoRef == null) return;
 		if (seq < routine['videos'].length) {
 			load(seq);
 		} else {
 			onEnded(record);
 		}
+	}, [videoRef, seq]);
 
-		ipcRenderer.on('pose-similarity', (event : any, args : any) => {
-			setPoseSimilarity(Math.abs(args));
-		});
+	useEffect(() => {
+		requestRef.current = requestAnimationFrame(capture);
 
 		return () => {
-			// if (requestRef.current) {
-			// 	cancelAnimationFrame(requestRef.current);
-			// }
+			if (requestRef.current) {
+				cancelAnimationFrame(requestRef.current);
+			}
 		};
-	}, [videoRef, length, seq]);
+	}, []);
+
+	ipcRenderer.on('pose-similarity', (event : any, args : any) => {
+		setPoseSimilarity(Math.abs(args));
+	});
 
 	// load video and model
-	async function load(seq: number) {
+	function load(seq: number) {
 		if (videoRef == null) return;
 
 		// 1. file loading
@@ -99,7 +104,7 @@ function Player({ routine, video, onEnded }: Props) {
 		videoRef.volume = 0.2;
 
 		// 3. play video
-		await videoRef.play();
+		// await videoRef.play();
 
 		if (seq == 0) {
 			videoRef.addEventListener('timeupdate', () => {
@@ -117,81 +122,66 @@ function Player({ routine, video, onEnded }: Props) {
 			});
 		}
 
+
 		// 5. when video ended play next video
 		videoRef.addEventListener('ended', () => {
-			if (videoRef == null) return;
-
-			if (requestRef.current) {
-				cancelAnimationFrame(requestRef.current);
-			}
-
 			setSeq(seq + 1);
 		});
 
-		videoRef.addEventListener('loadeddata', () => {
-			requestRef.current = requestAnimationFrame(capture);
+		videoRef.addEventListener('loadeddata', async () => {
+			await videoRef.play();
+			setLoading(false);
 		});
-
-
-		setLoading(false);
-	}
-
-	function lerp(start : number, end: number, amount: number) {
-		return (1-amount)*start+amount*end;
 	}
 
 	function end() {
 		console.log('끝');
 	}
 
-	let count = 0;
-
 	const capture = async () => {
-		if (videoRef == null) return;
+		try {
+			if (videoRef != null) {
+				// 1. resize video element
+				videoRef.width = inputWidth;
+				videoRef.height = inputHeight;
+			}
 
-		if (poseNet == null) {
-			requestRef.current = requestAnimationFrame(capture);
-			return;
-		}
+			console.log(requestRef.current);
 
-		// 1. resize video element
-		videoRef.width = inputWidth;
-		videoRef.height = inputHeight;
+			// // 1. get tensor from video element
+			// const tensor = (await tf.browser.fromPixelsAsync(videoRef));
 
-		// // 1. get tensor from video element
-		// const tensor = (await tf.browser.fromPixelsAsync(videoRef));
+			// // 2. resize tensor
+			// const boundingBox = getSquareBound(videoRef.width, videoRef.height);
+			// const expandedTensor : tf.Tensor<tf.Rank.R4> = tensor.expandDims();
+			// const resizedTensor = tf.image.cropAndResize(expandedTensor, [boundingBox], [0], [224, 224]);
 
-		// // 2. resize tensor
-		// const boundingBox = getSquareBound(videoRef.width, videoRef.height);
-		// const expandedTensor : tf.Tensor<tf.Rank.R4> = tensor.expandDims();
-		// const resizedTensor = tf.image.cropAndResize(expandedTensor, [boundingBox], [0], [224, 224]);
-
-
-		// 2. inference iamge
-		const inferencedPoses = await poseNet.estimateMultiplePoses(videoRef, {
-			flipHorizontal: false,
-			maxDetections: 3,
-			scoreThreshold: 0.5,
-			nmsRadius: 20,
-		});
-
-		// 3. upscale keypoints to webcam resolution
-		inferencedPoses.forEach(({ score, keypoints }: { score: number, keypoints: [] }) => {
-			keypoints.map((keypoint: any) => {
-				keypoint.position.x *= widthScaleRatio;
-				keypoint.position.y *= heightScaleRatio;
+			// 2. inference iamge
+			const inferencedPoses = await poseNet.estimateMultiplePoses(videoRef, {
+				flipHorizontal: false,
+				maxDetections: 3,
+				scoreThreshold: 0.5,
+				nmsRadius: 20,
 			});
-		});
+
+			// 3. upscale keypoints to webcam resolution
+			inferencedPoses.forEach(({ score, keypoints }: { score: number, keypoints: [] }) => {
+				keypoints.map((keypoint: any) => {
+					keypoint.position.x *= widthScaleRatio;
+					keypoint.position.y *= heightScaleRatio;
+				});
+			});
 
 
-		if (inferencedPoses.length >= 1 &&
-			count % 5 == 0) {
-			ipcRenderer.send('video-poses', inferencedPoses);
+			if (inferencedPoses.length >= 1) {
+				ipcRenderer.send('video-poses', inferencedPoses);
+			}
+
+			// 4. set keypoints and skelecton
+			setPose(inferencedPoses);
+		} catch (e) {
+			// requestRef.current = requestAnimationFrame(capture);
 		}
-		count++;
-
-		// 4. set keypoints and skelecton
-		setPose(inferencedPoses);
 
 		// 5. recursion capture()
 		requestRef.current = requestAnimationFrame(capture);
