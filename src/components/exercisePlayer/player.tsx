@@ -13,6 +13,7 @@ import { drawKeypoints, drawSkeleton, getSquareBound } from '../../utils/posenet
 
 import { css } from '@emotion/react';
 import PuffLoader from 'react-spinners/PuffLoader';
+import { tensorToImage } from '../../utils/video-util';
 
 type Props = {
 	routine: RoutineDAO;
@@ -40,15 +41,15 @@ function Player({ routine, video, onEnded }: Props) {
 	const [poseTime, setPoseTime] = useState<number>(0);
 	const [poseSimilarity, setPoseSimilarity] = useState<any>(0);
 
-	const inputWidth = 256;
-	const inputHeight = 256;
+	const inputWidth = 224;
+	const inputHeight = 224;
 
 	const widthScaleRatio = window.innerWidth / inputWidth;
 	const heightScaleRatio = (window.innerHeight - 100) / inputHeight;
 
-	const [poses, setPose] = useState<any>(null);
+	const [poses, setPoses] = useState<any>(null);
 
-	let poseNet: any;
+	let poseNet: posenet.PoseNet;
 
 
 	useEffect(() => {
@@ -80,14 +81,14 @@ function Player({ routine, video, onEnded }: Props) {
 				cancelAnimationFrame(requestRef.current);
 			}
 		};
-	}, []);
+	}, [videoRef]);
 
-	ipcRenderer.on('pose-similarity', (event : any, args : any) => {
+	ipcRenderer.on('pose-similarity', (event: any, args: any) => {
 		setPoseSimilarity(Math.abs(args));
 	});
 
 	// load video and model
-	function load(seq: number) {
+	async function load(seq: number) {
 		if (videoRef == null) return;
 
 		// 1. file loading
@@ -104,7 +105,7 @@ function Player({ routine, video, onEnded }: Props) {
 		videoRef.volume = 0.2;
 
 		// 3. play video
-		// await videoRef.play();
+		await videoRef.play();
 
 		if (seq == 0) {
 			videoRef.addEventListener('timeupdate', () => {
@@ -122,65 +123,87 @@ function Player({ routine, video, onEnded }: Props) {
 			});
 		}
 
-
 		// 5. when video ended play next video
 		videoRef.addEventListener('ended', () => {
 			setSeq(seq + 1);
 		});
 
-		videoRef.addEventListener('loadeddata', async () => {
-			await videoRef.play();
-			setLoading(false);
-		});
+		setLoading(false);
 	}
 
 	function end() {
 		console.log('끝');
 	}
 
+	let count = 0;
+
 	const capture = async () => {
 		try {
-			if (videoRef != null) {
-				// 1. resize video element
-				videoRef.width = inputWidth;
-				videoRef.height = inputHeight;
-			}
+			if (videoRef == null) return;
 
-			console.log(requestRef.current);
+			// 1. resize video element
+			// videoRef.width = inputWidth;
+			// videoRef.height = inputHeight;
 
-			// // 1. get tensor from video element
-			// const tensor = (await tf.browser.fromPixelsAsync(videoRef));
+			const tensor = tf.browser.fromPixels(videoRef);
 
-			// // 2. resize tensor
-			// const boundingBox = getSquareBound(videoRef.width, videoRef.height);
-			// const expandedTensor : tf.Tensor<tf.Rank.R4> = tensor.expandDims();
-			// const resizedTensor = tf.image.cropAndResize(expandedTensor, [boundingBox], [0], [224, 224]);
+			const resizedTensor = tf.tidy(() => {
+				// // 1. get tensor from video element
+
+				// // 2. resize tensor
+				const boundingBox = getSquareBound(tensor.shape[1], tensor.shape[0]);
+				// const expandedTensor = tf.tensor4d([tensor.arraySync()]);
+
+				const resizedTensor = tf.image.cropAndResize(
+					tf.tensor4d(tensor.dataSync(), [1, ...tensor.shape]),
+					[boundingBox],
+					[0], [inputHeight, inputWidth],
+					'nearest');
+
+				// return resizedTensor;
+				return tf.tensor3d(resizedTensor.squeeze().dataSync(), [inputHeight, inputWidth, 3]);
+			});
 
 			// 2. inference iamge
-			const inferencedPoses = await poseNet.estimateMultiplePoses(videoRef, {
+			const inferencedPoses = await poseNet.estimateMultiplePoses(resizedTensor, {
 				flipHorizontal: false,
 				maxDetections: 3,
 				scoreThreshold: 0.5,
 				nmsRadius: 20,
 			});
 
-			// 3. upscale keypoints to webcam resolution
-			inferencedPoses.forEach(({ score, keypoints }: { score: number, keypoints: [] }) => {
-				keypoints.map((keypoint: any) => {
-					keypoint.position.x *= widthScaleRatio;
-					keypoint.position.y *= heightScaleRatio;
+			resizedTensor.dispose();
+
+			// const width = tensor.shape[1];
+			// const height = tensor.shape[0];
+			const width = window.innerWidth;
+			const height = window.innerHeight - 100;
+			const posSize = (width > height ? height : width);
+			const dx = (width - posSize)/2;
+
+			// // 3. upscale keypoints to webcam resolution
+			inferencedPoses.forEach((pose) => {
+				pose.keypoints.map((keypoint: any) => {
+					keypoint.position.x *= posSize / inputWidth;
+					keypoint.position.y *= posSize / inputHeight;
+
+					keypoint.position.x += dx;
 				});
 			});
 
+			tensor.dispose();
 
-			if (inferencedPoses.length >= 1) {
+			if (inferencedPoses.length >= 1 &&
+				count % 2 == 0) {
 				ipcRenderer.send('video-poses', inferencedPoses);
 			}
+			count++;
 
 			// 4. set keypoints and skelecton
-			setPose(inferencedPoses);
+			setPoses(inferencedPoses);
 		} catch (e) {
 			// requestRef.current = requestAnimationFrame(capture);
+			console.log(e);
 		}
 
 		// 5. recursion capture()
@@ -193,17 +216,21 @@ function Player({ routine, video, onEnded }: Props) {
 
 		if (poses == null) return;
 
-		poses.forEach(({ score, keypoints }: { score: number, keypoints: [] }) => {
-			if (score >= 0.3) {
-				drawKeypoints(graphics, keypoints, 0.5);
-				drawSkeleton(graphics, keypoints, 0.5);
+		let i =0;
+		const len = poses.length;
+		while ( i < len) {
+			if (poses[i].score >= 0.3) {
+				drawKeypoints(graphics, poses[i].keypoints, 0.5);
+				drawSkeleton(graphics, poses[i].keypoints, 0.5);
 			}
-		});
+
+			i++;
+		}
 	}, [poses]);
 
 	const stageProps = {
 		width: window.innerWidth,
-		height: window.innerHeight - 100,
+		height: window.innerHeight-100,
 		options: {
 			backgroundAlpha: 0,
 			antialias: true,
@@ -224,9 +251,9 @@ function Player({ routine, video, onEnded }: Props) {
 						/>
 
 						<NavigatorMeter
-							exercise={ poseLabel }
-							time={ poseTime }
-							accuracy={ poseSimilarity }
+							exercise={poseLabel}
+							time={poseTime}
+							accuracy={poseSimilarity}
 						/>
 
 						<PixiStage {...stageProps}>
@@ -240,7 +267,6 @@ function Player({ routine, video, onEnded }: Props) {
 					</>
 				)
 			}
-
 			<Video ref={setVideoRef} />
 
 		</Container>
