@@ -72,19 +72,8 @@ function Webcam({ width, height }: Props) {
 			// 2. estimate pose
 			const {pose, posenetOutput} = await poseNet.estimatePose(image, true);
 
-			// pose.keypoints.slice(0, 4).forEach( (keypoint) => {
-			// 	if (keypoint.score < 0.3) {
-			// 		requestAnimationFrame(capture);
-			// 		return;
-			// 	}
-			// });
-
 			// 3. pose classification
 			const result = await poseNet.predict(posenetOutput);
-
-			// 4. pose counting
-			// console.log(repetitionCounter.count(result));
-
 
 			if (pose == null) {
 				requestRef.current = requestAnimationFrame(capture);
@@ -96,21 +85,11 @@ function Webcam({ width, height }: Props) {
 				keypoint.position.y *= heightScaleRatio;
 			});
 
-			const posSize = (width > height ? height : width);
-			const dx = (width - posSize)/2;
-
-			// // 3. upscale keypoints to webcam resolution
-			// pose.keypoints.map((keypoint: any) => {
-			// 	keypoint.position.x *= posSize / inputWidth;
-			// 	keypoint.position.y *= posSize / inputHeight;
-
-			// 	keypoint.position.x += dx;
-			// });
-
-
 			if (count % 2 == 0) {
 				ipcRenderer.send('webcam-poses', pose);
 			}
+
+			repetitionCounter.count(result);
 
 			// 4. set keypoints
 			setPoses([pose]);
