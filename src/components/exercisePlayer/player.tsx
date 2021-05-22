@@ -145,23 +145,22 @@ function Player({ routine, video, onEnded }: Props) {
 			// videoRef.width = inputWidth;
 			// videoRef.height = inputHeight;
 
-			const tensor = tf.browser.fromPixels(videoRef);
-
-			const resizedTensor = tf.tidy(() => {
+			const resizedTensor = tf.tidy(() : tf.Tensor3D => {
 				// // 1. get tensor from video element
+				const tensor = tf.browser.fromPixels(videoRef);
 
 				// // 2. resize tensor
 				const boundingBox = getSquareBound(tensor.shape[1], tensor.shape[0]);
-				// const expandedTensor = tf.tensor4d([tensor.arraySync()]);
+				const expandedTensor : tf.Tensor4D = tensor.expandDims(0);
 
 				const resizedTensor = tf.image.cropAndResize(
-					tf.tensor4d(tensor.dataSync(), [1, ...tensor.shape]),
+					expandedTensor,
 					[boundingBox],
 					[0], [inputHeight, inputWidth],
 					'nearest');
 
 				// return resizedTensor;
-				return tf.tensor3d(resizedTensor.squeeze().dataSync(), [inputHeight, inputWidth, 3]);
+				return resizedTensor.reshape(resizedTensor.shape.slice(1) as [number, number, number]);
 			});
 
 			// 2. inference iamge
@@ -176,8 +175,8 @@ function Player({ routine, video, onEnded }: Props) {
 
 			// const width = tensor.shape[1];
 			// const height = tensor.shape[0];
-			const width = window.innerWidth;
-			const height = window.innerHeight - 100;
+			const width = videoRef.videoWidth;
+			const height = videoRef.videoHeight;
 			const posSize = (width > height ? height : width);
 			const dx = (width - posSize)/2;
 
@@ -186,12 +185,8 @@ function Player({ routine, video, onEnded }: Props) {
 				pose.keypoints.map((keypoint: any) => {
 					keypoint.position.x *= posSize / inputWidth;
 					keypoint.position.y *= posSize / inputHeight;
-
-					keypoint.position.x += dx;
 				});
 			});
-
-			tensor.dispose();
 
 			if (inferencedPoses.length >= 1 &&
 				count % 2 == 0) {
@@ -327,7 +322,7 @@ const Video = styled.video`
 	padding: 0px;
 	
 	overflow:hidden;
-	background-color: #ffffff;
+	background-color: #000000;
 `;
 
 export default Player;
