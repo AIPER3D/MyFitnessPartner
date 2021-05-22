@@ -3,8 +3,8 @@ import * as tf from '@tensorflow/tfjs';
 const canvas : HTMLCanvasElement = document.createElement('canvas');
 const ctx = canvas.getContext('2d');
 
-export function tensorToImage(tensor : any) {
-	const [batch, height, width, channel] = tensor.shape;
+export function tensorToImage(tensor : tf.Tensor3D | tf.Tensor4D) {
+	const [height, width, channel] = tensor.shape.length >= 4 ? tensor.shape.slice(1) : tensor.shape;
 
 	// create a buffer array
 	const buffer = new Uint8ClampedArray(width * height * 4);

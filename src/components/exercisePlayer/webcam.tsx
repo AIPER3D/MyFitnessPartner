@@ -51,7 +51,7 @@ function Webcam({ width, height }: Props) {
 		webcamRef.current = await tf.data.webcam(element, {
 			resizeHeight: inputHeight,
 			resizeWidth: inputWidth,
-			// centerCrop: true,
+			centerCrop: false,
 		});
 
 		requestRef.current = requestAnimationFrame(capture);
@@ -83,7 +83,7 @@ function Webcam({ width, height }: Props) {
 			const result = await poseNet.predict(posenetOutput);
 
 			// 4. pose counting
-			console.log(repetitionCounter.count(result));
+			// console.log(repetitionCounter.count(result));
 
 
 			if (pose == null) {
@@ -91,10 +91,10 @@ function Webcam({ width, height }: Props) {
 				return;
 			}
 
-			// pose.keypoints.map( (keypoint : any) => {
-			// 	keypoint.position.x *= widthScaleRatio;
-			// 	keypoint.position.y *= heightScaleRatio;
-			// });
+			pose.keypoints.map( (keypoint : any) => {
+				keypoint.position.x *= widthScaleRatio;
+				keypoint.position.y *= heightScaleRatio;
+			});
 
 			const posSize = (width > height ? height : width);
 			const dx = (width - posSize)/2;
