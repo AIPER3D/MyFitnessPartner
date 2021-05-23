@@ -206,7 +206,7 @@ function RoutineCreate(this: any, { db } : PageProps) {
 	}
 
 	if (redirect) {
-		return (<Redirect to='/routines' />);
+		return (<Redirect to='/routines/1' />);
 	}
 
 	return (
