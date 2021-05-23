@@ -55,7 +55,7 @@ const Input = styled.input`
     width: calc(${ (props : InputProps) => props.vwidth });
     height: 50px;
     
-    padding: 0px 50px 0px 10px;
+    padding: 0px 10px 0px 10px;
     margin: ${ (props : InputProps) => props.vmargin };
     
     outline: none;
@@ -64,14 +64,39 @@ const Input = styled.input`
     font-size: 15px;
     
     &:focus {
-    border: 1px solid #48ACF0;
+    	border: 1px solid #48ACF0;
+    }
+`;
+
+const RadioName = styled.p`
+    margin: 5px 0px 5px 20px;
+    
+    font-size: 15px;
+    font-weight: bold;
+`;
+
+const Select = styled.select`
+    width: calc(${ (props : InputProps) => props.vwidth });
+    height: 50px;
+    
+    padding: 0px 10px 0px 10px;
+    margin: ${ (props : InputProps) => props.vmargin };
+    
+    outline: none;
+    border: 1px solid #CCCCCC;
+    
+    font-size: 15px;
+    
+    &:focus {
+    	border: 1px solid #48ACF0;
+    }
 `;
 
 type PageProps = {
 	db: RxDatabase;
 };
 
-function New({ db } : PageProps) {
+function UserNew({ db } : PageProps) {
 	const userDTO = new UserDTO();
 
 	useEffect(() => {
@@ -83,14 +108,24 @@ function New({ db } : PageProps) {
 
 		const name = (e.currentTarget.elements[0] as HTMLInputElement).value;
 
-		const h = Number((e.currentTarget.elements[1] as HTMLInputElement).value);
+		const g = (e.currentTarget.elements[1] as HTMLSelectElement).value;
+		console.log(g);
+
+		const a = Number((e.currentTarget.elements[2] as HTMLInputElement).value);
+		let age = a;
+		if (isNaN(a)) age = 0;
+		if (age <= 0) age = 0;
+		if (age >= 100) age = 100;
+		age = Number(age.toFixed(0));
+
+		const h = Number((e.currentTarget.elements[3] as HTMLInputElement).value);
 		let height = h;
 		if (isNaN(h)) height = 0;
 		if (height <= 0) height = 0;
 		if (height >= 1000) height = 999.9;
 		height = Number(height.toFixed(1));
 
-		const w = Number((e.currentTarget.elements[2] as HTMLInputElement).value);
+		const w = Number((e.currentTarget.elements[4] as HTMLInputElement).value);
 		let weight = w;
 		if (isNaN(w)) weight = 0;
 		if (weight <= 0) weight = 0;
@@ -110,6 +145,8 @@ function New({ db } : PageProps) {
 		const user : UserDAO = {
 			id: 1,
 			name: name,
+			gender: g,
+			age: age,
 			height: height,
 			weight: weight,
 		};
@@ -123,17 +160,51 @@ function New({ db } : PageProps) {
 			<Form onSubmit = { onSubmit }>
 				<Item>
 					<Name>이름</Name>
-					<Input vwidth = { '400px' } vmargin = { '0px 20px 15px 20px' } />
+					<Input vwidth = { '296px' } vmargin = { '0px 20px 15px 20px' } />
+				</Item>
+
+				<Item>
+					<Name>성별</Name>
+					<Select vwidth = { '111px' } vmargin = { '0px 20px 30px 10px' } >
+						<option value={ '' }>미선택</option>
+						<option value={ 'M' }>남자</option>
+						<option value={ 'F' }>여자</option>
+					</Select>
+				</Item>
+
+				<Item>
+					<Name>나이</Name>
+					<Input
+						type={ 'number' }
+						required={ true }
+						min={ 1 }
+						vwidth={ '111px' }
+						vmargin={ '0px 20px 30px 20px' }
+					/>
 				</Item>
 
 				<Item>
 					<Name>키</Name>
-					<Input type = { 'number ' } vwidth = { '150px' } vmargin = { '0px 20px 30px 20px' }/>
+					<Input
+						type={ 'number' }
+						required={ true }
+						min={ 1 }
+						step={ '0.1' }
+						vwidth={ '111px' }
+						vmargin = { '0px 20px 30px 10px' }
+					/>
 				</Item>
 
 				<Item>
 					<Name>몸무게</Name>
-					<Input vwidth = { '150px' }	vmargin = { '0px 18px 30px 18px' }/>
+					<Input
+						type={ 'number' }
+						required={ true }
+						min={ 1 }
+						step={ '0.1' }
+						vwidth={ '111px' }
+						vmargin={ '0px 20px 30px 10px' }
+					/>
 				</Item>
 				<Button text = { '시작하기' } width = { '100% - 40px' } />
 				<Link to="/dev">개발자 모드</Link>
@@ -142,4 +213,4 @@ function New({ db } : PageProps) {
 	);
 }
 
-export default New;
+export default UserNew;

@@ -23,7 +23,8 @@ import {
 	DevMain,
 	Test,
 
-	New,
+	UserNew,
+	UserModify,
 	Reset,
 } from './pages';
 import Dashboard from './components/dashboard/dashboard';
@@ -148,10 +149,15 @@ function App() {
 					{ newMode ? (
 						<Route path="/">
 							<ContainerWithoutMenu>
-								<New db = { db } />
+								<UserNew db = { db } />
 							</ContainerWithoutMenu>
 						</Route>
 					) : (<Route path="/new"></Route>)}
+					<Route path="/userModify">
+						<ContainerWithoutMenu>
+							<UserModify db={ db }/>
+						</ContainerWithoutMenu>
+					</Route>
 					<Route path="/exercisePlay/:id">
 						<ContainerWithoutMenu>
 							<ExercisePlay db={ db }/>

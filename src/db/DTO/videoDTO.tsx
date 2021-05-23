@@ -82,7 +82,7 @@ class VideoDTO {
 			const video : VideoDAO = {
 				id: doc[i].get('video_id'),
 				name: doc[i].get('video_name'),
-				timeline: doc[0].get('video_timeline'),
+				timeline: doc[i].get('video_timeline'),
 			};
 			result[doc[i].get('video_id')] = video;
 		}
@@ -104,7 +104,7 @@ class VideoDTO {
 			result.push({
 				id: doc[i].get('video_id'),
 				name: doc[i].get('video_name'),
-				timeline: doc[0].get('video_timeline'),
+				timeline: doc[i].get('video_timeline'),
 			});
 		}
 
@@ -124,7 +124,7 @@ class VideoDTO {
 			result.push({
 				id: doc[i].get('video_id'),
 				name: doc[i].get('video_name'),
-				timeline: doc[0].get('video_timeline'),
+				timeline: doc[i].get('video_timeline'),
 			});
 		}
 
@@ -144,7 +144,7 @@ class VideoDTO {
     		result[doc[i].get('video_id')] = {
     			id: doc[i].get('video_id'),
     			name: doc[i].get('video_name'),
-				timeline: doc[0].get('video_timeline'),
+				timeline: doc[i].get('video_timeline'),
     		};
     	}
 
