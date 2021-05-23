@@ -63,7 +63,7 @@ function Exercise2({ db } : PageProps) {
 		);
 	} else {
 		return (
-			<Player routine={ routine } video={ video } onEnded={ onEnded }/>
+			<Player routineDAO={ routine } videoDAO={ video } onEnded={ onEnded }/>
 		);
 	}
 }
