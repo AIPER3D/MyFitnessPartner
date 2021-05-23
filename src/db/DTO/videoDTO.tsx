@@ -150,6 +150,25 @@ class VideoDTO {
 
     	return result;
 	}
+
+	async updateVideo(data: VideoDAO) {
+		if (!this.db) return false;
+		if (!this.db.collections.videos) return false;
+
+		const doc = await this.db.collections.videos
+			.findOne()
+			.where({
+				video_id: data['id'],
+			});
+		console.log(doc);
+
+		doc.update({ $set: {
+			video_name: data['name'],
+			video_timeline: data['timeline'],
+		}});
+
+		return true;
+	}
 }
 
 export { VideoDTO };

@@ -94,6 +94,7 @@ function Item({ db, data, onPredict } : ItemProps) {
 	const [current, setCurrent] = useState<number>(0);
 	const [total, setTotal] = useState<number>(0);
 	const [analysisPer, setAnalysisPer] = useState<number>(0);
+	const [analysisCurrent, setAnalysisCurrent] = useState<number>(0);
 
 	const [uploadStatus, setUploadStatus] = useState<number>(0);
 	const [analysisStatus, setAnalysisStatus] = useState<number>(0);
@@ -297,6 +298,7 @@ function Item({ db, data, onPredict } : ItemProps) {
 		videoElement.playbackRate = 16;
 		videoElement.play()
 			.then(() => {
+				console.log(videoElement.readyState);
 				videoElement.requestVideoFrameCallback(getFrame);
 			})
 			.catch((e : any) => {
