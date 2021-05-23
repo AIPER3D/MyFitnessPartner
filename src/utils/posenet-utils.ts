@@ -41,11 +41,32 @@ export function drawKeypoints(graphics: any, keypoints: any, minConfidence: numb
 	}
 }
 
+// export function drawKeypoints(ctx: any, keypoints: any, minConfidence: number) {
+// 	for (let i = 0; i < keypoints.length; i++) {
+// 		const keypoint = keypoints[i];
+
+// 		if (keypoint.score < minConfidence) {
+// 			continue;
+// 		}
+
+// 		const { x, y } = keypoint.position;
+
+// 		drawPoint(ctx, x, y, 5, 'white');
+// 	}
+// }
+
 export function drawPoint(graphics: any, x: number, y: number, raidus: number, color: number) {
 	graphics.beginFill(color);
 	graphics.drawCircle(x, y, raidus);
 	graphics.endFill();
 }
+
+// export function drawPoint(ctx: any, x: number, y: number, raidus: number, color: string) {
+// 	ctx.beginPath();
+// 	ctx.fillStyle = color;
+// 	ctx.arc(x, y, raidus, 0, 2 * Math.PI);
+// 	ctx.fill();
+// }
 
 export function drawLine(graphics: any, [ax, ay]: [number, number],
 	[bx, by]: [number, number], thickness: number, color: number) {
@@ -55,6 +76,16 @@ export function drawLine(graphics: any, [ax, ay]: [number, number],
 	graphics.lineTo(bx, by);
 	graphics.endFill();
 }
+
+// export function drawLine(ctx: any, [ax, ay]: [number, number],
+// 	[bx, by]: [number, number], thickness: number, color: string) {
+// 	ctx.beginPath();
+// 	ctx.strokeStyle = color;
+// 	ctx.lineWidth = thickness;
+// 	ctx.moveTo(ax, ay);
+// 	ctx.lineTo(bx, by);
+// 	ctx.stroke();
+// }
 
 export function drawSkeleton(graphics: any, keypoints: any, minConfidence: number,) {
 	const skeleton = posenet.getAdjacentKeyPoints(keypoints, minConfidence);
@@ -75,6 +106,26 @@ export function drawSkeleton(graphics: any, keypoints: any, minConfidence: numbe
 		);
 	});
 }
+
+// export function drawSkeleton(ctx: any, keypoints: any, minConfidence: number,) {
+// 	const skeleton = posenet.getAdjacentKeyPoints(keypoints, minConfidence);
+
+// 	function toTuple({ y, x }: { y: any, x: any }) {
+// 		return [y, x];
+// 	}
+
+// 	skeleton.forEach((keypoints) => {
+// 		const ax = keypoints[0].position.x;
+// 		const ay = keypoints[0].position.y;
+
+// 		const bx = keypoints[1].position.x;
+// 		const by = keypoints[1].position.y;
+
+// 		drawLine(
+// 			ctx, [ax, ay], [bx, by], 2, 'white'
+// 		);
+// 	});
+// }
 
 /*
  * Draw the bounding box of a pose. For example, for a whole person standing

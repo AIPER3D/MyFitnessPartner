@@ -22,6 +22,9 @@ function PIP() {
 	const [x, setX] = useState<number>(0);
 	const [y, setY] = useState<number>(0);
 
+	const [width, setWidth] = useState<number>(640);
+	const [height, setHeight] = useState<number>(320);
+
 	function dragMouseDown(e : React.MouseEvent<HTMLDivElement>) {
 		e.preventDefault();
 
@@ -46,15 +49,15 @@ function PIP() {
 		let toX = (e.clientX - x);
 		if (toX < 0) {
 			toX = 0;
-		} else if (toX > (window.innerWidth - 640)) {
-			toX = (window.innerWidth - 640);
+		} else if (toX > (window.innerWidth - width)) {
+			toX = (window.innerWidth - width);
 		}
 
 		let toY = (e.clientY - y);
 		if (toY < 0) {
 			toY = 0;
-		} else if (toY >= (window.innerHeight - 360)) {
-			toY = (window.innerHeight - 360);
+		} else if (toY >= (window.innerHeight - height)) {
+			toY = (window.innerHeight - height);
 		}
 
 		e.currentTarget.style.left = toX + 'px';
@@ -69,8 +72,8 @@ function PIP() {
 		>
 
 			<Webcam
-				width = { 640 }
-				height = { 320 }
+				width = { width }
+				height = { height }
 				opacity = {0.5}
 			/>
 		</Wrapper>

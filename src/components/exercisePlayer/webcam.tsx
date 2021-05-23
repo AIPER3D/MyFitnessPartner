@@ -18,16 +18,12 @@ type Props = {
 }
 
 function Webcam({ width, height }: Props) {
-	// const tf = window.require('@tensorflow/tfjs');
 	const {ipcRenderer} = window.require('electron');
 
 	const elementRef = useRef<HTMLVideoElement>(null);
 	const webcamRef = useRef<any>(null);
 
 	const requestRef = useRef<number>();
-
-	// let poseNet: posenet.PoseNet;
-	// let poseClassification : tf.LayersModel;
 
 	let poseNet : tmPose.CustomPoseNet;
 
@@ -39,23 +35,12 @@ function Webcam({ width, height }: Props) {
 	const widthScaleRatio = width / inputWidth;
 	const heightScaleRatio = height / inputHeight;
 
-	const [poses, setPose] = useState<any>(null);
+	const [poses, setPoses] = useState<any>(null);
 
 	const [isPlaying, setPlaying] = useState<boolean>(true);
 
 	async function load() {
-		// poseNet = await posenet.load({
-		// 	architecture: 'MobileNetV1',
-		// 	outputStride: 16,
-		// 	inputResolution: { width: inputWidth, height: inputHeight },
-		// 	multiplier: 1,
-		// 	quantBytes: 2,
-		// });
-
 		poseNet = await loadTMPose('files/models/exercise_classifier/Squat/model.json');
-
-		// poseClassification = await loadModel('./files/models/exercise_classifier/Squat/model.json');
-
 		repetitionCounter = new RepetitionCounter(poseNet.getMetadata().labels[0], 0.8, 0.2);
 	}
 
@@ -66,64 +51,55 @@ function Webcam({ width, height }: Props) {
 		webcamRef.current = await tf.data.webcam(element, {
 			resizeHeight: inputHeight,
 			resizeWidth: inputWidth,
-			centerCrop: true,
+			centerCrop: false,
 		});
 
 		requestRef.current = requestAnimationFrame(capture);
 	}
 
 	let count = 0;
+
 	async function capture() {
-		if (webcamRef.current == null) return;
-		const webcam = webcamRef.current;
+		try {
+			if (webcamRef.current == null) return;
+			const webcam = webcamRef.current;
 
-		// 1. caputer iamge
-		const image = await webcam.capture();
+			// 1. caputer iamge
+			const image = await webcam.capture();
 
-		if (image == null) return;
+			if (image == null) return;
 
-		// 2. estimate pose
-		const {pose, posenetOutput} = await poseNet.estimatePose(image, true);
+			// 2. estimate pose
+			const {pose, posenetOutput} = await poseNet.estimatePose(image, true);
 
-		// pose.keypoints.slice(0, 4).forEach( (keypoint) => {
-		// 	if (keypoint.score < 0.3) {
-		// 		requestAnimationFrame(capture);
-		// 		return;
-		// 	}
-		// });
+			// 3. pose classification
+			const result = await poseNet.predict(posenetOutput);
 
-		// 3. pose classification
-		const result = await poseNet.predict(posenetOutput);
+			if (pose == null) {
+				requestRef.current = requestAnimationFrame(capture);
+				return;
+			}
 
-		// 4. pose counting
-		console.log(repetitionCounter.count(result));
+			pose.keypoints.map( (keypoint : any) => {
+				keypoint.position.x *= widthScaleRatio;
+				keypoint.position.y *= heightScaleRatio;
+			});
 
-		if (!pose) {
-			requestRef.current = requestAnimationFrame(capture);
-			return;
+			if (count % 2 == 0) {
+				ipcRenderer.send('webcam-poses', pose);
+			}
+
+			repetitionCounter.count(result);
+
+			// 4. set keypoints
+			setPoses([pose]);
+
+			image.dispose();
+			await tf.nextFrame();
+			count++;
+		} catch (e) {
+			console.log(e);
 		}
-
-		// pose.keypoints.map( (keypoint : any) => {
-		// 	keypoint.position.x *= widthScaleRatio;
-		// 	keypoint.position.y *= heightScaleRatio;
-		// });
-
-		// if (inferencedPoses.length >= 1&&
-		// 	count % 5 == 0) {
-		// 	ipcRenderer.send('webcam-poses', inferencedPoses);
-		// }
-
-		if (count % 5 == 0) {
-			ipcRenderer.send('webcam-poses', pose);
-		}
-
-		// 4. set keypoints
-		setPose([pose]);
-
-		image.dispose();
-		await tf.nextFrame();
-		count++;
-
 		requestRef.current = requestAnimationFrame(capture);
 	}
 
@@ -134,7 +110,10 @@ function Webcam({ width, height }: Props) {
 			});
 
 		return () => {
-			webcamRef.current.stop();
+			if (webcamRef.current) {
+				webcamRef.current.stop();
+			}
+
 			if (requestRef.current) {
 				cancelAnimationFrame(requestRef.current);
 			}
@@ -147,7 +126,7 @@ function Webcam({ width, height }: Props) {
 		if (poses == null) return;
 
 		poses.forEach(({ score, keypoints }: { score: number, keypoints: [] }) => {
-			if (score >= 0.3) {
+			if (score >= 0.1) {
 				drawKeypoints(graphics, keypoints, 0.5);
 				drawSkeleton(graphics, keypoints, 0.5);
 			}
