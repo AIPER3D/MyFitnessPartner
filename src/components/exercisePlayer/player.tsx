@@ -26,9 +26,9 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 	const record: RecordDAO = {
 		id: 0,
-		time: new Date().getTime(),
 		routineId: routineDAO['id'],
 		routineName: routineDAO['name'],
+		recordExercise: [],
 	};
 
 	const requestRef = useRef<number>();

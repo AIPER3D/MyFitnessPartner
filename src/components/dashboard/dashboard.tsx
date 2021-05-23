@@ -31,7 +31,11 @@ function Dashboard({db}: DashBoardProps) {
 	}
 	function yourCalory() {
 		if (user) {
-			return (66.47 + (13.75 * user.weight) + (5* user.height) - (6.76 * 25)).toFixed(1);
+			if (user.gender === 'M') {
+				return (66.47 + (13.75 * user.weight) + (5* user.height) - (6.76 * user.age)).toFixed(1);
+			} else if (user.gender === 'F') {
+				return (655 + (9.6 * user.weight) + (1.8* user.height) - (4.7 * user.age)).toFixed(1);
+			}
 		}
 	}
 
