@@ -20,26 +20,6 @@ export default class RepetitionCounter {
 		return this._nRepeats;
 	}
 
-	/*
-
-		[
-			{
-				className : squatTrue,
-				score : 0.xx
-			},
-			{
-				className : squatDown,
-				score : 0.xx
-			},
-		]
-
-		{
-			sqautTrue : 0.xx,
-			sqautDown : 0.xx
-		}
-
-	*/
-
 	public count(poseClassification : any) : number {
 		let poseConfidence = 0.0;
 
