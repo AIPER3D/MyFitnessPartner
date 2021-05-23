@@ -41,6 +41,7 @@ class RecordDTO {
 
     	await this.db.collections.records.insert({
     		record_id: id,
+    		time: data['time'],
     		routine_id: data['routineId'],
     		routine_name: data['routineName'],
     		record_exercises: data['recordExercise'],
@@ -63,6 +64,7 @@ class RecordDTO {
 
     	const result: RecordDAO = {
     		id: doc[0].get('record_id'),
+    		time: doc[0].get('record_time'),
     		routineId: doc[0].get('routine_id'),
     		routineName: doc[0]['routineName'],
     		recordExercise: doc[0].get('record_exercises'),
@@ -85,6 +87,7 @@ class RecordDTO {
     	for (let i = 0; i < doc.length; i++) {
     		result.push({
     			id: doc[i].get('record_id'),
+    			time: doc[i].get('record_time'),
     			routineId: doc[i].get('routine_id'),
     			routineName: doc[i]['routineName'],
     			recordExercise: doc[i].get('record_exercises'),
@@ -106,6 +109,7 @@ class RecordDTO {
     	for (let i = 0; i < doc.length; i++) {
     		result.push({
     			id: doc[i].get('record_id'),
+    			time: doc[i].get('record_time'),
     			routineId: doc[i].get('routine_id'),
     			routineName: doc[i]['routineName'],
     			recordExercise: doc[i].get('record_exercises'),
