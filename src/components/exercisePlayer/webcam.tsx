@@ -15,9 +15,10 @@ type Props = {
 	width: number;
 	height: number;
 	opacity: number;
+	poseLabel : string;
 }
 
-function Webcam({ width, height }: Props) {
+function Webcam({ width, height, opacity, poseLabel}: Props) {
 	const {ipcRenderer} = window.require('electron');
 
 	const elementRef = useRef<HTMLVideoElement>(null);
@@ -25,9 +26,9 @@ function Webcam({ width, height }: Props) {
 
 	const requestRef = useRef<number>();
 
-	let poseNet : tmPose.CustomPoseNet;
+	let poseNets : any;
 
-	let repetitionCounter : RepetitionCounter;
+	let repetitionCounter : any;
 
 	const inputHeight = 224;
 	const inputWidth = 224;
@@ -39,9 +40,43 @@ function Webcam({ width, height }: Props) {
 
 	const [isPlaying, setPlaying] = useState<boolean>(true);
 
+	useEffect(() => {
+		load()
+			.then(async () => {
+				await run();
+			});
+
+		return () => {
+			if (webcamRef.current) {
+				webcamRef.current.stop();
+			}
+
+			if (requestRef.current) {
+				cancelAnimationFrame(requestRef.current);
+			}
+		};
+	}, [poseLabel]);
+
+	useEffect( () => {
+		return () => {
+			Object.keys(repetitionCounter).forEach( (key) => {
+				console.log(key, repetitionCounter[key].nRepeats);
+			});
+		};
+	}, []);
+
 	async function load() {
-		poseNet = await loadTMPose('files/models/exercise_classifier/Squat/model.json');
-		repetitionCounter = new RepetitionCounter(poseNet.getMetadata().labels[0], 0.8, 0.2);
+		poseNets = {
+			Squat: await loadTMPose('files/models/exercise_classifier/Squat/model.json'),
+			Lunge: await loadTMPose('files/models/exercise_classifier/Lunge/model.json'),
+			Jump: await loadTMPose('files/models/exercise_classifier/Jump/model.json'),
+		};
+
+		repetitionCounter = {
+			Squat: new RepetitionCounter(poseNets.Squat.getMetadata().labels[0], 0.8, 0.2),
+			Lunge: new RepetitionCounter(poseNets.Lunge.getMetadata().labels[0], 0.8, 0.2),
+			Jump: new RepetitionCounter(poseNets.Jump.getMetadata().labels[0], 0.8, 0.2),
+		};
 	}
 
 	async function run() {
@@ -70,10 +105,10 @@ function Webcam({ width, height }: Props) {
 			if (image == null) return;
 
 			// 2. estimate pose
-			const {pose, posenetOutput} = await poseNet.estimatePose(image, true);
+			const {pose, posenetOutput} = await poseNets[poseLabel].estimatePose(image, true);
 
 			// 3. pose classification
-			const result = await poseNet.predict(posenetOutput);
+			const result = await poseNets[poseLabel].predict(posenetOutput);
 
 			if (pose == null) {
 				requestRef.current = requestAnimationFrame(capture);
@@ -89,7 +124,7 @@ function Webcam({ width, height }: Props) {
 				ipcRenderer.send('webcam-poses', pose);
 			}
 
-			repetitionCounter.count(result);
+			// console.log(result, repetitionCounter[poseLabel].count(result));
 
 			// 4. set keypoints
 			setPoses([pose]);
@@ -98,27 +133,11 @@ function Webcam({ width, height }: Props) {
 			await tf.nextFrame();
 			count++;
 		} catch (e) {
-			console.log(e);
+			// console.log(e);
 		}
 		requestRef.current = requestAnimationFrame(capture);
 	}
 
-	useEffect(() => {
-		load()
-			.then(async () => {
-				await run();
-			});
-
-		return () => {
-			if (webcamRef.current) {
-				webcamRef.current.stop();
-			}
-
-			if (requestRef.current) {
-				cancelAnimationFrame(requestRef.current);
-			}
-		};
-	}, []);
 
 	const draw = React.useCallback( (graphics) => {
 		graphics.clear();
