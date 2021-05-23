@@ -41,8 +41,6 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 	const [poseLabel, setPoseLabel] = useState<string>('');
 	const [poseTime, setPoseTime] = useState<number>(0);
-	// const poseLabel = useRef<string>('');
-	// const poseTime = useRef<string>('');
 
 	const [poseSimilarity, setPoseSimilarity] = useState<any>(0);
 
@@ -123,7 +121,6 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 					const start = videoDAO[routineDAO['videos'][value.current]]['timeline'][i]['start'];
 					const end = videoDAO[routineDAO['videos'][value.current]]['timeline'][i]['end'];
 
-
 					if (videoRef.currentTime >= start &&
 						videoRef.currentTime <= end) {
 						setPoseLabel(name);
@@ -134,7 +131,6 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 			// 5. when video ended play next video
 			videoRef.addEventListener('ended', () => {
-				console.log(videoDAO[routineDAO['videos'][value.current]]);
 				value.current += 1;
 				setSeq(value.current);
 				// seq 0 -> 1 로 변경
@@ -271,7 +267,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 						<NavigatorBottom
 							videoRef={videoRef}
 						/>
-						{/* <PIP poseLabel={poseLabel}/> */}
+						<PIP poseLabel={poseLabel}/>
 					</>
 				)
 			}

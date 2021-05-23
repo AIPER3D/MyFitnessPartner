@@ -18,6 +18,13 @@ type Props = {
 	poseLabel : string;
 }
 
+interface RepetitionObject {
+	Squat?: any;
+	Lunge?: any;
+	Jump?: any;
+	[props:string] : any;
+}
+
 function Webcam({ width, height, opacity, poseLabel}: Props) {
 	const {ipcRenderer} = window.require('electron');
 
@@ -28,7 +35,7 @@ function Webcam({ width, height, opacity, poseLabel}: Props) {
 
 	let poseNets : any;
 
-	let repetitionCounter : any;
+	const repetitionCounter = useRef<RepetitionObject>({});
 
 	const inputHeight = 224;
 	const inputWidth = 224;
@@ -59,9 +66,7 @@ function Webcam({ width, height, opacity, poseLabel}: Props) {
 
 	useEffect( () => {
 		return () => {
-			Object.keys(repetitionCounter).forEach( (key) => {
-				console.log(key, repetitionCounter[key].nRepeats);
-			});
+			console.log(repetitionCounter);
 		};
 	}, []);
 
@@ -72,7 +77,7 @@ function Webcam({ width, height, opacity, poseLabel}: Props) {
 			Jump: await loadTMPose('files/models/exercise_classifier/Jump/model.json'),
 		};
 
-		repetitionCounter = {
+		repetitionCounter.current = {
 			Squat: new RepetitionCounter(poseNets.Squat.getMetadata().labels[0], 0.8, 0.2),
 			Lunge: new RepetitionCounter(poseNets.Lunge.getMetadata().labels[0], 0.8, 0.2),
 			Jump: new RepetitionCounter(poseNets.Jump.getMetadata().labels[0], 0.8, 0.2),
@@ -115,16 +120,16 @@ function Webcam({ width, height, opacity, poseLabel}: Props) {
 				return;
 			}
 
+			if (count % 2 == 0) {
+				ipcRenderer.send('webcam-poses', pose);
+			}
+
 			pose.keypoints.map( (keypoint : any) => {
 				keypoint.position.x *= widthScaleRatio;
 				keypoint.position.y *= heightScaleRatio;
 			});
 
-			if (count % 2 == 0) {
-				ipcRenderer.send('webcam-poses', pose);
-			}
-
-			// console.log(result, repetitionCounter[poseLabel].count(result));
+			repetitionCounter.current[poseLabel].count(result);
 
 			// 4. set keypoints
 			setPoses([pose]);
