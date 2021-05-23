@@ -25,6 +25,8 @@ class UserDTO {
     	await this.db.collections.users.insert({
     		user_id: 1,
     		user_name: data['name'],
+    		user_gender: data['gender'],
+    		user_age: data['age'],
     		user_height: data['height'],
     		user_weight: data['weight'],
     	});
@@ -60,11 +62,27 @@ class UserDTO {
     	const result : UserDAO = {
     		id: doc[0].get('user_id'),
     		name: doc[0].get('user_name'),
+    		gender: doc[0].get('user_gender'),
+    		age: doc[0].get('user_age'),
     		height: doc[0].get('user_height'),
     		weight: doc[0].get('user_weight'),
     	};
 
     	return result;
+    }
+
+    async updateUser(data : UserDAO) {
+    	if (!this.db) return false;
+    	if (!this.db.collections.users) return false;
+
+    	const doc = await this.db.collections.users
+    		.find()
+    		.where('user_id')
+    		.eq(1)
+    		.remove();
+
+    	await this.addUser(data);
+    	return true;
     }
 }
 

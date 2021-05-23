@@ -11,6 +11,12 @@ const UserSchema = {
 		'user_name': {
 			'type': 'string',
 		},
+		'user_gender': {
+			'type': 'string',
+		},
+		'user_age': {
+			'type': 'number',
+		},
 		'user_height': {
 			'type': 'number',
 		},

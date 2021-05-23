@@ -3,7 +3,7 @@ import styled, { css } from 'styled-components';
 import { Link, useParams } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faVideo, faList, faClipboard, faChartPie } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faVideo, faList, faClipboard, faChartPie, faEdit } from '@fortawesome/free-solid-svg-icons';
 
 import { RxDatabase } from 'rxdb';
 import { UserDTO } from '../db/DTO';
@@ -160,6 +160,22 @@ const Icon = styled.div`
 	text-align: center;
 `;
 
+const Edit = styled(Link)`
+	position: absolute;
+	top: 10px;
+	left: 220px;
+	
+	& > * {
+		transition: 0.3s all;
+		opacity: 0.6;
+	}
+	
+	&:hover > * {
+		transition: 0.3s all;
+		opacity: 1.0;
+	}
+`;
+
 type PageProps = {
 	db: RxDatabase;
 };
@@ -188,6 +204,9 @@ function Menu({ db } : PageProps) {
 				<Profile/>
 				{ user ? (
 					<User>
+						<Edit to={'/userModify'}>
+							<FontAwesomeIcon icon={ faEdit } size={'sm'} color={'#f2f5ea'}/>
+						</Edit>
 						<UserName>{ user.name }</UserName>
 						<br/>
 						<UserStatus>{ user.height.toFixed(1) }cm / { user.weight.toFixed(1) }kg</UserStatus>
