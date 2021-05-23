@@ -113,6 +113,8 @@ function Webcam({ width, height, opacity, poseLabel}: Props) {
 			centerCrop: false,
 		});
 
+		if (webcamRef.current.disable == undefined) return;
+
 		requestRef.current = requestAnimationFrame(capture);
 	}
 

@@ -1,6 +1,8 @@
-import React, {useEffect, useState} from 'react';
+/* eslint-disable no-mixed-spaces-and-tabs */
+import React, {useEffect, useState, useRef} from 'react';
 import styled, { css } from 'styled-components';
 import { Link, useParams } from 'react-router-dom';
+import * as tf from '@tensorflow/tfjs';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHome, faVideo, faList, faClipboard, faChartPie, faEdit } from '@fortawesome/free-solid-svg-icons';
@@ -8,6 +10,7 @@ import { faHome, faVideo, faList, faClipboard, faChartPie, faEdit } from '@forta
 import { RxDatabase } from 'rxdb';
 import { UserDTO } from '../db/DTO';
 import { UserDAO } from '../db/DAO';
+import { Webcam } from '../components/exercisePlayer';
 
 
 const color = {
@@ -194,6 +197,29 @@ function Menu({ db } : PageProps) {
 		select();
 	}, [db]);
 
+	useEffect(() => {
+		webCamCheck();
+	}, [route]);
+	function success(stream: any) {
+		// The success function receives an argument which points to the webcam stream
+		console.log(true);
+	}
+	function error() {
+		console.log(false);
+	}
+	async function webCamCheck() {
+		if (navigator.getUserMedia) {
+			navigator.getUserMedia({video: true}, success, error);
+	   } else {
+			error();
+	   }
+		// // eslint-disable-next-line no-self-assign
+		// if (typeof navigator.mediaDevices.getUserMedia === 'undefined') {
+		// 	console.log(typeof navigator.mediaDevices.getUserMedia);
+		// } else {
+		// 	console.log(typeof navigator.mediaDevices.getUserMedia);
+		// }
+	}
 	async function select() {
 		setUser(await userDTO.getUser());
 	}
