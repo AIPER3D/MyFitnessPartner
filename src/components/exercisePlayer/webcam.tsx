@@ -10,6 +10,8 @@ import { drawKeypoints, drawSkeleton } from '../../utils/posenet-utils';
 import { loadModel, loadTMPose } from '../../utils/load-utils';
 import RepetitionCounter from '../../utils/RepetitionCounter';
 import * as tmPose from '@teachablemachine/pose';
+import { timer } from '../../utils/bench-util';
+import { RecordDAO } from '../../db/DAO';
 
 type Props = {
 	width: number;
@@ -53,6 +55,10 @@ function Webcam({ width, height, opacity, poseLabel}: Props) {
 				await run();
 			});
 
+		const _timer = timer(false);
+
+		const startTime = _timer.start();
+
 		return () => {
 			if (webcamRef.current) {
 				webcamRef.current.stop();
@@ -61,12 +67,25 @@ function Webcam({ width, height, opacity, poseLabel}: Props) {
 			if (requestRef.current) {
 				cancelAnimationFrame(requestRef.current);
 			}
+
+			if (poseLabel != '') {
+				const endTime = _timer.stamp();
+
+				const record = {
+					name: poseLabel,
+					startTime,
+					endTime,
+					count: repetitionCounter.current[poseLabel].nRepeats,
+				};
+
+				console.log(record);
+			}
 		};
 	}, [poseLabel]);
 
 	useEffect( () => {
 		return () => {
-			console.log(repetitionCounter);
+			// console.log(repetitionCounter);
 		};
 	}, []);
 
