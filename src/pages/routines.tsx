@@ -65,8 +65,9 @@ function Routines({ db } : PageProps) {
 
 		setContent(arr);
 	}
+
 	function onClick(id: number) {
-		console.log(id);
+		// console.log(id);
 	}
 
 	return (
