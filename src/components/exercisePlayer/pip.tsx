@@ -1,5 +1,6 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
+import { RoutineDAO, VideoDAO } from '../../db/DAO';
 
 import { Webcam } from './';
 
@@ -17,10 +18,21 @@ const Wrapper = styled.div`
 	
 `;
 
-function PIP() {
+
+type Props = {
+	poseLabel : any;
+};
+
+function PIP({poseLabel} : Props) {
 	const [down, setDown] = useState<boolean>(false);
 	const [x, setX] = useState<number>(0);
 	const [y, setY] = useState<number>(0);
+
+	const [_poseLabel, setPoseLabel] = useState<string>('');
+
+	useEffect(() => {
+		setPoseLabel(poseLabel);
+	}, [poseLabel]);
 
 	const [width, setWidth] = useState<number>(640);
 	const [height, setHeight] = useState<number>(320);
@@ -75,6 +87,7 @@ function PIP() {
 				width = { width }
 				height = { height }
 				opacity = {0.5}
+				poseLabel = {_poseLabel}
 			/>
 		</Wrapper>
 	);
