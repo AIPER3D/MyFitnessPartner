@@ -11,6 +11,28 @@ type NeedleProps = {
     value: any;
 };
 
+
+function NavigatorMeter({ exercise, accuracy, time } : Props) {
+	return (
+		<Meter>
+			<Speedo>
+				<Face>
+					<Needle value = { (accuracy * 100).toFixed(0) } />
+				</Face>
+			</Speedo>
+			<TimeBack></TimeBack>
+			<Time value={ time }></Time>
+			<Name>{ exercise }</Name>
+			<Acc>{ (accuracy * 100).toFixed(0) }</Acc>
+		</Meter>
+	);
+}
+
+NavigatorMeter.defaultProps = {
+
+};
+
+
 const Meter = styled.div`
 	position: absolute;
 	display: block;
@@ -120,25 +142,5 @@ const Acc = styled.div`
     font-weight: bold;
     font-size: 26px;
 `;
-
-function NavigatorMeter({ exercise, accuracy, time } : Props) {
-	return (
-		<Meter>
-			<Speedo>
-				<Face>
-					<Needle value = { (accuracy * 100).toFixed(0) } />
-				</Face>
-			</Speedo>
-			<TimeBack></TimeBack>
-			<Time value={ time }></Time>
-			<Name>{ exercise }</Name>
-			<Acc>{ (accuracy * 100).toFixed(0) }</Acc>
-		</Meter>
-	);
-}
-
-NavigatorMeter.defaultProps = {
-
-};
 
 export default NavigatorMeter;
