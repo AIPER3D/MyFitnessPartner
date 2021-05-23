@@ -16,29 +16,34 @@ import PuffLoader from 'react-spinners/PuffLoader';
 import { tensorToImage } from '../../utils/video-util';
 
 type Props = {
-	routine: RoutineDAO;
-	video: VideoDAO[];
+	routineDAO: RoutineDAO;
+	videoDAO: VideoDAO[];
 	onEnded: (record: RecordDAO) => void;
 };
 
-function Player({ routine, video, onEnded }: Props) {
+function Player({ routineDAO, videoDAO, onEnded }: Props) {
 	const { ipcRenderer } = window.require('electron');
 
 	const record: RecordDAO = {
 		id: 0,
 		time: new Date().getTime(),
-		routineId: routine['id'],
-		routineName: routine['name'],
+		routineId: routineDAO['id'],
+		routineName: routineDAO['name'],
 	};
 
 	const requestRef = useRef<number>();
 
 	const [isLoading, setLoading] = useState<boolean>(true);
 	const [videoRef, setVideoRef] = useState<HTMLVideoElement | null>(null);
-	const [seq, setSeq] = useState<number>(0);
+
+	const value = useRef(0);
+	const [seq, setSeq] = useState<number>(value.current);
 
 	const [poseLabel, setPoseLabel] = useState<string>('');
 	const [poseTime, setPoseTime] = useState<number>(0);
+	// const poseLabel = useRef<string>('');
+	// const poseTime = useRef<string>('');
+
 	const [poseSimilarity, setPoseSimilarity] = useState<any>(0);
 
 	const inputWidth = 224;
@@ -66,14 +71,18 @@ function Player({ routine, video, onEnded }: Props) {
 
 		// 2. when all task is ready, set loading false
 		// if (videoRef == null) return;
-		if (seq < routine['videos'].length) {
-			load(seq);
+		if (seq < routineDAO['videos'].length) {
+			load();
 		} else {
 			onEnded(record);
 		}
 	}, [videoRef, seq]);
 
 	useEffect(() => {
+		// if (requestRef.current) {
+		// 	cancelAnimationFrame(requestRef.current);
+		// }
+
 		requestRef.current = requestAnimationFrame(capture);
 
 		return () => {
@@ -88,11 +97,11 @@ function Player({ routine, video, onEnded }: Props) {
 	});
 
 	// load video and model
-	async function load(seq: number) {
+	async function load() {
 		if (videoRef == null) return;
 
 		// 1. file loading
-		const file = fs.readFileSync('./files/videos/' + video[routine['videos'][seq]]['id'] + '.vd');
+		const file = fs.readFileSync('./files/videos/' + videoDAO[routineDAO['videos'][value.current]]['id'] + '.vd');
 		const uint8Array = new Uint8Array(file);
 		const arrayBuffer = uint8Array.buffer;
 		const blob = new Blob([arrayBuffer]);
@@ -109,10 +118,11 @@ function Player({ routine, video, onEnded }: Props) {
 
 		if (seq == 0) {
 			videoRef.addEventListener('timeupdate', () => {
-				for (let i = 0; i < video[routine['videos'][seq]]['timeline'].length; i++) {
-					const name = video[routine['videos'][seq]]['timeline'][i]['name'];
-					const start = video[routine['videos'][seq]]['timeline'][i]['start'];
-					const end = video[routine['videos'][seq]]['timeline'][i]['end'];
+				for (let i = 0; i < videoDAO[routineDAO['videos'][value.current]]['timeline'].length; i++) {
+					const name = videoDAO[routineDAO['videos'][value.current]]['timeline'][i]['name'];
+					const start = videoDAO[routineDAO['videos'][value.current]]['timeline'][i]['start'];
+					const end = videoDAO[routineDAO['videos'][value.current]]['timeline'][i]['end'];
+
 
 					if (videoRef.currentTime >= start &&
 						videoRef.currentTime <= end) {
@@ -121,12 +131,15 @@ function Player({ routine, video, onEnded }: Props) {
 					}
 				}
 			});
-		}
 
-		// 5. when video ended play next video
-		videoRef.addEventListener('ended', () => {
-			setSeq(seq + 1);
-		});
+			// 5. when video ended play next video
+			videoRef.addEventListener('ended', () => {
+				console.log(videoDAO[routineDAO['videos'][value.current]]);
+				value.current += 1;
+				setSeq(value.current);
+				// seq 0 -> 1 로 변경
+			});
+		}
 
 		setLoading(false);
 	}
@@ -140,7 +153,6 @@ function Player({ routine, video, onEnded }: Props) {
 	const capture = async () => {
 		try {
 			if (videoRef == null) return;
-
 			// 1. resize video element
 			// videoRef.width = inputWidth;
 			// videoRef.height = inputHeight;
@@ -200,7 +212,6 @@ function Player({ routine, video, onEnded }: Props) {
 			setPoses(inferencedPoses);
 		} catch (e) {
 			// requestRef.current = requestAnimationFrame(capture);
-			console.log(e);
 		}
 
 		// 5. recursion capture()
@@ -243,7 +254,7 @@ function Player({ routine, video, onEnded }: Props) {
 				) : (
 					<>
 						<NavigatorTop
-							routine={routine}
+							routine={routineDAO}
 							seq={seq + 1}
 						/>
 
@@ -260,7 +271,7 @@ function Player({ routine, video, onEnded }: Props) {
 						<NavigatorBottom
 							videoRef={videoRef}
 						/>
-						<PIP />
+						{/* <PIP poseLabel={poseLabel}/> */}
 					</>
 				)
 			}
