@@ -199,9 +199,26 @@ function Menu({ db } : PageProps) {
 	}, [db]);
 
 	useEffect(() => {
-		webCamCheck();
+		detectWebcam(function(hasWebcam : any) {
+			console.log(hasWebcam);
+		});
+
+		// webCamCheck();
 	}, [route]);
+
+	function detectWebcam(callback : any) {
+		const md = navigator.mediaDevices;
+		if (!md || !md.enumerateDevices) return callback(false);
+		md.enumerateDevices().then((devices : any) => {
+		  callback(devices.some((device : any) => 'videoinput' === device.kind));
+		});
+	}
+
 	function webCamCheck() {
+		console.log(DetectRTC.isWebRTCSupported);
+		console.log(DetectRTC.audioInputDevices);	// (implemented)
+		console.log(DetectRTC.audioOutputDevices);	// (implemented)
+		console.log(DetectRTC.videoInputDevices);	// (implemented)
 		if (DetectRTC.hasWebcam === false) {
 			console.log(false);
 		}
