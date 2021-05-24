@@ -11,6 +11,7 @@ import { RxDatabase } from 'rxdb';
 import { UserDTO } from '../db/DTO';
 import { UserDAO } from '../db/DAO';
 import { Webcam } from '../components/exercisePlayer';
+import DetectRTC from 'detectrtc';
 
 
 const color = {
@@ -200,25 +201,10 @@ function Menu({ db } : PageProps) {
 	useEffect(() => {
 		webCamCheck();
 	}, [route]);
-	function success(stream: any) {
-		// The success function receives an argument which points to the webcam stream
-		console.log(true);
-	}
-	function error() {
-		console.log(false);
-	}
-	async function webCamCheck() {
-		if (navigator.getUserMedia) {
-			navigator.getUserMedia({video: true}, success, error);
-	   } else {
-			error();
-	   }
-		// // eslint-disable-next-line no-self-assign
-		// if (typeof navigator.mediaDevices.getUserMedia === 'undefined') {
-		// 	console.log(typeof navigator.mediaDevices.getUserMedia);
-		// } else {
-		// 	console.log(typeof navigator.mediaDevices.getUserMedia);
-		// }
+	function webCamCheck() {
+		if (DetectRTC.hasWebcam === false) {
+			console.log(false);
+		}
 	}
 	async function select() {
 		setUser(await userDTO.getUser());
