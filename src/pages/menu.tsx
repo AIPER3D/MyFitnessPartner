@@ -207,10 +207,16 @@ function Menu({ db } : PageProps) {
 	}, [route]);
 
 	function detectWebcam(callback : any) {
-		const md = navigator.mediaDevices;
+		const md : MediaDevices = navigator.mediaDevices;
 		if (!md || !md.enumerateDevices) return callback(false);
-		md.enumerateDevices().then((devices : any) => {
-		  callback(devices.some((device : any) => 'videoinput' === device.kind));
+		md.enumerateDevices().then((devices : MediaDeviceInfo[]) => {
+			devices.forEach( (device : MediaDeviceInfo) => {
+				if ('videoinput' === device.kind ) {
+					callback(device);
+				}
+			});
+		  callback(devices.some((device : MediaDeviceInfo) => 'videoinput' === device.kind));
+		//   callback(devices);
 		});
 	}
 
