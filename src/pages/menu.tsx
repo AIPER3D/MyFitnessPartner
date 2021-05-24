@@ -211,7 +211,7 @@ function Menu({ db } : PageProps) {
 	const userDTO = new UserDTO();
 	const { route } = useParams<Param>();
 	const [user, setUser] = useState<UserDAO | null>(null);
-	let isAbleWebcam: boolean = false;
+	const [isAbleWebcam, setAbleWebcam] = useState<boolean>(false);
 
 	useEffect(() => {
 		userDTO.setDB(db);
@@ -226,10 +226,10 @@ function Menu({ db } : PageProps) {
 	function chkWebcam() {
 		// eslint-disable-next-line no-empty
 		if (DetectRTC.hasWebcam === false) {
-			isAbleWebcam = false;
+			setAbleWebcam(false);
 		} else {
 			// eslint-disable-next-line no-unused-vars
-			isAbleWebcam = true;
+			setAbleWebcam(true);
 		}
 		console.log(isAbleWebcam);
 	}
@@ -239,8 +239,10 @@ function Menu({ db } : PageProps) {
 
 	function test(){
 		if (isAbleWebcam){
+			console.log(1);
 			return <Button1 to={ '/exerciseReady/1' } >운동하기</Button1>;
 		} else {
+			console.log(2);
 			return <Button2 to={ '/' } >웹캠을찾을수없음</Button2>;
 		}
 	}
@@ -266,7 +268,13 @@ function Menu({ db } : PageProps) {
 				)}
 			</DIV>
 			<DIV>
-				{test()}
+				{
+					isAbleWebcam ? (
+						<Button1 to={ '/exerciseReady/1' } >운동하기</Button1>
+					 ) : (
+						<Button2 to={ '/' } >웹캠을찾을수없음</Button2>
+					 )
+				}
 			</DIV>
 			<UL>
 				<LI value={route == undefined ? 'selected' : ''}>
