@@ -1,3 +1,4 @@
+/* eslint-disable space-before-blocks */
 /* eslint-disable no-mixed-spaces-and-tabs */
 import React, {useEffect, useState, useRef} from 'react';
 import styled, { css } from 'styled-components';
@@ -12,6 +13,8 @@ import { UserDTO } from '../db/DTO';
 import { UserDAO } from '../db/DAO';
 import { Webcam } from '../components/exercisePlayer';
 import DetectRTC from 'detectrtc';
+import { div } from 'ndarray-ops';
+import { render } from '@testing-library/react';
 
 
 const color = {
@@ -19,6 +22,7 @@ const color = {
 	'pink': '#E75A7C',
 	'white': '#F2F5EA',
 	'blue': '#48ACF0',
+	'gray': 'gray',
 };
 
 const NAV = styled.nav`
@@ -109,7 +113,7 @@ const MenuName = styled.p`
 	padding: 0px 0px 0px 15px;
 `;
 
-const Button = styled(Link)`
+const Button1 = styled(Link)`
 	display: block;
 	width: 220px;
     padding: 15px 5px 15px 5px;
@@ -125,7 +129,22 @@ const Button = styled(Link)`
 		filter: brightness(110%);
     }
 `;
-
+const Button2 = styled(Link)`
+	display: block;
+	width: 220px;
+    padding: 15px 5px 15px 5px;
+    margin: 15px 0px 10px 10px;
+    
+    background-color: ${ color.gray };
+    text-decoration: none;
+    text-align: center;
+    color: #f2f5ea;
+    
+    &:hover {
+		transition: all 0.5s;
+		filter: brightness(110%);
+    }
+`;
 const Profile = styled.img`
 	float: left;
 	width: 48px;
@@ -192,6 +211,7 @@ function Menu({ db } : PageProps) {
 	const userDTO = new UserDTO();
 	const { route } = useParams<Param>();
 	const [user, setUser] = useState<UserDAO | null>(null);
+	let isAbleWebcam: boolean = false;
 
 	useEffect(() => {
 		userDTO.setDB(db);
@@ -199,40 +219,31 @@ function Menu({ db } : PageProps) {
 	}, [db]);
 
 	useEffect(() => {
-		detectWebcam(function(hasWebcam : any) {
-			console.log(hasWebcam);
-		});
-
-		// webCamCheck();
+		chkWebcam();
+		test();
 	}, [route]);
 
-	function detectWebcam(callback : any) {
-		const md : MediaDevices = navigator.mediaDevices;
-		if (!md || !md.enumerateDevices) return callback(false);
-		md.enumerateDevices().then((devices : MediaDeviceInfo[]) => {
-			devices.forEach( (device : MediaDeviceInfo) => {
-				if ('videoinput' === device.kind ) {
-					callback(device);
-				}
-			});
-		  callback(devices.some((device : MediaDeviceInfo) => 'videoinput' === device.kind));
-		//   callback(devices);
-		});
-	}
-
-	function webCamCheck() {
-		console.log(DetectRTC.isWebRTCSupported);
-		console.log(DetectRTC.audioInputDevices);	// (implemented)
-		console.log(DetectRTC.audioOutputDevices);	// (implemented)
-		console.log(DetectRTC.videoInputDevices);	// (implemented)
+	function chkWebcam() {
+		// eslint-disable-next-line no-empty
 		if (DetectRTC.hasWebcam === false) {
-			console.log(false);
+			isAbleWebcam = false;
+		} else {
+			// eslint-disable-next-line no-unused-vars
+			isAbleWebcam = true;
 		}
+		console.log(isAbleWebcam);
 	}
 	async function select() {
 		setUser(await userDTO.getUser());
 	}
 
+	function test(){
+		if (isAbleWebcam){
+			return <Button1 to={ '/exerciseReady/1' } >운동하기</Button1>;
+		} else {
+			return <Button2 to={ '/' } >웹캠을찾을수없음</Button2>;
+		}
+	}
 	return (
 		<NAV>
 			<DIV>
@@ -255,7 +266,7 @@ function Menu({ db } : PageProps) {
 				)}
 			</DIV>
 			<DIV>
-				<Button to={ '/exerciseReady/1' }>운동하기</Button>
+				{test()}
 			</DIV>
 			<UL>
 				<LI value={route == undefined ? 'selected' : ''}>
