@@ -211,7 +211,7 @@ function Menu({ db } : PageProps) {
 	const userDTO = new UserDTO();
 	const { route } = useParams<Param>();
 	const [user, setUser] = useState<UserDAO | null>(null);
-	const [isAbleWebcam, setAbleWebcam] = useState<boolean>(false);
+	const [hasWebcam, setHasWebcam] = useState<boolean>(false);
 
 	useEffect(() => {
 		userDTO.setDB(db);
@@ -219,33 +219,19 @@ function Menu({ db } : PageProps) {
 	}, [db]);
 
 	useEffect(() => {
-		chkWebcam();
-		test();
+		checkWebcam();
 	}, [route]);
 
-	function chkWebcam() {
-		// eslint-disable-next-line no-empty
-		if (DetectRTC.hasWebcam === false) {
-			setAbleWebcam(false);
-		} else {
-			// eslint-disable-next-line no-unused-vars
-			setAbleWebcam(true);
-		}
-		console.log(isAbleWebcam);
+	function checkWebcam() {
+		DetectRTC.load( () => {
+			// console.log(DetectRTC.videoInputDevices);
+			setHasWebcam(DetectRTC.hasWebcam);
+		});
 	}
 	async function select() {
 		setUser(await userDTO.getUser());
 	}
 
-	function test(){
-		if (isAbleWebcam){
-			console.log(1);
-			return <Button1 to={ '/exerciseReady/1' } >운동하기</Button1>;
-		} else {
-			console.log(2);
-			return <Button2 to={ '/' } >웹캠을찾을수없음</Button2>;
-		}
-	}
 	return (
 		<NAV>
 			<DIV>
@@ -269,7 +255,7 @@ function Menu({ db } : PageProps) {
 			</DIV>
 			<DIV>
 				{
-					isAbleWebcam ? (
+					hasWebcam ? (
 						<Button1 to={ '/exerciseReady/1' } >운동하기</Button1>
 					 ) : (
 						<Button2 to={ '/' } >웹캠을찾을수없음</Button2>
