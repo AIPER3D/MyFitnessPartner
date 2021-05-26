@@ -131,7 +131,7 @@ function Record({ db } : PageProps) {
 					<Text weight = {'bold'}> { routine['name'] } </Text>
 				</Box>
 				<Box width = { '210px' } height = { '23px' }>
-					<Text> { moment(record['time']).format('YYYY-MM-DD HH:mm:ss') } </Text>
+					<Text> { moment(record['startTime']).format('YYYY-MM-DD HH:mm:ss') } </Text>
 				</Box>
 				<Title>진행한 운동</Title>
 				<Box width = { '920px' } height= { '50px' }>
