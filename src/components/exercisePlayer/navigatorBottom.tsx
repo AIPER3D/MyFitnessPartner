@@ -38,7 +38,7 @@ const ProgressLight = styled.div.attrs((props: ProgressProps) => ({
 	},
 }))<ProgressProps>`
 	height: 5px;
-	background-color: background-color: #48ACF0;
+	background-color: #48ACF0;
 `;
 
 const NavTitle = styled.div`
