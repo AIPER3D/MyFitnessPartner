@@ -20,7 +20,8 @@ import { timer } from '../../utils/bench-util';
 type ItemProps = {
 	db: RxDatabase;
     data: Data;
-    onPredict: (tensorImage : any) => Promise<string>;
+    onPredict: (tensorImage : any, end : boolean) => Promise<string>;
+    predictable: boolean;
 };
 
 const Root = styled.div`
@@ -86,28 +87,31 @@ const Text = styled.p`
 `;
 
 
-function Item({ db, data, onPredict } : ItemProps) {
+function Item({ db, data, onPredict, predictable } : ItemProps) {
 	const videoDTO = new VideoDTO();
 	const id = videoDTO.getNewId();
 	const [thumb, setThumb] = useState<string>(progress);
+	const [src, setSrc] = useState<any>(null);
 
 	const [current, setCurrent] = useState<number>(0);
 	const [total, setTotal] = useState<number>(0);
 	const [analysisPer, setAnalysisPer] = useState<number>(0);
-	const [analysisCurrent, setAnalysisCurrent] = useState<number>(0);
+	const [analysisBefore, setAnalysisBefore] = useState<number>(0);
+	const [analysisRefresh, setAnalysisRefresh] = useState<number>(0);
+	const [analysisKey, setAnalysisKey] = useState<number>(0);
 
 	const [uploadStatus, setUploadStatus] = useState<number>(0);
 	const [analysisStatus, setAnalysisStatus] = useState<number>(0);
 	const [submitStatus, setSubmitStatus] = useState<number>(0);
 
-	const videoElement : any = document.createElement('video');
-	const canvasElement : any = document.createElement('canvas');
+	const [videoElement] = useState<any>(document.createElement('video'));
+	const [canvasElement] = useState<any>(document.createElement('canvas'));
 	const ctx : any = canvasElement.getContext('2d');
 	// const ccc = useRef<HTMLCanvasElement | null>(null);
 
-	const timelineArray: any[] = [];
-	const exerciseArray : string[] = [];
-	const timeArray : [number, number] = [0, 0];
+	const [timelineArray] = useState<any>([]);
+	const [exerciseArray] = useState<any>([]);
+	const [timeArray] = useState<any>([0, 0]);
 
 	videoDTO.setDB(db);
 
@@ -116,6 +120,35 @@ function Item({ db, data, onPredict } : ItemProps) {
 			videoElement.pause();
 		});
 	}, []);
+
+	useEffect(() => {
+		if (uploadStatus == Status.UPLOADING_SUCCES && analysisStatus == 0 && predictable == true) {
+			(async () => {
+				function retryCheck() {
+					setAnalysisRefresh(Math.random());
+					setTimeout(retryCheck, 10000);
+				}
+
+				setAnalysisStatus(Status.ANALYZING);
+				setAnalysisKey(analysisRefresh);
+				await analysis(analysisRefresh);
+
+				setTimeout(retryCheck, 10000);
+			})();
+		} else if (analysisStatus == Status.ANALYZING) {
+			if (analysisPer < 100 && analysisBefore == analysisPer) {
+				console.log('분석 재시작');
+				setAnalysisStatus(Status.ANALYZING);
+				(async () => {
+					setAnalysisKey(analysisRefresh);
+					await analysis(analysisRefresh);
+				})();
+			} else {
+				console.log(analysisStatus + ' : ' + analysisBefore + ' > ' + analysisPer);
+				setAnalysisBefore(analysisPer);
+			}
+		}
+	}, [uploadStatus, predictable, analysisRefresh]);
 
 	// 운동 영상 업로드
 	data.reader.onload = async (e) => {
@@ -156,7 +189,6 @@ function Item({ db, data, onPredict } : ItemProps) {
 				fs.writeFileSync('./files/videos/' + vidName, vidValue);
 
 				setUploadStatus(Status.UPLOADING_SUCCES);
-				await analysis(blob, image);
 			}
 			return success;
 		};
@@ -174,6 +206,7 @@ function Item({ db, data, onPredict } : ItemProps) {
 		videoElement.addEventListener('timeupdate', timeupdate);
 		videoElement.preload = 'metadata';
 		videoElement.src = url;
+		setSrc(url);
 
 		videoElement.muted = true;
 		videoElement.playsInline = true;
@@ -196,114 +229,149 @@ function Item({ db, data, onPredict } : ItemProps) {
 	};
 
 	// 운동 영상 분석
-	async function analysis(video : Blob, thumbnail : string) {
+	async function analysis(key : number) {
 		async function getFrame(now : any, meta : any) {
-			videoElement.pause();
+			try {
+				videoElement.pause();
 
-			// 1. get sqaure bounding box
-			const boundingBox = getSquareBound(meta.width, meta.height);
+				// 재시작하여 새로운 분석이 시작되면, 기존의 분석 프로세스는 중단
+				if (key != analysisKey) {
+					return;
+				}
 
-			// 2. resize image
-			const tensor = (await tf.browser.fromPixelsAsync(videoElement));
-			const expandedTensor = tensor.expandDims();
-			const resizedTensor = tf.image.cropAndResize(expandedTensor, [boundingBox], [0], [224, 224]);
+				// 1. get sqaure bounding box
+				const boundingBox = getSquareBound(meta.width, meta.height);
 
-			// 3. inference image
-			const result = await onPredict(resizedTensor);
+				// 2. resize image
+				const tensor = (await tf.browser.fromPixelsAsync(videoElement));
+				const expandedTensor = tensor.expandDims();
+				const resizedTensor = tf.image.cropAndResize(expandedTensor, [boundingBox], [0], [224, 224]);
 
-			tensor.dispose();
-			expandedTensor.dispose();
-			resizedTensor.dispose();
+				// 3. inference image
+				const result = await onPredict(resizedTensor, false);
 
-			// exerciseArray가 비어있는 상태
-			if (exerciseArray.length <= 0) {
-				// 시작시간 설정
-				timeArray[0] = timeArray[1];
-			}
+				tensor.dispose();
+				expandedTensor.dispose();
+				resizedTensor.dispose();
 
-			// 결과를 배열에 추가
-			exerciseArray.push(result);
+				// exerciseArray가 비어있는 상태
+				if (exerciseArray.length <= 0) {
+					// 시작시간 설정
+					timeArray[0] = timeArray[1];
+				}
 
-			// 가장 마지막 시간을 종료 시간으로 설정
-			if (meta.mediaTime > timeArray[1]) {
-				timeArray[1] = meta.mediaTime;
-			}
+				// 결과를 배열에 추가
+				exerciseArray.push(result);
 
-			// exerciseArray가 가득찬 상태
-			if (exerciseArray.length >= 20) {
-				// 빈도 측정
+				// 가장 마지막 시간을 종료 시간으로 설정
+				if (meta.mediaTime > timeArray[1]) {
+					timeArray[1] = meta.mediaTime;
+				}
 
-				const count = getCount(exerciseArray);
+				// exerciseArray가 가득찬 상태
+				if (exerciseArray.length >= 20) {
+					// 빈도 측정
 
-				const sortedCount = Object.keys(count).sort(function(a, b) {
-					return count[a]-count[b];
-				});
-				const maxKey = sortedCount[sortedCount.length - 1];
+					const count = getCount(exerciseArray);
 
-				// console.log({
-				// 	start: timeArray[0],
-				// 	end: timeArray[1],
-				// 	result: count,
-				// });
+					const sortedCount = Object.keys(count).sort(function(a, b) {
+						return count[a] - count[b];
+					});
+					const maxKey = sortedCount[sortedCount.length - 1];
 
-				// 마무리
-				if (timelineArray.length > 0 && timelineArray[timelineArray.length - 1]['name'] == maxKey) {
-					timelineArray[timelineArray.length - 1]['end'] = timeArray[1];
+					// console.log({
+					// 	start: timeArray[0],
+					// 	end: timeArray[1],
+					// 	result: count,
+					// });
+
+					// 마무리
+					if (timelineArray.length > 0 && timelineArray[timelineArray.length - 1]['name'] == maxKey) {
+						timelineArray[timelineArray.length - 1]['end'] = timeArray[1];
+					} else {
+						timelineArray.push({
+							name: maxKey,
+							start: timeArray[0],
+							end: timeArray[1],
+						});
+					}
+
+					// 비우기
+					for (let i = exerciseArray.length; i > 0; i--) {
+						exerciseArray.pop();
+					}
+				}
+
+				// 분석 수치 입력
+				setAnalysisPer(Math.round(videoElement.currentTime / videoElement.duration * 100));
+				// 반복
+				if (!videoElement.ended &&
+					(videoElement.duration - videoElement.currentTime) > 0.5) {
+					videoElement.play()
+						.then(() => {
+							videoElement.requestVideoFrameCallback(getFrame);
+						})
+						.catch(async (e: any) => {
+							setTimeout(() => {
+								videoElement.play()
+									.then(async () => {
+										console.log('재생');
+										videoElement.requestVideoFrameCallback(getFrame);
+									})
+									.catch(async (e: any) => {
+										console.log(e);
+										console.log('오류로 인한 분석 재시작');
+										setAnalysisStatus(Status.ANALYZING);
+										setAnalysisKey(analysisRefresh);
+										await analysis(analysisRefresh);
+									});
+							}, 1000);
+						});
 				} else {
-					timelineArray.push({
-						name: maxKey,
-						start: timeArray[0],
-						end: timeArray[1],
-					});
+					// 타임라인이 비면 뭔가 문제가 있는것이므로 재시도
+					if (timelineArray.length <= 0) {
+						console.log('분석 재시작');
+						setAnalysisStatus(Status.ANALYZING);
+						setAnalysisKey(analysisRefresh);
+						await analysis(analysisRefresh);
+					} else {
+						await onPredict(null, true);
+						setAnalysisStatus(Status.ANALYZING_SUCCES);
+						console.log(timelineArray);
+						await submit();
+					}
 				}
-
-				// 비우기
-				for (let i = exerciseArray.length; i > 0; i--) {
-					exerciseArray.pop();
-				}
-			}
-
-			// 분석 수치 입력
-			setAnalysisPer(Math.round(videoElement.currentTime / videoElement.duration * 100));
-			// 반복
-			if (!videoElement.ended &&
-				(videoElement.duration - videoElement.currentTime) > 0.5) {
-				videoElement.play()
-					.then(() => {
-						videoElement.requestVideoFrameCallback(getFrame);
-					})
-					.catch((e : any) => {
-						setTimeout(() => {
-							videoElement.play()
-								.then(() => {
-									videoElement.requestVideoFrameCallback(getFrame);
-								})
-								.catch((e : any) => {
-									console.log(e);
-									setUploadStatus(Status.ANALYZING_FAIL);
-								});
-						}, 1000);
-					});
-			} else {
-				setAnalysisStatus(Status.ANALYZING_SUCCES);
-				console.log(timelineArray);
-				await submit();
+			} catch (e : any) {
+				console.log(e);
+				console.log('오류로 인한 분석 재시작');
+				setAnalysisStatus(Status.ANALYZING);
+				setAnalysisKey(analysisRefresh);
+				await analysis(analysisRefresh);
 			}
 		}
 
-		// 1. 영상 분석
-		setAnalysisStatus(Status.ANALYZING);
+		for (let i = 0; i < timelineArray.length; i++) {
+			timelineArray.pop();
+		}
+		for (let i = 0; i < exerciseArray.length; i++) {
+			exerciseArray.pop();
+		}
+		timeArray[0] = 0;
+		timeArray[1] = 0;
 
-		// 2. 콜백
-		videoElement.playbackRate = 16;
-		videoElement.play()
-			.then(() => {
-				console.log(videoElement.readyState);
+		videoElement.currentTime = 0;
+		videoElement.playbackRate = 0.1;
+		videoElement.play().
+			then(async () => {
+				console.log('재생');
 				videoElement.requestVideoFrameCallback(getFrame);
-			})
-			.catch((e : any) => {
+				videoElement.playbackRate = 16;
+			}).catch(async (e : any) => {
 				console.log(e);
-				setUploadStatus(Status.ANALYZING_FAIL);
+				console.log('오류로 인한 분석 재시작');
+				setAnalysisStatus(Status.ANALYZING);
+				setAnalysisKey(analysisRefresh);
+				await analysis(analysisRefresh);
 			});
 	}
 

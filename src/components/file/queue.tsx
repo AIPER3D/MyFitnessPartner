@@ -49,6 +49,7 @@ const Count = styled.p`
 function Queue({ db, data } : QueueProps) {
 	// const [exerciseModel, setExerciseModel] = useState<tf.LayersModel>();
 	const [exerciseModel, setExerciseModel] = useState<CustomPoseNet>();
+	const [seq, setSeq] = useState<number>(0);
 
 	useEffect(() => {
 		(async () => {
@@ -57,8 +58,11 @@ function Queue({ db, data } : QueueProps) {
 		})();
 	}, []);
 
-	async function predict(tensorImage : any) : Promise<string> {
-		if (exerciseModel != undefined && exerciseModel != null) {
+	async function predict(tensorImage : any, end : boolean) : Promise<string> {
+		if (end == true) {
+			setSeq(seq + 1);
+			return '';
+		} else if (exerciseModel != undefined && exerciseModel != null) {
 			const image = tensorToImage(tensorImage);
 
 			const {
@@ -101,7 +105,7 @@ function Queue({ db, data } : QueueProps) {
 	const arr = [];
 	for (let i = 0; i < data.length; i++) {
 		arr.push(
-			<Item key = { i } db= { db } data={ data[i] } onPredict={ predict } />
+			<Item key = { i } db= { db } data={ data[i] } onPredict={ predict } predictable={ i == seq } />
 		);
 	}
 
