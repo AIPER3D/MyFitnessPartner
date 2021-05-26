@@ -122,6 +122,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 						videoRef.currentTime <= end) {
 						setPoseLabel(name);
 						setPoseTime((videoRef.currentTime - start) / (end - start));
+						console.log(start + ' | ' + videoRef.currentTime + ' | ' + end);
 					}
 				}
 			});

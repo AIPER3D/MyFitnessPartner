@@ -32,11 +32,13 @@ const ProgressBar = styled.div`
 	background-color: #CCCCCC;
 `;
 
-const ProgressLight = styled.div`
-	width: ${ (props : ProgressProps) => props.width };
+const ProgressLight = styled.div.attrs((props: ProgressProps) => ({
+	style: {
+		width: props.width,
+	},
+}))<ProgressProps>`
 	height: 5px;
-	
-	background-color: #48ACF0;
+	background-color: background-color: #48ACF0;
 `;
 
 const NavTitle = styled.div`
@@ -105,7 +107,7 @@ const Icon = styled(FontAwesomeIcon)`
 function NavigatorBottom({ videoRef } : Props) {
 	const [time, setTime] = useState<string>('');
 	const [per, setPer] = useState<number>(0);
-	const [playing, setPlaying] = useState<boolean>(false);
+	const [playing, setPlaying] = useState<boolean>(true);
 
 	function digit(n : number) : string {
 		if (n >= 10) return '' + n;
