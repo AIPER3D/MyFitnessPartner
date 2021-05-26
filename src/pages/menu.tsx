@@ -258,7 +258,7 @@ function Menu({ db } : PageProps) {
 					hasWebcam ? (
 						<Button1 to={ '/exerciseReady/1' } >운동하기</Button1>
 					 ) : (
-						<Button2 to={ '/' } >웹캠을찾을수없음</Button2>
+						<Button2 to={ '/' } >카메라를 찾을 수 없음</Button2>
 					 )
 				}
 			</DIV>
