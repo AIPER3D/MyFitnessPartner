@@ -25,6 +25,7 @@ function Dashboard({db}: DashBoardProps) {
 		(async ()=>{
 			setTime(await getExerciseTime());
 		})();
+		console.log(recordDTO.getAllRecords());
 	}, [db]);
 
 	async function getUser() {

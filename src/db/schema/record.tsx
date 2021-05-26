@@ -8,6 +8,9 @@ const RecordSchema = {
 		'record_id': {
 			'type': 'number',
 		},
+		'record_time': {
+			'type': 'number',
+		},
 		'routine_id': {
 			'type': 'number',
 		},

@@ -26,7 +26,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 	const record: RecordDAO = {
 		id: 0,
-		time: 10,
+		time: 1000,
 		routineId: routineDAO['id'],
 		routineName: routineDAO['name'],
 		recordExercise: [
