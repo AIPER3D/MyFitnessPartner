@@ -14,6 +14,7 @@ import { drawKeypoints, drawSkeleton, getSquareBound } from '../../utils/posenet
 import { css } from '@emotion/react';
 import PuffLoader from 'react-spinners/PuffLoader';
 import { tensorToImage } from '../../utils/video-util';
+import moment from 'moment';
 
 type Props = {
 	routineDAO: RoutineDAO;
@@ -26,14 +27,15 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 	const record: RecordDAO = {
 		id: 0,
-		time: 1000,
+		time: 10,
+		startTime: moment().unix(),
 		routineId: routineDAO['id'],
 		routineName: routineDAO['name'],
 		recordExercise: [
 			{
 				name: 'sqart',
-				startTime: new Date().getTime(),
-				endTime: new Date().getTime()+1000,
+				startTime: moment().unix(),
+				endTime: moment().unix() + 1000,
 				count: 10,
 			},
 		],

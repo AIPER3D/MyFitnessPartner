@@ -11,6 +11,9 @@ const RecordSchema = {
 		'record_time': {
 			'type': 'number',
 		},
+		'record_start_time': {
+			'type': 'number',
+		},
 		'routine_id': {
 			'type': 'number',
 		},
