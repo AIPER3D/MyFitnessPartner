@@ -10,6 +10,8 @@ import { drawKeypoints, drawSkeleton } from '../../utils/posenet-utils';
 import { loadModel, loadTMPose } from '../../utils/load-utils';
 import RepetitionCounter from '../../utils/RepetitionCounter';
 import * as tmPose from '@teachablemachine/pose';
+import { timer } from '../../utils/bench-util';
+import { RecordDAO } from '../../db/DAO';
 
 type Props = {
 	width: number;
@@ -28,7 +30,7 @@ interface RepetitionObject {
 function Webcam({ width, height, opacity, poseLabel}: Props) {
 	const {ipcRenderer} = window.require('electron');
 
-	const elementRef = useRef<HTMLVideoElement>(null);
+	const videoRef = useRef<HTMLVideoElement>(null);
 	const webcamRef = useRef<any>(null);
 
 	const requestRef = useRef<number>();
@@ -53,6 +55,10 @@ function Webcam({ width, height, opacity, poseLabel}: Props) {
 				await run();
 			});
 
+		const _timer = timer(false);
+
+		const startTime = _timer.start();
+
 		return () => {
 			if (webcamRef.current) {
 				webcamRef.current.stop();
@@ -61,14 +67,19 @@ function Webcam({ width, height, opacity, poseLabel}: Props) {
 			if (requestRef.current) {
 				cancelAnimationFrame(requestRef.current);
 			}
+
+			if (poseLabel != '') {
+				const endTime = _timer.stamp();
+
+				const record = {
+					name: poseLabel,
+					startTime,
+					endTime,
+					count: repetitionCounter.current[poseLabel].nRepeats,
+				};
+			}
 		};
 	}, [poseLabel]);
-
-	useEffect( () => {
-		return () => {
-			console.log(repetitionCounter);
-		};
-	}, []);
 
 	async function load() {
 		poseNets = {
@@ -85,8 +96,8 @@ function Webcam({ width, height, opacity, poseLabel}: Props) {
 	}
 
 	async function run() {
-		if (elementRef.current == null) return;
-		const element = elementRef.current;
+		if (videoRef.current == null) return;
+		const element = videoRef.current;
 
 		webcamRef.current = await tf.data.webcam(element, {
 			resizeHeight: inputHeight,
@@ -101,24 +112,21 @@ function Webcam({ width, height, opacity, poseLabel}: Props) {
 
 	async function capture() {
 		try {
-			if (webcamRef.current == null) return;
 			const webcam = webcamRef.current;
 
 			// 1. caputer iamge
 			const image = await webcam.capture();
 
-			if (image == null) return;
-
 			// 2. estimate pose
 			const {pose, posenetOutput} = await poseNets[poseLabel].estimatePose(image, true);
-
-			// 3. pose classification
-			const result = await poseNets[poseLabel].predict(posenetOutput);
 
 			if (pose == null) {
 				requestRef.current = requestAnimationFrame(capture);
 				return;
 			}
+
+			// 3. pose classification
+			const result = await poseNets[poseLabel].predict(posenetOutput);
 
 			if (count % 2 == 0) {
 				ipcRenderer.send('webcam-poses', pose);
@@ -138,7 +146,7 @@ function Webcam({ width, height, opacity, poseLabel}: Props) {
 			await tf.nextFrame();
 			count++;
 		} catch (e) {
-			// console.log(e);
+			console.log(e);
 		}
 		requestRef.current = requestAnimationFrame(capture);
 	}
@@ -172,7 +180,7 @@ function Webcam({ width, height, opacity, poseLabel}: Props) {
 			<Video
 				muted
 				autoPlay
-				ref={elementRef}
+				ref={videoRef}
 				width={width}
 				height={height}
 			/>

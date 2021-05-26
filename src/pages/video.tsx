@@ -1,6 +1,9 @@
+const path = require('path');
+import {loadFile, loadJson} from '../utils/load-utils';
+
 const fs = window.require('fs');
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import {Redirect, useParams} from 'react-router-dom';
 import styled from 'styled-components';
 
 import { RxDatabase } from 'rxdb';
@@ -72,18 +75,17 @@ const Input = styled.input`
 const SubBox = styled.div`
 	float: left;
 	
-	width: calc(100% - 10px);
+	width: calc(100%);
 	height: 30px;
 	margin: 5px 5px 5px 5px;
 	
-	border: 1px solid #dddddd;
-	background: #eeeeee;
+	background: #ffffff;
 `;
 
-const SubTitle = styled.div`
+const SubTitle = styled.select`
 	float: left;
-	width: calc(100% - 200px);
-	height: 20px;
+	width: calc(100% - 10px);
+	height: 30px;
 	padding: 4px 0px 5px 15px;
 	margin: 0px 0px 0px 0px;
 	
@@ -91,6 +93,22 @@ const SubTitle = styled.div`
 	font-size: 12pt;
 	font-weight: bold;
 	text-align: left;
+	
+	transition: 0.5s all;
+	border: 1px solid #cccccc;
+	
+	outline: none;
+	appearance: none;
+	
+	&:focus {
+		transition: 0.5s all;
+		border: 1px solid #000000;
+	}
+	
+	&:after {
+		transition: 0.5s all;
+		border: 1px solid #cccccc;
+	}
 `;
 
 type ImageProps = {
@@ -105,11 +123,12 @@ const SubImage = styled.img`
 `;
 
 const SubText = styled.p`
-	float: left;
-	width: calc(150px);
+	position: absolute;
+	float: right;
+	width: calc(150px - 10px);
 	height: 20px;
-	padding: 5px 0px 0px 15px;
-	margin: 0px 0px 0px 0px;
+	padding: 5px 15px 0px 15px;
+	margin: 0px 0px 0px 250px;
 	
 	color: #000000;
 	font-size: 10pt;
@@ -132,7 +151,8 @@ function Video({ db } : PageProps) {
 	const [video, setVideo] = useState<VideoDAO | null>(null);
 	const [name, setName] = useState<string>('');
 	const [thumbnail, setThumbnail] = useState<string>(dummy);
-	const timeline : Object[] = [];
+	const [updated, setUpdated] = useState<number>(0);
+
 	useEffect(() => {
 		videoDTO.setDB(db);
 		load();
@@ -153,9 +173,53 @@ function Video({ db } : PageProps) {
 			}
 		}
 	}
-
 	function onChangeName(e : any) {
 		setName(e.target.value);
+		setUpdated(updated + 1);
+	}
+	function digit(n : number) : string {
+		if (n >= 10) return '' + n;
+		else return '0' + n;
+	}
+	function getTime(time : number) : string {
+		if (isNaN(time)) return '00:00';
+
+		const h = Math.floor(time / 3600);
+		time = time % 3600;
+
+		const m = Math.floor(time / 60);
+		time = time % 60;
+
+		const s = Math.floor(time);
+
+		return digit(h) + ':' + digit(m) + ':' + digit(s);
+	}
+	async function onChangeOption(e : any) {
+		if (video == null) return;
+
+		video['timeline'][e.target.id]['name'] = e.target.value;
+		setUpdated(updated + 1);
+	}
+	async function submit(e : any) {
+		e.preventDefault();
+
+		if (updated == 0) {
+			setUpdated(-1);
+			return;
+		}
+
+		if (video == null) return;
+
+		video['name'] = name;
+
+		videoDTO.setDB(db);
+		const result = await videoDTO.updateVideo(video);
+		if (result == true) {
+			alert(`수정 완료`);
+		} else {
+			alert('수정 실패');
+		}
+		setUpdated(0);
 	}
 
 	if (video == null) {
@@ -165,19 +229,30 @@ function Video({ db } : PageProps) {
 			</div>
 		);
 	} else {
+		const metadata = loadJson('files/models/exercise_classifier/PoseClassification/metadata.json');
+		const options = [];
+		for (let i = 0; i < metadata['labels'].length; i++) {
+			options.push(<option key={ i } value={ metadata['labels'][i] }> { metadata['labels'][i] } </option>);
+		}
+
 		const arr = [];
-		console.log(video['timeline']);
 		for (let i = 0; i < video.timeline.length; i++) {
 			arr.push(
-				<SubBox key = { i }>
-					<SubTitle>{video['timeline'][i]['name']}</SubTitle>
-					<SubText>{video['timeline'][i]['start']} - {video['timeline'][i]['end']}</SubText>
+				<SubBox key={ i }>
+					<SubTitle id={ i.toString() } value={video['timeline'][i]['name']} onChange={ onChangeOption }>
+						{ options }
+					</SubTitle>
+					<SubText>{getTime(video['timeline'][i]['start'])} - {getTime(video['timeline'][i]['end'])}</SubText>
 				</SubBox>
 			);
 		}
 
+		if (updated == -1) {
+			return (<Redirect to={ '/videos/1' } />);
+		}
+
 		return (
-			<div>
+			<form onSubmit={ submit } >
 				<Header text='영상 정보' />
 				<Title>영상 명</Title>
 				<Box width={ '920px' } height={ '23px' } color={ name != video.name ? '#48ACF0' : '#eeeeee' }>
@@ -190,8 +265,9 @@ function Video({ db } : PageProps) {
 				<Box width = { '430px' } height= { '300px' }>
 					{ arr }
 				</Box>
-				<Button href={ '/videos/1' } text = { '확인' } />
-			</div>
+
+				<Button text={ updated > 0 ? '수정하기' : '돌아가기' } color={ updated > 0 ? 'blue' : 'dark'}/>
+			</form>
 		);
 	}
 }
