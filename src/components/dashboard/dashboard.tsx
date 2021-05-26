@@ -23,9 +23,8 @@ function Dashboard({db}: DashBoardProps) {
 		getUser();
 		getRecord();
 		(async ()=>{
-			setTime(await getExerciseTime());
+			console.log(await getExerciseTime());
 		})();
-		console.log(recordDTO.getAllRecords());
 	}, [db]);
 
 	async function getUser() {
@@ -46,6 +45,7 @@ function Dashboard({db}: DashBoardProps) {
 	}
 
 	async function getExerciseTime() {
+		console.log(moment().set({hour: 0, minute: 0, second: 0, millisecond: 0}).unix());
 		return await recordDTO.getTimeByDay(moment().unix());
 	}
 

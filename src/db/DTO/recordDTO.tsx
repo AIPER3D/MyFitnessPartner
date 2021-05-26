@@ -42,6 +42,7 @@ class RecordDTO {
 
     	await this.db.collections.records.insert({
     		record_id: id,
+    		record_time: data['time'],
     		routine_id: data['routineId'],
     		routine_name: data['routineName'],
     		record_exercises: data['recordExercise'],
@@ -137,13 +138,13 @@ class RecordDTO {
     			})
     		.exec();
 
-    		let result = 0;
-    		if (doc) {
-    			for (let i = 0; i < doc.length; i++) {
-    				result += doc[i].get('time');
-    			}
-    		}
-    		return result;
+    		// let result = 0;
+    		// if (doc) {
+    		// 	for (let i = 0; i < doc.length; i++) {
+    		// 		result += doc[i].get('time');
+    		// 	}
+    		// }
+    		return doc;
     }
 }
 
