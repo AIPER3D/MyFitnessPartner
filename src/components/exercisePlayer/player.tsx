@@ -26,10 +26,17 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 	const record: RecordDAO = {
 		id: 0,
-		time: 0,
+		time: 10,
 		routineId: routineDAO['id'],
 		routineName: routineDAO['name'],
-		recordExercise: [],
+		recordExercise: [
+			{
+				name: 'sqart',
+				startTime: new Date().getTime(),
+				endTime: new Date().getTime()+1000,
+				count: 10,
+			},
+		],
 	};
 
 	const requestRef = useRef<number>();

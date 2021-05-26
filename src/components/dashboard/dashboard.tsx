@@ -7,6 +7,7 @@ import { RecordDTO } from '../../db/DTO/recordDTO';
 import { UserDTO } from '../../db/DTO/userDTO';
 import { UserDAO } from '../../db/DAO/userDAO';
 import { RecordDAO } from '../../db/DAO';
+import moment from 'moment';
 type DashBoardProps = {
 	db : RxDatabase;
 }
@@ -15,11 +16,15 @@ function Dashboard({db}: DashBoardProps) {
 	const [records, setRecords] = useState<RecordDAO[] | null>(null);
 	const userDTO = new UserDTO();
 	const [user, setUser] = useState<UserDAO | null>(null);
+	const [time, setTime] = useState(1);
 	useEffect(()=>{
 		recordDTO.setDB(db);
 		userDTO.setDB(db);
 		getUser();
 		getRecord();
+		(async ()=>{
+			setTime(await getExerciseTime());
+		})();
 	}, [db]);
 
 	async function getUser() {
@@ -39,8 +44,8 @@ function Dashboard({db}: DashBoardProps) {
 		}
 	}
 
-	function yourExerciseTime() {
-		return 30;
+	async function getExerciseTime() {
+		return await recordDTO.getTimeByDay(moment().unix());
 	}
 
 	function yourExerciseDay() {
@@ -97,7 +102,7 @@ function Dashboard({db}: DashBoardProps) {
 						<i className="far fa-clock fa-2x text-dark"></i>
 						<div className="card_inner">
 							<p className="text-primary-p"> 오늘 운동시간 </p>
-							<span className="font-bold text-title"> {yourExerciseTime()} 분</span>
+							<span className="font-bold text-title"> {time} 분</span>
 						</div>
 					</div>
 					<div className="card">
