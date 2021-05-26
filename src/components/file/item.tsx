@@ -109,6 +109,9 @@ function Item({ db, data, onPredict, predictable } : ItemProps) {
 	const ctx : any = canvasElement.getContext('2d');
 	// const ccc = useRef<HTMLCanvasElement | null>(null);
 
+	const [fileThumbnail, setFileThumbnail] = useState<any>(null);
+	const [fileVideo, setFileVideo] = useState<any>(null);
+
 	const [timelineArray] = useState<any>([]);
 	const [exerciseArray] = useState<any>([]);
 	const [timeArray] = useState<any>([0, 0]);
@@ -179,14 +182,10 @@ function Item({ db, data, onPredict, predictable } : ItemProps) {
 					return;
 				}
 
-				const thumbName = id + '.im';
-				fs.writeFileSync('./files/thumbnails/' + thumbName, image);
-				setThumb(image);
-
 				setUploadStatus(Status.SAVING_VIDEO);
-				const vidName = id + '.vd';
-				const vidValue = Buffer.from(e.target.result);
-				fs.writeFileSync('./files/videos/' + vidName, vidValue);
+				setFileThumbnail(image);
+				setThumb(image);
+				setFileVideo(Buffer.from(e.target.result));
 
 				setUploadStatus(Status.UPLOADING_SUCCES);
 			}
@@ -378,6 +377,13 @@ function Item({ db, data, onPredict, predictable } : ItemProps) {
 	// 운동 영상 등록
 	async function submit() {
 		setSubmitStatus(Status.SUBMITTING);
+
+		const thumbName = id + '.im';
+		fs.writeFileSync('./files/thumbnails/' + thumbName, fileThumbnail);
+
+		const vidName = id + '.vd';
+		fs.writeFileSync('./files/videos/' + vidName, fileVideo);
+
 
 		const videoDAO : VideoDAO = {
 			id: id,

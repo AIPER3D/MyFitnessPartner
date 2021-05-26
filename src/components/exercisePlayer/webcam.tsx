@@ -117,6 +117,8 @@ function Webcam({ width, height, opacity, poseLabel}: Props) {
 			// 1. caputer iamge
 			const image = await webcam.capture();
 
+			if (image == null) return;
+
 			// 2. estimate pose
 			const {pose, posenetOutput} = await poseNets[poseLabel].estimatePose(image, true);
 

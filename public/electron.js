@@ -112,10 +112,10 @@ function compareKeypoints() {
 		const normalizedWebcamKeypoints = normalizeKeypoints(webcamBoundingBox, resizedWebcamKeypoints);
 
 		// 4. keypoints to one dimentonal array
-		const videoKeypointsArray = oneDimentionalKeypoints(normalizedVideoKeypoints);
-		const webcamKeypointsArray = oneDimentionalKeypoints(normalizedWebcamKeypoints);
+		const [videoKeypointsArray, videoKeypointsScores] = oneDimentionalKeypoints(normalizedVideoKeypoints);
+		const [webcamKeypointsArray, _] = oneDimentionalKeypoints(normalizedWebcamKeypoints);
 
-		const keypointsSimilarity = similarity(videoKeypointsArray, webcamKeypointsArray);
+		const keypointsSimilarity = cosineSimilarity(videoKeypointsArray, webcamKeypointsArray);
 
 		return keypointsSimilarity;
 	}
@@ -127,7 +127,7 @@ function lerp(start, end, amount) {
 	return (1-amount)*start+amount*end;
 }
 
-function similarity(A, B) {
+function cosineSimilarity(A, B) {
 	var dotproduct = 0;
 	var mA = 0;
 	var mB = 0;
@@ -141,6 +141,18 @@ function similarity(A, B) {
 	var similarity = (dotproduct) / ((mA) * (mB)); // here you needed extra brackets
 	return similarity;
 }
+
+// function weightedDistanceMatching(vectorPose1XY, vectorPose2XY, vectorConfidences: number[]): number {
+// 	const summation1 = 1 / vectorConfidences[vectorConfidences.length - 1];
+  
+// 	let summation2 = 0;
+// 	for (let i = 0; i < vectorPose1XY.length; i++) {
+// 	  let confIndex = Math.floor(i / 2);
+// 	  summation2 += vectorConfidences[confIndex] * Math.abs(vectorPose1XY[i] - vectorPose2XY[i]);
+// 	}
+  
+// 	return summation1 * summation2;
+//   }
 
 function getBoundingBox(keypoints) {
 	function reducer({ maxX, maxY, minX, minY }, { position: { x, y } }) {
@@ -191,13 +203,23 @@ function l2normalize(val, max, min) {
 }
 
 function oneDimentionalKeypoints(keypoints) {
-	const oneDimention = [];
+	const vectorPose = [];
+	const vectorScores = [];
+
+	let vectorScoresSum = 0;
 
 	keypoints.forEach( (keypoint) => {
-		oneDimention.push(keypoint.position.x);
-		oneDimention.push(keypoint.position.y);
+		vectorPose.push(keypoint.position.x);
+		vectorPose.push(keypoint.position.y);
+
+		const score = keypoint.score;
+		vectorScores.push(score);
+		vectorScoresSum += score;
 	});
-	return oneDimention;
+
+	vectorScores.push(vectorScoresSum);
+
+	return [vectorPose, vectorScores];
 }
 
 ipcMain.handle('exercise-classification', async (event, receivedBuffer) => {

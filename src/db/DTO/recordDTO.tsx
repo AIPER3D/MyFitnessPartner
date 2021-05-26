@@ -42,7 +42,6 @@ class RecordDTO {
 
     	await this.db.collections.records.insert({
     		record_id: id,
-    		time: data['time'],
     		routine_id: data['routineId'],
     		routine_name: data['routineName'],
     		record_exercises: data['recordExercise'],
