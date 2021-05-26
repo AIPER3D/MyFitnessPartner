@@ -78,10 +78,6 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 	}, [videoRef, seq]);
 
 	useEffect(() => {
-		// if (requestRef.current) {
-		// 	cancelAnimationFrame(requestRef.current);
-		// }
-
 		requestRef.current = requestAnimationFrame(capture);
 
 		return () => {
@@ -139,10 +135,6 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 		}
 
 		setLoading(false);
-	}
-
-	function end() {
-		console.log('끝');
 	}
 
 	let count = 0;
