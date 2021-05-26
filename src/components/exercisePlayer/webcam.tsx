@@ -18,6 +18,7 @@ type Props = {
 	height: number;
 	opacity: number;
 	poseLabel : string;
+	setRecordExercise : React.Dispatch<React.SetStateAction<RecordDAO['recordExercise']>>
 }
 
 interface RepetitionObject {
@@ -27,7 +28,7 @@ interface RepetitionObject {
 	[props:string] : any;
 }
 
-function Webcam({ width, height, opacity, poseLabel}: Props) {
+function Webcam({ width, height, opacity, poseLabel, setRecordExercise}: Props) {
 	const {ipcRenderer} = window.require('electron');
 
 	const videoRef = useRef<HTMLVideoElement>(null);
@@ -48,6 +49,8 @@ function Webcam({ width, height, opacity, poseLabel}: Props) {
 	const [poses, setPoses] = useState<any>(null);
 
 	const [isPlaying, setPlaying] = useState<boolean>(true);
+
+	const [recordExcercise, _] = useState<RecordDAO['recordExercise']>([]);
 
 	useEffect(() => {
 		load()
@@ -71,12 +74,20 @@ function Webcam({ width, height, opacity, poseLabel}: Props) {
 			if (poseLabel != '') {
 				const endTime = _timer.stamp();
 
-				const record = {
+
+				const record : {
+					name: string;
+					startTime: Number;
+					endTime: Number;
+					count: Number;
+				} = {
 					name: poseLabel,
 					startTime,
 					endTime,
 					count: repetitionCounter.current[poseLabel].nRepeats,
 				};
+
+				recordExcercise.push(record);
 			}
 		};
 	}, [poseLabel]);
@@ -117,12 +128,22 @@ function Webcam({ width, height, opacity, poseLabel}: Props) {
 			// 1. caputer iamge
 			const image = await webcam.capture();
 
-			if (image == null) return;
+			if (image == null) {
+				return;
+			}
+
+			if (poseLabel == '') {
+				image.dispose();
+				requestRef.current = requestAnimationFrame(capture);
+				return;
+			}
 
 			// 2. estimate pose
 			const {pose, posenetOutput} = await poseNets[poseLabel].estimatePose(image, true);
 
+
 			if (pose == null) {
+				image.dispose();
 				requestRef.current = requestAnimationFrame(capture);
 				return;
 			}
@@ -130,9 +151,7 @@ function Webcam({ width, height, opacity, poseLabel}: Props) {
 			// 3. pose classification
 			const result = await poseNets[poseLabel].predict(posenetOutput);
 
-			if (count % 2 == 0) {
-				ipcRenderer.send('webcam-poses', pose);
-			}
+			ipcRenderer.send('webcam-poses', pose);
 
 			pose.keypoints.map( (keypoint : any) => {
 				keypoint.position.x *= widthScaleRatio;
@@ -144,7 +163,6 @@ function Webcam({ width, height, opacity, poseLabel}: Props) {
 			// 4. set keypoints
 			setPoses([pose]);
 
-			image.dispose();
 			await tf.nextFrame();
 			count++;
 		} catch (e) {

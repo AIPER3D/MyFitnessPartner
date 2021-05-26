@@ -36,6 +36,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 	const [isLoading, setLoading] = useState<boolean>(true);
 	const [videoRef, setVideoRef] = useState<HTMLVideoElement | null>(null);
+	const [recordExcercise, setRecordExercise] = useState<RecordDAO['recordExercise']>([]);
 
 	const value = useRef(0);
 	const [seq, setSeq] = useState<number>(value.current);
@@ -191,8 +192,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 				});
 			});
 
-			if (inferencedPoses.length >= 1 &&
-				count % 2 == 0) {
+			if (inferencedPoses.length >= 1) {
 				ipcRenderer.send('video-poses', inferencedPoses);
 			}
 			count++;
@@ -260,7 +260,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 						<NavigatorBottom
 							videoRef={videoRef}
 						/>
-						<PIP poseLabel={poseLabel}/>
+						<PIP poseLabel={poseLabel} setRecordExercise={setRecordExercise}/>
 					</>
 				)
 			}
@@ -271,7 +271,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 }
 
 const Loader = css`
-	z-index : 1000;
+	z-index : 1003;
 `;
 
 const PixiStage = styled(Stage)`
