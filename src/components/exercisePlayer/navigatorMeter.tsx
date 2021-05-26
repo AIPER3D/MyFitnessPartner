@@ -11,17 +11,16 @@ type NeedleProps = {
     value: any;
 };
 
-
 function NavigatorMeter({ exercise, accuracy, time } : Props) {
 	return (
 		<Meter>
 			<Speedo>
 				<Face>
-					<Needle value = { (accuracy * 100).toFixed(0) } />
+					<Needle value = { ((accuracy * 180) - 90) + 'deg' } />
 				</Face>
 			</Speedo>
 			<TimeBack></TimeBack>
-			<Time value={ time }></Time>
+			<Time value={ (time * 160).toFixed(0) + 'px' }></Time>
 			<Name>{ exercise }</Name>
 			<Acc>{ (accuracy * 100).toFixed(0) }</Acc>
 		</Meter>
@@ -67,7 +66,11 @@ const Face = styled.div`
     position: relative;
 `;
 
-const Needle = styled.div`
+const Needle = styled.div.attrs((props : TimeProps) => ({
+	style: {
+		transform: `rotate(` + props + `)`,
+	},
+}))<TimeProps>`
     width: 4px;
     height: 70px;
     background: #2C363F;
@@ -83,7 +86,6 @@ const Needle = styled.div`
     transform-origin: bottom;
     
     transition: all 1s;
-    transform: rotate(${ (props : NeedleProps) => (props.value * 1.8) - 90 }deg);
 `;
 
 const Name = styled.div`
@@ -115,11 +117,14 @@ const TimeBack = styled.div`
     border-radius: 1px;
 `;
 
-const Time = styled.div`
+const Time = styled.div.attrs((props : TimeProps) => ({
+	style: {
+		'padding-left': props.value,
+	},
+}))<TimeProps>`
 	display: block;
     position: absolute;
     top: 10px;
-    padding-left: ${ (props : TimeProps) => (props.value * 160).toFixed(0) }px;
     height: 25px;
     
     text-align: center;
