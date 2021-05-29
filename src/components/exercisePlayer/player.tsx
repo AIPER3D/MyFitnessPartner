@@ -50,8 +50,8 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 	const [videoRef, setVideoRef] = useState<HTMLVideoElement | null>(null);
 	const [recordExcercise, setRecordExercise] = useState<RecordDAO['recordExercise']>([]);
 
-	const value = useRef(0);
-	const [seq, setSeq] = useState<number>(value.current);
+	const seqRef = useRef(0);
+	const [seq, setSeq] = useState<number>(seqRef.current);
 
 	const [poseLabel, setPoseLabel] = useState<string>('');
 	const [poseTime, setPoseTime] = useState<number>(0);
@@ -124,7 +124,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 		if (videoRef == null) return;
 
 		// 1. file loading
-		const file = fs.readFileSync('./files/videos/' + videoDAO[routineDAO['videos'][value.current]]['id'] + '.vd');
+		const file = fs.readFileSync('./files/videos/' + videoDAO[routineDAO['videos'][seqRef.current]]['id'] + '.vd');
 		const uint8Array = new Uint8Array(file);
 		const arrayBuffer = uint8Array.buffer;
 		const blob = new Blob([arrayBuffer]);
@@ -138,12 +138,12 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 		if (seq == 0) {
 			videoRef.addEventListener('timeupdate', () => {
-				if (value.current >= routineDAO['videos'].length) return;
+				if (seqRef.current >= routineDAO['videos'].length) return;
 
-				for (let i = 0; i < videoDAO[routineDAO['videos'][value.current]]['timeline'].length; i++) {
-					const name = videoDAO[routineDAO['videos'][value.current]]['timeline'][i]['name'];
-					const start = videoDAO[routineDAO['videos'][value.current]]['timeline'][i]['start'];
-					const end = videoDAO[routineDAO['videos'][value.current]]['timeline'][i]['end'];
+				for (let i = 0; i < videoDAO[routineDAO['videos'][seqRef.current]]['timeline'].length; i++) {
+					const name = videoDAO[routineDAO['videos'][seqRef.current]]['timeline'][i]['name'];
+					const start = videoDAO[routineDAO['videos'][seqRef.current]]['timeline'][i]['start'];
+					const end = videoDAO[routineDAO['videos'][seqRef.current]]['timeline'][i]['end'];
 
 					if (videoRef.currentTime >= start &&
 						videoRef.currentTime <= end) {
@@ -157,8 +157,8 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 			videoRef.addEventListener('ended', () => {
 				videoRef.pause();
 
-				value.current += 1;
-				setSeq(value.current);
+				seqRef.current += 1;
+				setSeq(seqRef.current);
 			});
 
 			videoRef.addEventListener('loadeddata', () => {
