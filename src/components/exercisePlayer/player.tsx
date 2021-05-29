@@ -44,6 +44,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 	const requestRef = useRef<number>();
 
 	const [playerLoaded, setPlayerLoaded] = useState<boolean>(false);
+	const [videoLoaded, setVideoLoaded] = useState<boolean>(false);
 	const [webcamLoaded, setWebcamLoaded] = useState<boolean>(false);
 
 	const [videoRef, setVideoRef] = useState<HTMLVideoElement | null>(null);
@@ -92,18 +93,27 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 		};
 	}, [videoRef]);
 
-	// 로딩 완료 체크
+	// 비디오 로딩
 	useEffect(() => {
-		console.log(playerLoaded + '/' + webcamLoaded);
 		if (videoRef == null) return;
-		if (!playerLoaded || !webcamLoaded) return;
 
+		setVideoLoaded(false);
 		if (seq < routineDAO['videos'].length) {
 			load();
 		} else {
 			onEnded(record);
 		}
-	}, [videoRef, seq, playerLoaded, webcamLoaded]);
+	}, [videoRef, seq]);
+
+	// 로딩 완료 체크
+	useEffect(() => {
+		console.log(playerLoaded + '/' + videoLoaded + '/' + webcamLoaded);
+		if (videoRef == null) return;
+		if (!playerLoaded || !videoLoaded || !webcamLoaded) return;
+		(async () => {
+			await videoRef.play();
+		})();
+	}, [videoRef, seq, playerLoaded, videoLoaded, webcamLoaded]);
 
 	ipcRenderer.on('pose-similarity', (event: any, args: any) => {
 		setPoseSimilarity(Math.abs(args));
@@ -148,10 +158,11 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 				setSeq(value.current);
 				// seq 0 -> 1 로 변경
 			});
-		}
 
-		// 3. play
-		await videoRef.play();
+			videoRef.addEventListener('loadeddata', () => {
+				setVideoLoaded(true);
+			});
+		}
 	}
 
 	let count = 0;
