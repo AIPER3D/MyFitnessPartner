@@ -37,7 +37,7 @@ function Webcam({ width, height, opacity, poseLabel, onLoaded, setRecordExercise
 
 	const requestRef = useRef<number>();
 
-	let poseNets : any;
+	const [poseNets, setPoseNets] = useState<any>();
 
 	const repetitionCounter = useRef<RepetitionObject>({});
 
@@ -91,16 +91,20 @@ function Webcam({ width, height, opacity, poseLabel, onLoaded, setRecordExercise
 	}, [poseLabel]);
 
 	async function load() {
-		poseNets = {
-			Squat: await loadTMPose('files/models/exercise_classifier/Squat/model.json'),
-			Lunge: await loadTMPose('files/models/exercise_classifier/Lunge/model.json'),
-			Jump: await loadTMPose('files/models/exercise_classifier/Jump/model.json'),
-		};
+		const poseSquat = await loadTMPose('files/models/exercise_classifier/Squat/model.json');
+		const poseLunge = await loadTMPose('files/models/exercise_classifier/Lunge/model.json');
+		const poseJump = await loadTMPose('files/models/exercise_classifier/Jump/model.json');
+
+		setPoseNets({
+			Squat: poseSquat,
+			Lunge: poseLunge,
+			Jump: poseJump,
+		});
 
 		repetitionCounter.current = {
-			Squat: new RepetitionCounter(poseNets.Squat.getMetadata().labels[0], 0.8, 0.2),
-			Lunge: new RepetitionCounter(poseNets.Lunge.getMetadata().labels[0], 0.8, 0.2),
-			Jump: new RepetitionCounter(poseNets.Jump.getMetadata().labels[0], 0.8, 0.2),
+			Squat: new RepetitionCounter(poseSquat.getMetadata().labels[0], 0.8, 0.2),
+			Lunge: new RepetitionCounter(poseLunge.getMetadata().labels[0], 0.8, 0.2),
+			Jump: new RepetitionCounter(poseJump.getMetadata().labels[0], 0.8, 0.2),
 		};
 
 		onLoaded(true);
