@@ -42,6 +42,8 @@ class RecordDTO {
 
     	await this.db.collections.records.insert({
     		record_id: id,
+    		record_time: data['time'],
+    		record_start_time: data['startTime'],
     		routine_id: data['routineId'],
     		routine_name: data['routineName'],
     		record_exercises: data['recordExercise'],
@@ -65,6 +67,7 @@ class RecordDTO {
     	const result: RecordDAO = {
     		id: doc[0].get('record_id'),
     		time: doc[0].get('record_time'),
+    		startTime: doc[0].get('record_start_time'),
     		routineId: doc[0].get('routine_id'),
     		routineName: doc[0].get('routine_name'),
     		recordExercise: doc[0].get('record_exercises'),
@@ -88,6 +91,7 @@ class RecordDTO {
     		result.push({
     			id: doc[i].get('record_id'),
     			time: doc[i].get('record_time'),
+    			startTime: doc[i].get('record_start_time'),
     			routineId: doc[i].get('routine_id'),
     			routineName: doc[i].get('routine_name'),
     			recordExercise: doc[i].get('record_exercises'),
@@ -110,6 +114,7 @@ class RecordDTO {
     		result.push({
     			id: doc[i].get('record_id'),
     			time: doc[i].get('record_time'),
+    			startTime: doc[i].get('record_start_time'),
     			routineId: doc[i].get('routine_id'),
     			routineName: doc[i].get('routine_name'),
     			recordExercise: doc[i].get('record_exercises'),
@@ -119,30 +124,25 @@ class RecordDTO {
     }
 
 
-    async getRecordByToday(date : number) {
-    	if (!this.db) return [];
-    	if (!this.db.collections.records) return [];
+    async getTimeByDay(date : number) {
+    	if (!this.db) return 0;
+    	if (!this.db.collections.records) return 0;
 
 
     	const doc = await this.db.collections.records
     		.find()
-    		.where('record_exercises')
-    		.where('exercise_start_time')
-    		.gt(moment(date).set({hour: 0, minute: 0, second: 0, millisecond: 0}).unix())
-    		.lt(moment(date).set({hour: 23, minute: 59, second: 59, millisecond: 0}).unix())
+    		.where('record_start_time')
+    		.gte(moment(date).set({hour: 0, minute: 0, second: 0, millisecond: 0}).unix())
+    		.lte(moment(date).add(1, 'day').set({hour: 0, minute: 0, second: 0, millisecond: 0}).unix())
     		.exec();
 
-    		const result : RecordDAO[] = [];
-    		for (let i = 0; i < doc.length; i++) {
-    			result.push({
-    				id: doc[i].get('record_id'),
-    				time: doc[i].get('record_time'),
-    				routineId: doc[i].get('routine_id'),
-    				routineName: doc[i].get('routine_name'),
-    				recordExercise: doc[i].get('record_exercises'),
-    			});
+    	let result = 0;
+    	if (doc) {
+    		for (let i=0; i< doc.length; i++) {
+    			result += doc[i].get('record_time');
     		}
-    		return result;
+    	}
+    	return result;
     }
 }
 

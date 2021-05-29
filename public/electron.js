@@ -112,10 +112,14 @@ function compareKeypoints() {
 		const normalizedWebcamKeypoints = normalizeKeypoints(webcamBoundingBox, resizedWebcamKeypoints);
 
 		// 4. keypoints to one dimentonal array
-		const [videoKeypointsArray, videoKeypointsScores] = oneDimentionalKeypoints(normalizedVideoKeypoints);
-		const [webcamKeypointsArray, _] = oneDimentionalKeypoints(normalizedWebcamKeypoints);
+		const [videoKeypointsArray, _] = oneDimentionalKeypoints(normalizedVideoKeypoints);
+		const [webcamKeypointsArray, webcamKeypointsScores] = oneDimentionalKeypoints(normalizedWebcamKeypoints);
 
 		const keypointsSimilarity = cosineSimilarity(videoKeypointsArray, webcamKeypointsArray);
+		// const keypointsSimilarity = weightedDistanceMatching(
+		// 	webcamKeypointsArray,
+		// 	videoKeypointsArray,
+		// 	webcamKeypointsScores);
 
 		return keypointsSimilarity;
 	}
@@ -142,17 +146,16 @@ function cosineSimilarity(A, B) {
 	return similarity;
 }
 
-// function weightedDistanceMatching(vectorPose1XY, vectorPose2XY, vectorConfidences: number[]): number {
-// 	const summation1 = 1 / vectorConfidences[vectorConfidences.length - 1];
-  
-// 	let summation2 = 0;
-// 	for (let i = 0; i < vectorPose1XY.length; i++) {
-// 	  let confIndex = Math.floor(i / 2);
-// 	  summation2 += vectorConfidences[confIndex] * Math.abs(vectorPose1XY[i] - vectorPose2XY[i]);
-// 	}
-  
-// 	return summation1 * summation2;
-//   }
+function weightedDistanceMatching(vectorPose1XY, vectorPose2XY, vectorConfidences) {
+	const summation1 = 1 / vectorConfidences[vectorConfidences.length - 1];
+	let summation2 = 0;
+	for (let i = 0; i < vectorPose1XY.length; i++) {
+		const confIndex = Math.floor(i / 2);
+		summation2 += vectorConfidences[confIndex] * Math.abs(vectorPose1XY[i] - vectorPose2XY[i]);
+	}
+
+	return summation1 * summation2;
+}
 
 function getBoundingBox(keypoints) {
 	function reducer({ maxX, maxY, minX, minY }, { position: { x, y } }) {
