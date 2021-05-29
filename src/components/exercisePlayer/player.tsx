@@ -138,6 +138,8 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 		if (seq == 0) {
 			videoRef.addEventListener('timeupdate', () => {
+				if (value.current >= routineDAO['videos'].length) return;
+
 				for (let i = 0; i < videoDAO[routineDAO['videos'][value.current]]['timeline'].length; i++) {
 					const name = videoDAO[routineDAO['videos'][value.current]]['timeline'][i]['name'];
 					const start = videoDAO[routineDAO['videos'][value.current]]['timeline'][i]['start'];
@@ -147,16 +149,16 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 						videoRef.currentTime <= end) {
 						setPoseLabel(name);
 						setPoseTime((videoRef.currentTime - start) / (end - start));
-						console.log(start + ' | ' + videoRef.currentTime + ' | ' + end);
 					}
 				}
 			});
 
 			// 5. when video ended play next video
 			videoRef.addEventListener('ended', () => {
+				videoRef.pause();
+
 				value.current += 1;
 				setSeq(value.current);
-				// seq 0 -> 1 로 변경
 			});
 
 			videoRef.addEventListener('loadeddata', () => {
