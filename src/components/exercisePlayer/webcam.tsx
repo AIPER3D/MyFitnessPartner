@@ -18,6 +18,7 @@ type Props = {
 	height: number;
 	opacity: number;
 	poseLabel : string;
+	onLoaded: (val: boolean) => void;
 }
 
 interface RepetitionObject {
@@ -27,7 +28,7 @@ interface RepetitionObject {
 	[props:string] : any;
 }
 
-function Webcam({ width, height, opacity, poseLabel}: Props) {
+function Webcam({ width, height, opacity, poseLabel, onLoaded }: Props) {
 	const {ipcRenderer} = window.require('electron');
 
 	const videoRef = useRef<HTMLVideoElement>(null);
@@ -46,8 +47,6 @@ function Webcam({ width, height, opacity, poseLabel}: Props) {
 	const heightScaleRatio = height / inputHeight;
 
 	const [poses, setPoses] = useState<any>(null);
-
-	const [isPlaying, setPlaying] = useState<boolean>(true);
 
 	useEffect(() => {
 		load()
@@ -93,6 +92,8 @@ function Webcam({ width, height, opacity, poseLabel}: Props) {
 			Lunge: new RepetitionCounter(poseNets.Lunge.getMetadata().labels[0], 0.8, 0.2),
 			Jump: new RepetitionCounter(poseNets.Jump.getMetadata().labels[0], 0.8, 0.2),
 		};
+
+		onLoaded(true);
 	}
 
 	async function run() {

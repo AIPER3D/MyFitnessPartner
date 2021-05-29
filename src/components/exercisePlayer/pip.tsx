@@ -21,9 +21,10 @@ const Wrapper = styled.div`
 
 type Props = {
 	poseLabel : any;
+	onLoaded: (val: boolean) => void;
 };
 
-function PIP({poseLabel} : Props) {
+function PIP({ poseLabel, onLoaded } : Props) {
 	const [down, setDown] = useState<boolean>(false);
 	const [x, setX] = useState<number>(0);
 	const [y, setY] = useState<number>(0);
@@ -88,6 +89,7 @@ function PIP({poseLabel} : Props) {
 				height = { height }
 				opacity = {0.5}
 				poseLabel = {_poseLabel}
+				onLoaded = { onLoaded }
 			/>
 		</Wrapper>
 	);

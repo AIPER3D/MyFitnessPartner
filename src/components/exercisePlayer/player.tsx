@@ -34,7 +34,9 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 	const requestRef = useRef<number>();
 
-	const [isLoading, setLoading] = useState<boolean>(true);
+	const [playerLoaded, setPlayerLoaded] = useState<boolean>(false);
+	const [webcamLoaded, setWebcamLoaded] = useState<boolean>(false);
+
 	const [videoRef, setVideoRef] = useState<HTMLVideoElement | null>(null);
 
 	const value = useRef(0);
@@ -55,10 +57,11 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 	let poseNet: posenet.PoseNet;
 
-
+	// 최초 모델 로딩
 	useEffect(() => {
-		// 1. posenet load
 		(async () => {
+			setPlayerLoaded(false);
+
 			poseNet = await posenet.load({
 				architecture: 'MobileNetV1',
 				outputStride: 16,
@@ -66,19 +69,11 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 				multiplier: 1,
 				quantBytes: 2,
 			});
+
+			requestRef.current = requestAnimationFrame(capture);
+
+			setPlayerLoaded(true);
 		})();
-
-		// 2. when all task is ready, set loading false
-		// if (videoRef == null) return;
-		if (seq < routineDAO['videos'].length) {
-			load();
-		} else {
-			onEnded(record);
-		}
-	}, [videoRef, seq]);
-
-	useEffect(() => {
-		requestRef.current = requestAnimationFrame(capture);
 
 		return () => {
 			if (requestRef.current) {
@@ -87,11 +82,24 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 		};
 	}, [videoRef]);
 
+	// 로딩 완료 체크
+	useEffect(() => {
+		console.log(playerLoaded + '/' + webcamLoaded);
+		if (videoRef == null) return;
+		if (!playerLoaded || !webcamLoaded) return;
+
+		if (seq < routineDAO['videos'].length) {
+			load();
+		} else {
+			onEnded(record);
+		}
+	}, [videoRef, seq, playerLoaded, webcamLoaded]);
+
 	ipcRenderer.on('pose-similarity', (event: any, args: any) => {
 		setPoseSimilarity(Math.abs(args));
 	});
 
-	// load video and model
+	// Video Load and Play
 	async function load() {
 		if (videoRef == null) return;
 
@@ -107,9 +115,6 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 		videoRef.playsInline = true;
 		videoRef.src = url;
 		videoRef.volume = 0.2;
-
-		// 3. play video
-		await videoRef.play();
 
 		if (seq == 0) {
 			videoRef.addEventListener('timeupdate', () => {
@@ -135,11 +140,11 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 			});
 		}
 
-		setLoading(false);
+		// 3. play
+		await videoRef.play();
 	}
 
 	let count = 0;
-
 	const capture = async () => {
 		try {
 			if (videoRef == null) return;
@@ -238,33 +243,33 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 	return (
 		<Container>
-			{
-				isLoading ? (
-					<PuffLoader css={Loader} color={'#E75A7C'} loading={isLoading} size={300} />
-				) : (
-					<>
-						<NavigatorTop
-							routine={routineDAO}
-							seq={seq + 1}
-						/>
+			<PuffLoader css={Loader} color={'#E75A7C'} loading={ !(playerLoaded && webcamLoaded) } size={300} />
+			<BackPanel value = { (playerLoaded && webcamLoaded) ? 'none' : 'block' } />
 
-						<NavigatorMeter
-							exercise={poseLabel}
-							time={poseTime}
-							accuracy={poseSimilarity}
-						/>
+			<NavigatorTop
+				routine={routineDAO}
+				seq={seq + 1}
+			/>
 
-						<PixiStage {...stageProps}>
-							<Graphics draw={draw} />
-						</PixiStage>
+			<NavigatorMeter
+				exercise={poseLabel}
+				time={poseTime}
+				accuracy={poseSimilarity}
+			/>
 
-						<NavigatorBottom
-							videoRef={videoRef}
-						/>
-						<PIP poseLabel={poseLabel}/>
-					</>
-				)
-			}
+			<PixiStage {...stageProps}>
+				<Graphics draw={draw} />
+			</PixiStage>
+
+			<NavigatorBottom
+				videoRef={videoRef}
+			/>
+
+			<PIP
+				poseLabel={ poseLabel }
+				onLoaded={ setWebcamLoaded }
+			/>
+
 			<Video ref={setVideoRef} />
 
 		</Container>
@@ -272,7 +277,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 }
 
 const Loader = css`
-	z-index : 1000;
+	z-index: 1000020;
 `;
 
 const PixiStage = styled(Stage)`
@@ -326,6 +331,23 @@ const Video = styled.video`
 	
 	overflow:hidden;
 	background-color: #000000;
+`;
+
+const BackPanel = styled.div.attrs((props: { value: string }) => ({
+	style: {
+		display: props.value,
+	},
+}))<{ value: string }>`
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 100vw;
+	height: 100vh;
+	
+	z-index: 1000010;
+	background-color: #000000;
+	
+	transition: 1s all;
 `;
 
 export default Player;
