@@ -72,9 +72,9 @@ function Webcam({ width, height, opacity, poseLabel, onLoaded }: Props) {
 
 				const record : {
 					name: string;
-					startTime: Number;
-					endTime: Number;
-					count: Number;
+					startTime: number;
+					endTime: number;
+					count: number;
 				} = {
 					name: poseLabel,
 					startTime,

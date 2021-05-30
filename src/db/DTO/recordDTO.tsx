@@ -152,12 +152,20 @@ class RecordDTO {
     		.find()
     		.exec();
 
-    	const result = [];
+    	const result: any[] = [];
     	for (let i = 0; i < doc.length; i++) {
     		result.push(doc[i].get('record_create_time'));
     	}
 
-    	return doc;
+    	result.filter((item, i)=> {
+    		return (
+    			result.findIndex((item2, j) => {
+    				return item === item2;
+    			}) === i
+    		);
+    	});
+
+    	return result.length;
     }
 }
 
