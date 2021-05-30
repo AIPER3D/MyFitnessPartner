@@ -17,6 +17,7 @@ function Dashboard({db}: DashBoardProps) {
 	const userDTO = new UserDTO();
 	const [user, setUser] = useState<UserDAO | null>(null);
 	const [time, setTime] = useState(1);
+	const [day, setDay] = useState(0);
 	useEffect(()=>{
 		recordDTO.setDB(db);
 		userDTO.setDB(db);
@@ -24,6 +25,7 @@ function Dashboard({db}: DashBoardProps) {
 		getRecord();
 		(async ()=>{
 			setTime(await getExerciseTime());
+			setDay(await yourExerciseDay());
 			console.log(await recordDTO.getExerciseDay());
 		})();
 	}, [db]);
@@ -49,8 +51,8 @@ function Dashboard({db}: DashBoardProps) {
 		return await recordDTO.getTimeByDay(Number(moment().format('YYYYMMDD')));
 	}
 
-	function yourExerciseDay() {
-		return 7;
+	async function yourExerciseDay() {
+		return await recordDTO.getExerciseDay();
 	}
 
 	function mostExercise() {
@@ -103,14 +105,14 @@ function Dashboard({db}: DashBoardProps) {
 						<i className="far fa-clock fa-2x text-dark"></i>
 						<div className="card_inner">
 							<p className="text-primary-p"> 오늘 운동시간 </p>
-							<span className="font-bold text-title"> {time} 분</span>
+							<span className="font-bold text-title"> {time.toFixed(0)} 분</span>
 						</div>
 					</div>
 					<div className="card">
 						<i className="fa fa-calendar fa-2x text-red"></i>
 						<div className="card_inner">
 							<p className="text-primary-p"> 총 운동 날짜 </p>
-							<span className="font-bold text-title"> {yourExerciseDay()} 일</span>
+							<span className="font-bold text-title"> {day} 일</span>
 						</div>
 					</div>
 				</div>
@@ -121,7 +123,7 @@ function Dashboard({db}: DashBoardProps) {
 								<h1>일간 운동량</h1>
 							</div>
 						</div>
-						<Chart />
+						<Chart db={db}/>
 					</div>
 					<div className="charts_exerciseInfo">
 						<div className="charts_exerciseInfo_title">
