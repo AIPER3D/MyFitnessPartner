@@ -144,6 +144,17 @@ class RecordDTO {
     	}
     	return result;
     }
+
+    async getExerciseDay() {
+    	if (!this.db) return 0;
+    	if (!this.db.collections.records) return 0;
+
+    	const doc = await this.db.collections.records
+    		.find()
+    		.exec();
+
+    	return doc;
+    }
 }
 
 export { RecordDTO };
