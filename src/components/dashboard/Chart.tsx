@@ -9,7 +9,7 @@ type Props = {
 }
 function Chart({db}: Props) {
 	const recordDTO = new RecordDTO();
-	const [records, setRecords] = useState<Number[] | null>(null);
+	const [records, setRecords] = useState<number[] | null>(null);
 	useEffect(()=>{
 		recordDTO.setDB(db);
 		(async ()=>{
@@ -36,13 +36,13 @@ function Chart({db}: Props) {
 	];
 	if (records) {
 		Wdata = [
-			{ x: 0, y: Number.parseInt(records[0].toString())},
-			{ x: 1, y: Number.parseInt(records[1].toString())},
-			{ x: 2, y: Number.parseInt(records[2].toString())},
-			{ x: 3, y: Number.parseInt(records[3].toString())},
-			{ x: 4, y: Number.parseInt(records[4].toString())},
-			{ x: 5, y: Number.parseInt(records[5].toString())},
-			{ x: 6, y: Number.parseInt(records[6].toString())},
+			{ x: 0, y: records[0]},
+			{ x: 1, y: records[1]},
+			{ x: 2, y: records[2]},
+			{ x: 3, y: records[3]},
+			{ x: 4, y: records[4]},
+			{ x: 5, y: records[5]},
+			{ x: 6, y: records[6]},
 		];
 	}
 
