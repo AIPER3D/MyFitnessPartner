@@ -29,14 +29,7 @@ export const recordContext = createContext<RecordDAO>({
 	createTime: 0,
 	routineId: 0,
 	routineName: '',
-	recordExercise: [
-		// {
-		// 	name: 'sqart',
-		// 	startTime: moment().unix(),
-		// 	endTime: moment().unix() + 1000,
-		// 	count: 10,
-		// },
-	],
+	recordExercise: [],
 });
 
 function Player({ routineDAO, videoDAO, onEnded }: Props) {
