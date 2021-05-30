@@ -35,12 +35,13 @@ export const recordContext = createContext<RecordDAO>({
 function Player({ routineDAO, videoDAO, onEnded }: Props) {
 	const { ipcRenderer } = window.require('electron');
 
+
 	// record 초기화
 	const recordDAO = useContext(recordContext);
 
 	const playTime = useRef(moment().unix());
 
-	recordDAO.createTime = moment().unix();
+	recordDAO.createTime = Number(moment().format('YYYYMMDD'));
 	recordDAO.routineId = routineDAO['id'];
 	recordDAO.routineName = routineDAO['name'];
 

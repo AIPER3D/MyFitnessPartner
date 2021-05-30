@@ -132,8 +132,7 @@ class RecordDTO {
     	const doc = await this.db.collections.records
     		.find()
     		.where('record_create_time')
-    		.gte(moment(date).set({hour: 0, minute: 0, second: 0, millisecond: 0}).unix())
-    		.lte(moment(date).add(1, 'day').set({hour: 0, minute: 0, second: 0, millisecond: 0}).unix())
+    		.eq(date)
     		.exec();
 
     	let result = 0;
@@ -152,6 +151,11 @@ class RecordDTO {
     	const doc = await this.db.collections.records
     		.find()
     		.exec();
+
+    	const result = [];
+    	for (let i = 0; i < doc.length; i++) {
+    		result.push(doc[i].get('record_create_time'));
+    	}
 
     	return doc;
     }
