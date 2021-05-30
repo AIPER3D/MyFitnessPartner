@@ -28,7 +28,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 	const record: RecordDAO = {
 		id: 0,
 		playTime: 10,
-		createTime: moment().unix(),
+		createTime: Number(moment().format('YYYYMMDD')),
 		routineId: routineDAO['id'],
 		routineName: routineDAO['name'],
 		recordExercise: [
