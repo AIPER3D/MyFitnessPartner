@@ -126,12 +126,16 @@ function Record({ db } : PageProps) {
 	} else {
 		const arr = [];
 		for (let i = 0; record['recordExercise'].length; i++) {
-			arr.push(
-				<SubBox key = { i }>
-					<SubTitle>{ record['recordExercise'][i]['name'] }</SubTitle>
-					<SubText>{ record['recordExercise'][i]['count'] }회</SubText>
-				</SubBox>
-			);
+			console.log(record['recordExercise'][i]);
+
+			if (record['recordExercise'][i]['name'] && record['recordExercise'][i]['count']) {
+				arr.push(
+					<SubBox key={i}>
+						<SubTitle>{record['recordExercise'][i]['name']}</SubTitle>
+						<SubText>{record['recordExercise'][i]['count']}회</SubText>
+					</SubBox>
+				);
+			}
 		}
 
 		return (
