@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
-import { RoutineDAO, VideoDAO } from '../../db/DAO';
+import { RoutineDAO, VideoDAO, RecordDAO } from '../../db/DAO';
 
 import { Webcam } from './';
 
@@ -18,12 +18,13 @@ const Wrapper = styled.div`
 	
 `;
 
-
 type Props = {
 	poseLabel : any;
+	setRecordExercise : React.Dispatch<React.SetStateAction<RecordDAO['recordExercise']>>
+	onLoaded: (val: boolean) => void;
 };
 
-function PIP({poseLabel} : Props) {
+function PIP({ poseLabel, setRecordExercise, onLoaded } : Props) {
 	const [down, setDown] = useState<boolean>(false);
 	const [x, setX] = useState<number>(0);
 	const [y, setY] = useState<number>(0);
@@ -88,6 +89,8 @@ function PIP({poseLabel} : Props) {
 				height = { height }
 				opacity = {0.5}
 				poseLabel = {_poseLabel}
+				setRecordExercise = { setRecordExercise }
+				onLoaded = { onLoaded }
 			/>
 		</Wrapper>
 	);

@@ -18,6 +18,8 @@ type Props = {
 	height: number;
 	opacity: number;
 	poseLabel : string;
+	onLoaded: (val: boolean) => void;
+	setRecordExercise : React.Dispatch<React.SetStateAction<RecordDAO['recordExercise']>>
 }
 
 interface RepetitionObject {
@@ -27,7 +29,7 @@ interface RepetitionObject {
 	[props:string] : any;
 }
 
-function Webcam({ width, height, opacity, poseLabel}: Props) {
+function Webcam({ width, height, opacity, poseLabel, onLoaded, setRecordExercise }: Props) {
 	const {ipcRenderer} = window.require('electron');
 
 	const videoRef = useRef<HTMLVideoElement>(null);
@@ -35,7 +37,7 @@ function Webcam({ width, height, opacity, poseLabel}: Props) {
 
 	const requestRef = useRef<number>();
 
-	let poseNets : any;
+	const [poseNets, setPoseNets] = useState<any>();
 
 	const repetitionCounter = useRef<RepetitionObject>({});
 
@@ -46,8 +48,7 @@ function Webcam({ width, height, opacity, poseLabel}: Props) {
 	const heightScaleRatio = height / inputHeight;
 
 	const [poses, setPoses] = useState<any>(null);
-
-	const [isPlaying, setPlaying] = useState<boolean>(true);
+	const [recordExcercise, _] = useState<RecordDAO['recordExercise']>([]);
 
 	useEffect(() => {
 		load()
@@ -71,28 +72,42 @@ function Webcam({ width, height, opacity, poseLabel}: Props) {
 			if (poseLabel != '') {
 				const endTime = _timer.stamp();
 
-				const record = {
+
+				const record : {
+					name: string;
+					startTime: Number;
+					endTime: Number;
+					count: Number;
+				} = {
 					name: poseLabel,
 					startTime,
 					endTime,
 					count: repetitionCounter.current[poseLabel].nRepeats,
 				};
+
+				recordExcercise.push(record);
 			}
 		};
 	}, [poseLabel]);
 
 	async function load() {
-		poseNets = {
-			Squat: await loadTMPose('files/models/exercise_classifier/Squat/model.json'),
-			Lunge: await loadTMPose('files/models/exercise_classifier/Lunge/model.json'),
-			Jump: await loadTMPose('files/models/exercise_classifier/Jump/model.json'),
-		};
+		const poseSquat = await loadTMPose('files/models/exercise_classifier/Squat/model.json');
+		const poseLunge = await loadTMPose('files/models/exercise_classifier/Lunge/model.json');
+		const poseJump = await loadTMPose('files/models/exercise_classifier/Jump/model.json');
+
+		setPoseNets({
+			Squat: poseSquat,
+			Lunge: poseLunge,
+			Jump: poseJump,
+		});
 
 		repetitionCounter.current = {
-			Squat: new RepetitionCounter(poseNets.Squat.getMetadata().labels[0], 0.8, 0.2),
-			Lunge: new RepetitionCounter(poseNets.Lunge.getMetadata().labels[0], 0.8, 0.2),
-			Jump: new RepetitionCounter(poseNets.Jump.getMetadata().labels[0], 0.8, 0.2),
+			Squat: new RepetitionCounter(poseSquat.getMetadata().labels[0], 0.8, 0.2),
+			Lunge: new RepetitionCounter(poseLunge.getMetadata().labels[0], 0.8, 0.2),
+			Jump: new RepetitionCounter(poseJump.getMetadata().labels[0], 0.8, 0.2),
 		};
+
+		onLoaded(true);
 	}
 
 	async function run() {
@@ -117,7 +132,15 @@ function Webcam({ width, height, opacity, poseLabel}: Props) {
 			// 1. caputer iamge
 			const image = await webcam.capture();
 
-			if (image == null) return;
+			if (image == null) {
+				return;
+			}
+
+			if (poseLabel == '') {
+				image.dispose();
+				requestRef.current = requestAnimationFrame(capture);
+				return;
+			}
 
 			// 2. estimate pose
 			const {pose, posenetOutput} = await poseNets[poseLabel].estimatePose(image, true);
@@ -130,9 +153,7 @@ function Webcam({ width, height, opacity, poseLabel}: Props) {
 			// 3. pose classification
 			const result = await poseNets[poseLabel].predict(posenetOutput);
 
-			if (count % 2 == 0) {
-				ipcRenderer.send('webcam-poses', pose);
-			}
+			ipcRenderer.send('webcam-poses', pose);
 
 			pose.keypoints.map( (keypoint : any) => {
 				keypoint.position.x *= widthScaleRatio;
@@ -144,7 +165,6 @@ function Webcam({ width, height, opacity, poseLabel}: Props) {
 			// 4. set keypoints
 			setPoses([pose]);
 
-			image.dispose();
 			await tf.nextFrame();
 			count++;
 		} catch (e) {
