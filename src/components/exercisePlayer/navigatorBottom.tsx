@@ -147,7 +147,7 @@ function NavigatorBottom({ videoRef } : Props) {
 		if (videoRef == null) return;
 
 		videoRef.addEventListener('loadedmetadata', () => {
-			setPlaying(!videoRef.paused);
+			setPlaying(true);
 		});
 		videoRef.addEventListener('timeupdate', () => {
 			if (videoRef == null) return;
