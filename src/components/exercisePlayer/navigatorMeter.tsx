@@ -16,13 +16,13 @@ function NavigatorMeter({ exercise, accuracy, time } : Props) {
 		<Meter>
 			<Speedo>
 				<Face>
-					<Needle value = { ((accuracy * 180) - 90) + 'deg' } />
+					<Needle value = { ((accuracy ? accuracy : 0 * 180) - 90) + 'deg' } />
 				</Face>
 			</Speedo>
 			<TimeBack></TimeBack>
 			<Time value={ (time * 160).toFixed(0) + 'px' }></Time>
 			<Name>{ exercise }</Name>
-			<Acc>{ (accuracy * 100).toFixed(0) }</Acc>
+			<Acc>{ accuracy ? (accuracy * 100).toFixed(0) : '?' }</Acc>
 		</Meter>
 	);
 }
@@ -68,7 +68,7 @@ const Face = styled.div`
 
 const Needle = styled.div.attrs((props : TimeProps) => ({
 	style: {
-		transform: `rotate(` + props + `)`,
+		transform: `rotate(` + props.value + `)`,
 	},
 }))<TimeProps>`
     width: 4px;
@@ -119,7 +119,7 @@ const TimeBack = styled.div`
 
 const Time = styled.div.attrs((props : TimeProps) => ({
 	style: {
-		'padding-left': props.value,
+		paddingLeft: props.value,
 	},
 }))<TimeProps>`
 	display: block;
