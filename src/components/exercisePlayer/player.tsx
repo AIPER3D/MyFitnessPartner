@@ -138,18 +138,22 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 		if (seq == 0) {
 			videoRef.addEventListener('timeupdate', () => {
-				if (seqRef.current >= routineDAO['videos'].length) return;
+				try {
+					if (seqRef.current >= routineDAO['videos'].length) return;
 
-				for (let i = 0; i < videoDAO[routineDAO['videos'][seqRef.current]]['timeline'].length; i++) {
-					const name = videoDAO[routineDAO['videos'][seqRef.current]]['timeline'][i]['name'];
-					const start = videoDAO[routineDAO['videos'][seqRef.current]]['timeline'][i]['start'];
-					const end = videoDAO[routineDAO['videos'][seqRef.current]]['timeline'][i]['end'];
+					for (let i = 0; i < videoDAO[routineDAO['videos'][seqRef.current]]['timeline'].length; i++) {
+						const name = videoDAO[routineDAO['videos'][seqRef.current]]['timeline'][i]['name'];
+						const start = videoDAO[routineDAO['videos'][seqRef.current]]['timeline'][i]['start'];
+						const end = videoDAO[routineDAO['videos'][seqRef.current]]['timeline'][i]['end'];
 
-					if (videoRef.currentTime >= start &&
-						videoRef.currentTime <= end) {
-						setPoseLabel(name);
-						setPoseTime((videoRef.currentTime - start) / (end - start));
+						if (videoRef.currentTime >= start &&
+							videoRef.currentTime <= end) {
+							setPoseLabel(name);
+							setPoseTime((videoRef.currentTime - start) / (end - start));
+						}
 					}
+				} catch (e : any) {
+					console.log('종료');
 				}
 			});
 
