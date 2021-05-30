@@ -145,7 +145,7 @@ function Record({ db } : PageProps) {
 				</Box>
 				<Box width = { '210px' } height = { '23px' }>
 					<Text> { record['recordExercise'].length >= 1 ?
-						moment(record['recordExercise'][0]['startTime'] * 1000).format('YYYY-MM-DD') :
+						moment(record['recordExercise'][0]['startTime'] * 1000).format('YYYY-MM-DD HH:mm:ss') :
 						moment(record['createTime'], 'YYYYMMDD').format('YYYY-MM-DD') } </Text>
 				</Box>
 				<Title>진행한 운동</Title>
