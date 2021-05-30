@@ -16,7 +16,7 @@ function NavigatorMeter({ exercise, accuracy, time } : Props) {
 		<Meter>
 			<Speedo>
 				<Face>
-					<Needle value = { ((accuracy ? accuracy : 0 * 180) - 90) + 'deg' } />
+					<Needle value = { accuracy ? ((accuracy * 180) - 90) + 'deg' : '-90deg' } />
 				</Face>
 			</Speedo>
 			<TimeBack></TimeBack>

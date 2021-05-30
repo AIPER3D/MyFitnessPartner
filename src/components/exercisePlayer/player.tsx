@@ -23,6 +23,7 @@ type Props = {
 	onEnded: (record: RecordDAO) => void;
 };
 
+
 export const recordContext = createContext<RecordDAO>({
 	id: (new RecordDTO()).getNewId(),
 	playTime: 0,

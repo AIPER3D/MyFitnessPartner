@@ -110,6 +110,7 @@ function Record({ db } : PageProps) {
 		const re: RecordDAO | null = await recordDTO.getRecordById(Number(id));
 		if (re != null) {
 			setRecord(re);
+
 			const ro: RoutineDAO | null = await routineDTO.getRoutineById(Number(re['routineId']));
 			if (ro != null) {
 				setRoutine(ro);
@@ -124,6 +125,18 @@ function Record({ db } : PageProps) {
 			</div>
 		);
 	} else {
+		const arr = [];
+		for (let i = 0; i < record['recordExercise'].length; i++) {
+			if (record['recordExercise'][i] != undefined) {
+				arr.push(
+					<SubBox key={i}>
+						<SubTitle>{record['recordExercise'][i]['name']}</SubTitle>
+						<SubText>{record['recordExercise'][i]['count']}회</SubText>
+					</SubBox>
+				);
+			}
+		}
+
 		return (
 			<div>
 				<Header text='운동 기록' />
@@ -131,30 +144,11 @@ function Record({ db } : PageProps) {
 					<Text weight = {'bold'}> { routine['name'] } </Text>
 				</Box>
 				<Box width = { '210px' } height = { '23px' }>
-					<Text> { moment(record['createTime']).format('YYYY-MM-DD HH:mm:ss') } </Text>
+					<Text> { record['createTime'] } </Text>
 				</Box>
 				<Title>진행한 운동</Title>
 				<Box width = { '920px' } height= { '50px' }>
-					<SubBox>
-						<SubTitle>운동 명</SubTitle>
-						<SubText>0회</SubText>
-					</SubBox>
-					<SubBox>
-						<SubTitle>운동 명</SubTitle>
-						<SubText>0회</SubText>
-					</SubBox>
-					<SubBox>
-						<SubTitle>운동 명</SubTitle>
-						<SubText>0회</SubText>
-					</SubBox>
-					<SubBox>
-						<SubTitle>운동 명</SubTitle>
-						<SubText>0회</SubText>
-					</SubBox>
-					<SubBox>
-						<SubTitle>운동 명</SubTitle>
-						<SubText>0회</SubText>
-					</SubBox>
+					{ arr }
 				</Box>
 				<Button href={ '/records/1' } text = { '확인' } />
 			</div>
