@@ -1,6 +1,6 @@
 /* eslint-disable new-cap */
 /* eslint-disable no-constant-condition */
-import React, { useEffect, useRef, useReducer } from 'react';
+import React, { useEffect, useRef, useReducer, useContext } from 'react';
 import styled from 'styled-components';
 import * as tf from '@tensorflow/tfjs';
 import * as posenet from '@tensorflow-models/posenet';
@@ -12,6 +12,8 @@ import RepetitionCounter from '../../utils/RepetitionCounter';
 import * as tmPose from '@teachablemachine/pose';
 import { timer } from '../../utils/bench-util';
 import { RecordDAO } from '../../db/DAO';
+import { recordContext } from './player';
+import moment from 'moment';
 
 type Props = {
 	width: number;
@@ -19,7 +21,7 @@ type Props = {
 	opacity: number;
 	poseLabel : string;
 	onLoaded: (val: boolean) => void;
-	setRecordExercise : React.Dispatch<React.SetStateAction<RecordDAO['recordExercise']>>
+	// setRecordExercise : React.Dispatch<React.SetStateAction<RecordDAO['recordExercise']>>
 }
 
 interface RepetitionObject {
@@ -29,13 +31,15 @@ interface RepetitionObject {
 	[props:string] : any;
 }
 
-function Webcam({ width, height, opacity, poseLabel, onLoaded, setRecordExercise }: Props) {
+function Webcam({ width, height, opacity, poseLabel, onLoaded }: Props) {
 	const {ipcRenderer} = window.require('electron');
+
+	const recordDAO = useContext(recordContext);
 
 	const videoRef = useRef<HTMLVideoElement>(null);
 	const webcamRef = useRef<any>(null);
 
-	const requestRef = useRef<number>();
+	const requestRef = useRef<number>(0);
 
 	const [poseNets, setPoseNets] = useState<any>();
 
@@ -48,7 +52,7 @@ function Webcam({ width, height, opacity, poseLabel, onLoaded, setRecordExercise
 	const heightScaleRatio = height / inputHeight;
 
 	const [poses, setPoses] = useState<any>(null);
-	const [recordExcercise, _] = useState<RecordDAO['recordExercise']>([]);
+	// const [recordExcercise, _] = useState<RecordDAO['recordExercise']>([]);
 
 	useEffect(() => {
 		load()
@@ -56,9 +60,9 @@ function Webcam({ width, height, opacity, poseLabel, onLoaded, setRecordExercise
 				await run();
 			});
 
-		const _timer = timer(false);
+		// const _timer = timer(false);
 
-		const startTime = _timer.start();
+		const startTime = moment().unix();
 
 		return () => {
 			if (webcamRef.current) {
@@ -70,8 +74,7 @@ function Webcam({ width, height, opacity, poseLabel, onLoaded, setRecordExercise
 			}
 
 			if (poseLabel != '') {
-				const endTime = _timer.stamp();
-
+				const endTime = moment().unix();
 
 				const record : {
 					name: string;
@@ -85,7 +88,7 @@ function Webcam({ width, height, opacity, poseLabel, onLoaded, setRecordExercise
 					count: repetitionCounter.current[poseLabel].nRepeats,
 				};
 
-				recordExcercise.push(record);
+				recordDAO.recordExercise.push(record);
 			}
 		};
 	}, [poseLabel]);
@@ -138,6 +141,7 @@ function Webcam({ width, height, opacity, poseLabel, onLoaded, setRecordExercise
 
 			if (poseLabel == '') {
 				image.dispose();
+				cancelAnimationFrame(requestRef.current);
 				requestRef.current = requestAnimationFrame(capture);
 				return;
 			}

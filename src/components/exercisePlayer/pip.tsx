@@ -20,11 +20,11 @@ const Wrapper = styled.div`
 
 type Props = {
 	poseLabel : any;
-	setRecordExercise : React.Dispatch<React.SetStateAction<RecordDAO['recordExercise']>>
+	// setRecordExercise : React.Dispatch<React.SetStateAction<RecordDAO['recordExercise']>>
 	onLoaded: (val: boolean) => void;
 };
 
-function PIP({ poseLabel, setRecordExercise, onLoaded } : Props) {
+function PIP({ poseLabel, onLoaded } : Props) {
 	const [down, setDown] = useState<boolean>(false);
 	const [x, setX] = useState<number>(0);
 	const [y, setY] = useState<number>(0);
@@ -89,7 +89,7 @@ function PIP({ poseLabel, setRecordExercise, onLoaded } : Props) {
 				height = { height }
 				opacity = {0.5}
 				poseLabel = {_poseLabel}
-				setRecordExercise = { setRecordExercise }
+				// setRecordExercise = { setRecordExercise }
 				onLoaded = { onLoaded }
 			/>
 		</Wrapper>
