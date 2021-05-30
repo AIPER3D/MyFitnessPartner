@@ -1,5 +1,5 @@
 const fs = window.require('fs');
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, createContext, useContext } from 'react';
 import styled from 'styled-components';
 
 import { NavigatorTop, NavigatorMeter, NavigatorBottom, PIP } from './';
@@ -15,6 +15,7 @@ import { css } from '@emotion/react';
 import PuffLoader from 'react-spinners/PuffLoader';
 import { tensorToImage } from '../../utils/video-util';
 import moment from 'moment';
+import { RecordDTO } from '../../db/DTO';
 
 type Props = {
 	routineDAO: RoutineDAO;
@@ -22,24 +23,33 @@ type Props = {
 	onEnded: (record: RecordDAO) => void;
 };
 
+export const recordContext = createContext<RecordDAO>({
+	id: (new RecordDTO()).getNewId(),
+	playTime: 0,
+	createTime: 0,
+	routineId: 0,
+	routineName: '',
+	recordExercise: [
+		// {
+		// 	name: 'sqart',
+		// 	startTime: moment().unix(),
+		// 	endTime: moment().unix() + 1000,
+		// 	count: 10,
+		// },
+	],
+});
+
 function Player({ routineDAO, videoDAO, onEnded }: Props) {
 	const { ipcRenderer } = window.require('electron');
 
-	const record: RecordDAO = {
-		id: 0,
-		playTime: 10,
-		createTime: moment().unix(),
-		routineId: routineDAO['id'],
-		routineName: routineDAO['name'],
-		recordExercise: [
-			{
-				name: 'sqart',
-				startTime: moment().unix(),
-				endTime: moment().unix() + 1000,
-				count: 10,
-			},
-		],
-	};
+	// record 초기화
+	const recordDAO = useContext(recordContext);
+
+	const playTime = useRef(moment().unix());
+
+	recordDAO.createTime = moment().unix();
+	recordDAO.routineId = routineDAO['id'];
+	recordDAO.routineName = routineDAO['name'];
 
 	const requestRef = useRef<number>();
 
@@ -101,7 +111,8 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 		if (seq < routineDAO['videos'].length) {
 			load();
 		} else {
-			onEnded(record);
+			recordDAO.playTime = (moment().unix() - playTime.current) / 60; // minute
+			onEnded(recordDAO);
 		}
 	}, [videoRef, seq]);
 
@@ -171,7 +182,6 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 		}
 	}
 
-	let count = 0;
 	const capture = async () => {
 		try {
 			if (videoRef == null) return;
@@ -227,7 +237,6 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 			if (inferencedPoses.length >= 1) {
 				ipcRenderer.send('video-poses', inferencedPoses);
 			}
-			count++;
 
 			// 4. set keypoints and skelecton
 			setPoses(inferencedPoses);
@@ -293,7 +302,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 			<PIP
 				poseLabel={ poseLabel }
-				setRecordExercise={ setRecordExercise }
+				// setRecordExercise={ setRecordExercise }
 				onLoaded={ setWebcamLoaded }
 			/>
 
