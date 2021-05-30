@@ -42,8 +42,8 @@ class RecordDTO {
 
     	await this.db.collections.records.insert({
     		record_id: id,
-    		record_time: data['playTime'],
-    		record_start_time: data['createTime'],
+    		record_play_time: data['playTime'],
+    		record_create_time: data['createTime'],
     		routine_id: data['routineId'],
     		routine_name: data['routineName'],
     		record_exercises: data['recordExercise'],
@@ -66,8 +66,8 @@ class RecordDTO {
 
     	const result: RecordDAO = {
     		id: doc[0].get('record_id'),
-    		playTime: doc[0].get('record_time'),
-    		createTime: doc[0].get('record_start_time'),
+    		playTime: doc[0].get('record_play_time'),
+    		createTime: doc[0].get('record_create_time'),
     		routineId: doc[0].get('routine_id'),
     		routineName: doc[0].get('routine_name'),
     		recordExercise: doc[0].get('record_exercises'),
@@ -90,8 +90,8 @@ class RecordDTO {
     	for (let i = 0; i < doc.length; i++) {
     		result.push({
     			id: doc[i].get('record_id'),
-    			playTime: doc[i].get('record_time'),
-    			createTime: doc[i].get('record_start_time'),
+    			playTime: doc[i].get('record_play_time'),
+    			createTime: doc[i].get('record_create_time'),
     			routineId: doc[i].get('routine_id'),
     			routineName: doc[i].get('routine_name'),
     			recordExercise: doc[i].get('record_exercises'),
@@ -113,8 +113,8 @@ class RecordDTO {
     	for (let i = 0; i < doc.length; i++) {
     		result.push({
     			id: doc[i].get('record_id'),
-    			playTime: doc[i].get('record_time'),
-    			createTime: doc[i].get('record_start_time'),
+    			playTime: doc[i].get('record_play_time'),
+    			createTime: doc[i].get('record_create_time'),
     			routineId: doc[i].get('routine_id'),
     			routineName: doc[i].get('routine_name'),
     			recordExercise: doc[i].get('record_exercises'),
@@ -131,7 +131,7 @@ class RecordDTO {
 
     	const doc = await this.db.collections.records
     		.find()
-    		.where('record_start_time')
+    		.where('record_create_time')
     		.gte(moment(date).set({hour: 0, minute: 0, second: 0, millisecond: 0}).unix())
     		.lte(moment(date).add(1, 'day').set({hour: 0, minute: 0, second: 0, millisecond: 0}).unix())
     		.exec();
@@ -139,7 +139,7 @@ class RecordDTO {
     	let result = 0;
     	if (doc) {
     		for (let i=0; i< doc.length; i++) {
-    			result += doc[i].get('record_time');
+    			result += doc[i].get('record_play_time');
     		}
     	}
     	return result;
