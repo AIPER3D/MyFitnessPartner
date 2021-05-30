@@ -120,7 +120,7 @@ function Dashboard({db}: DashBoardProps) {
 					<div className="charts_exerciseAmount">
 						<div className="charts_exerciseAmount_title">
 							<div>
-								<h1>일간 운동량</h1>
+								<h1>주간 운동량</h1>
 							</div>
 						</div>
 						<Chart db={db}/>

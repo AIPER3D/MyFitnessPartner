@@ -52,7 +52,8 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 	const [videoLoaded, setVideoLoaded] = useState<boolean>(false);
 	const [webcamLoaded, setWebcamLoaded] = useState<boolean>(false);
 
-	const [videoRef, setVideoRef] = useState<HTMLVideoElement | null>(null);
+	const videoRef = useRef<HTMLVideoElement>(null);
+	// const [videoRef, setVideoRef] = useState<HTMLVideoElement | null>(null);
 	const [recordExcercise, setRecordExercise] = useState<RecordDAO['recordExercise']>([]);
 
 	const seqRef = useRef(0);
@@ -71,14 +72,19 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 	const [poses, setPoses] = useState<any>(null);
 
-	let poseNet: posenet.PoseNet;
+	// const [poseNet, setPoseNet] = useState<any>(null);
+
+	const poseNet = useRef<any>();
+
+	// let poseNet: posenet.PoseNet;
 
 	// 최초 모델 로딩
 	useEffect(() => {
 		(async () => {
 			setPlayerLoaded(false);
 
-			poseNet = await posenet.load({
+			// setPoseNet();
+			poseNet.current = await posenet.load({
 				architecture: 'MobileNetV1',
 				outputStride: 16,
 				inputResolution: { width: inputWidth, height: inputHeight },
@@ -86,22 +92,27 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 				quantBytes: 2,
 			});
 
-			requestRef.current = requestAnimationFrame(capture);
+			console.log('loading model');
 
 			setPlayerLoaded(true);
-		})();
+		})().then( () => {
+			requestRef.current = requestAnimationFrame(capture);
+		});
 
 		return () => {
 			if (requestRef.current) {
 				cancelAnimationFrame(requestRef.current);
 			}
+
+			if (poseNet.current != null) {
+				poseNet.current.dispose();
+				console.log('dispose posenet');
+			}
 		};
-	}, [videoRef]);
+	}, []);
 
 	// 비디오 로딩
 	useEffect(() => {
-		if (videoRef == null) return;
-
 		setVideoLoaded(false);
 		if (seq < routineDAO['videos'].length) {
 			load();
@@ -109,17 +120,19 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 			recordDAO.playTime = (moment().unix() - playTime.current) / 60; // minute
 			onEnded(recordDAO);
 		}
-	}, [videoRef, seq]);
+	}, [seq]);
 
 	// 로딩 완료 체크
 	useEffect(() => {
 		console.log(playerLoaded + '/' + videoLoaded + '/' + webcamLoaded);
-		if (videoRef == null) return;
+
 		if (!playerLoaded || !videoLoaded || !webcamLoaded) return;
+
 		(async () => {
-			await videoRef.play();
+			if (videoRef.current == null) return;
+			await videoRef.current.play();
 		})();
-	}, [videoRef, seq, playerLoaded, videoLoaded, webcamLoaded]);
+	}, [seq, playerLoaded, videoLoaded, webcamLoaded]);
 
 	ipcRenderer.on('pose-similarity', (event: any, args: any) => {
 		setPoseSimilarity(Math.abs(args));
@@ -127,7 +140,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 	// Video Load and Play
 	async function load() {
-		if (videoRef == null) return;
+		if (videoRef.current == null) return;
 
 		// 1. file loading
 		const file = fs.readFileSync('./files/videos/' + videoDAO[routineDAO['videos'][seqRef.current]]['id'] + '.vd');
@@ -137,13 +150,13 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 		const url = URL.createObjectURL(blob);
 
 		// 2. settings
-		videoRef.controls = true;
-		videoRef.playsInline = true;
-		videoRef.src = url;
-		videoRef.volume = 0.2;
+		videoRef.current.controls = true;
+		videoRef.current.playsInline = true;
+		videoRef.current.src = url;
+		videoRef.current.volume = 0.2;
 
 		if (seq == 0) {
-			videoRef.addEventListener('timeupdate', () => {
+			videoRef.current.addEventListener('timeupdate', () => {
 				try {
 					if (seqRef.current >= routineDAO['videos'].length) return;
 
@@ -152,10 +165,12 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 						const start = videoDAO[routineDAO['videos'][seqRef.current]]['timeline'][i]['start'];
 						const end = videoDAO[routineDAO['videos'][seqRef.current]]['timeline'][i]['end'];
 
-						if (videoRef.currentTime >= start &&
-							videoRef.currentTime <= end) {
-							setPoseLabel(name);
-							setPoseTime((videoRef.currentTime - start) / (end - start));
+						if (videoRef.current != null) {
+							if (videoRef.current.currentTime >= start &&
+								videoRef.current.currentTime <= end) {
+								setPoseLabel(name);
+								setPoseTime((videoRef.current.currentTime - start) / (end - start));
+							}
 						}
 					}
 				} catch (e : any) {
@@ -164,14 +179,16 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 			});
 
 			// 5. when video ended play next video
-			videoRef.addEventListener('ended', () => {
-				videoRef.pause();
+			videoRef.current.addEventListener('ended', () => {
+				if (videoRef.current != null) {
+					videoRef.current.pause();
+				}
 
 				seqRef.current += 1;
 				setSeq(seqRef.current);
 			});
 
-			videoRef.addEventListener('loadeddata', () => {
+			videoRef.current.addEventListener('loadeddata', () => {
 				setVideoLoaded(true);
 			});
 		}
@@ -179,64 +196,67 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 	const capture = async () => {
 		try {
-			if (videoRef == null) return;
+			if (videoRef.current != null) {
+				// if (videoRef == null) return;
 			// 1. resize video element
 			// videoRef.width = inputWidth;
 			// videoRef.height = inputHeight;
 
-			const resizedTensor = tf.tidy(() : tf.Tensor3D => {
+				const resizedTensor = tf.tidy(() : tf.Tensor3D => {
 				// // 1. get tensor from video element
-				const tensor = tf.browser.fromPixels(videoRef);
+					const tensor = tf.browser.fromPixels(videoRef.current as HTMLVideoElement);
 
-				// // 2. resize tensor
-				const boundingBox = getSquareBound(tensor.shape[1], tensor.shape[0]);
-				const expandedTensor : tf.Tensor4D = tensor.expandDims(0);
+					// // 2. resize tensor
+					const boundingBox = getSquareBound(tensor.shape[1], tensor.shape[0]);
+					const expandedTensor : tf.Tensor4D = tensor.expandDims(0);
 
-				const resizedTensor = tf.image.cropAndResize(
-					expandedTensor,
-					[boundingBox],
-					[0], [inputHeight, inputWidth],
-					'nearest');
+					const resizedTensor = tf.image.cropAndResize(
+						expandedTensor,
+						[boundingBox],
+						[0], [inputHeight, inputWidth],
+						'nearest');
 
-				// return resizedTensor;
-				return resizedTensor.reshape(resizedTensor.shape.slice(1) as [number, number, number]);
-			});
-
-			// 2. inference iamge
-			const inferencedPoses = await poseNet.estimateMultiplePoses(resizedTensor, {
-				flipHorizontal: false,
-				maxDetections: 3,
-				scoreThreshold: 0.5,
-				nmsRadius: 20,
-			});
-
-			resizedTensor.dispose();
-
-			// const width = tensor.shape[1];
-			// const height = tensor.shape[0];
-			const width = videoRef.videoWidth;
-			const height = videoRef.videoHeight;
-			const posSize = (width > height ? height : width);
-			const dx = (width - posSize) / 2;
-
-			// 3. upscale keypoints to webcam resolution
-			inferencedPoses.forEach((pose) => {
-				pose.keypoints.map((keypoint: any) => {
-					keypoint.position.x *= posSize / inputWidth;
-					keypoint.position.y *= posSize / inputHeight;
-
-					keypoint.position.x += dx;
+					// return resizedTensor;
+					return resizedTensor.reshape(resizedTensor.shape.slice(1) as [number, number, number]);
 				});
-			});
 
-			if (inferencedPoses.length >= 1) {
-				ipcRenderer.send('video-poses', inferencedPoses);
+				// 2. inference iamge
+				const inferencedPoses = await poseNet.current.estimateMultiplePoses(resizedTensor, {
+					flipHorizontal: false,
+					maxDetections: 3,
+					scoreThreshold: 0.5,
+					nmsRadius: 20,
+				});
+
+				resizedTensor.dispose();
+
+				// const width = tensor.shape[1];
+				// const height = tensor.shape[0];
+				const width = videoRef.current.videoWidth;
+				const height = videoRef.current.videoHeight;
+				const posSize = (width > height ? height : width);
+				const dx = (width - posSize) / 2;
+
+				// 3. upscale keypoints to webcam resolution
+				inferencedPoses.forEach((pose : any) => {
+					pose.keypoints.map((keypoint: any) => {
+						keypoint.position.x *= posSize / inputWidth;
+						keypoint.position.y *= posSize / inputHeight;
+
+						keypoint.position.x += dx;
+					});
+				});
+
+				if (inferencedPoses.length >= 1) {
+					ipcRenderer.send('video-poses', inferencedPoses);
+				}
+
+				// 4. set keypoints and skelecton
+				setPoses(inferencedPoses);
 			}
-
-			// 4. set keypoints and skelecton
-			setPoses(inferencedPoses);
 		} catch (e) {
 			// requestRef.current = requestAnimationFrame(capture);
+			console.log(e);
 		}
 
 		// 5. recursion capture()
@@ -292,7 +312,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 			</PixiStage>
 
 			<NavigatorBottom
-				videoRef={videoRef}
+				videoRef={videoRef.current}
 			/>
 
 			<PIP
@@ -301,7 +321,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 				onLoaded={ setWebcamLoaded }
 			/>
 
-			<Video ref={ setVideoRef } />
+			<Video ref={ videoRef } />
 
 		</Container>
 	);

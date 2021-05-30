@@ -41,7 +41,8 @@ function Webcam({ width, height, opacity, poseLabel, onLoaded }: Props) {
 
 	const requestRef = useRef<number>(0);
 
-	const [poseNets, setPoseNets] = useState<any>();
+	// const [poseNets, setPoseNets] = useState<any>();
+	const poseNets = useRef<any>(null);
 
 	const repetitionCounter = useRef<RepetitionObject>({});
 
@@ -55,23 +56,16 @@ function Webcam({ width, height, opacity, poseLabel, onLoaded }: Props) {
 	// const [recordExcercise, _] = useState<RecordDAO['recordExercise']>([]);
 
 	useEffect(() => {
-		load()
-			.then(async () => {
-				await run();
-			});
-
-		// const _timer = timer(false);
-
 		const startTime = moment().unix();
 
 		return () => {
-			if (webcamRef.current) {
-				webcamRef.current.stop();
-			}
+			// if (webcamRef.current) {
+			// 	webcamRef.current.stop();
+			// }
 
-			if (requestRef.current) {
-				cancelAnimationFrame(requestRef.current);
-			}
+			// if (requestRef.current) {
+			// 	cancelAnimationFrame(requestRef.current);
+			// }
 
 			if (poseLabel != '') {
 				const endTime = moment().unix();
@@ -93,16 +87,35 @@ function Webcam({ width, height, opacity, poseLabel, onLoaded }: Props) {
 		};
 	}, [poseLabel]);
 
+	useEffect( () => {
+		load()
+			.then(async () => {
+				await run();
+			});
+
+		console.log('webcam load model');
+
+		return () => {
+			if (webcamRef.current) {
+				webcamRef.current.stop();
+			}
+
+			if (requestRef.current) {
+				cancelAnimationFrame(requestRef.current);
+			}
+		};
+	}, []);
+
 	async function load() {
 		const poseSquat = await loadTMPose('files/models/exercise_classifier/Squat/model.json');
 		const poseLunge = await loadTMPose('files/models/exercise_classifier/Lunge/model.json');
 		const poseJump = await loadTMPose('files/models/exercise_classifier/Jump/model.json');
 
-		setPoseNets({
+		webcamRef.current = {
 			Squat: poseSquat,
 			Lunge: poseLunge,
 			Jump: poseJump,
-		});
+		};
 
 		repetitionCounter.current = {
 			Squat: new RepetitionCounter(poseSquat.getMetadata().labels[0], 0.8, 0.2),
@@ -133,13 +146,9 @@ function Webcam({ width, height, opacity, poseLabel, onLoaded }: Props) {
 			// 1. caputer iamge
 			const image = await webcam.capture();
 
-			if (image == null) {
-				return;
-			}
-
 			if (poseLabel != '') {
 				// 2. estimate pose
-				const {pose, posenetOutput} = await poseNets[poseLabel].estimatePose(image, true);
+				const {pose, posenetOutput} = await poseNets.current[poseLabel].estimatePose(image, true);
 
 				if (pose == null) {
 					requestRef.current = requestAnimationFrame(capture);
@@ -147,7 +156,7 @@ function Webcam({ width, height, opacity, poseLabel, onLoaded }: Props) {
 				}
 
 				// 3. pose classification
-				const result = await poseNets[poseLabel].predict(posenetOutput);
+				const result = await poseNets.current[poseLabel].predict(posenetOutput);
 
 				ipcRenderer.send('webcam-poses', pose);
 
