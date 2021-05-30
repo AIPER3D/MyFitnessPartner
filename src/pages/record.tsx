@@ -115,8 +115,8 @@ function Record({ db } : PageProps) {
 				if (re['recordExercise'][i] != undefined) {
 					arr.push(
 						<SubBox key={i}>
-							<SubTitle>{re['recordExercise'][i]['name']}</SubTitle>
-							<SubText>{re['recordExercise'][i]['count']}회</SubText>
+							<SubTitle key={i}>{re['recordExercise'][i]['name']}</SubTitle>
+							<SubText key={i}>{re['recordExercise'][i]['count']}회</SubText>
 						</SubBox>
 					);
 				}
@@ -139,8 +139,6 @@ function Record({ db } : PageProps) {
 			</div>
 		);
 	} else {
-
-
 		return (
 			<div>
 				<Header text='운동 기록' />
