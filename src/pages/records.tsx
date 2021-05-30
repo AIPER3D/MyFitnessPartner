@@ -57,7 +57,7 @@ function Records({ db } : PageProps) {
 			arr.push({
 				id: record[i]['id'],
 				title: record[i]['routineName'],
-				desc: moment(record[i]['createTime'] * 1000).format('YYYY-MM-DD HH:mm:ss'),
+				desc: record[i]['createTime'].toString(),
 				thumbnail: thumbnail,
 				onClick: onClick,
 			});
