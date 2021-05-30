@@ -99,6 +99,7 @@ function Record({ db } : PageProps) {
 	const recordDTO = new RecordDTO();
 	const [routine, setRoutine] = useState<RoutineDAO | null>(null);
 	const [record, setRecord] = useState<RecordDAO | null>(null);
+	const [exercise, setExercise] = useState<any>([]);
 
 	useEffect(() => {
 		routineDTO.setDB(db);
@@ -109,7 +110,21 @@ function Record({ db } : PageProps) {
 	async function load() {
 		const re: RecordDAO | null = await recordDTO.getRecordById(Number(id));
 		if (re != null) {
+			const arr = [];
+			for (let i = 0; re['recordExercise'].length; i++) {
+				if (re['recordExercise'][i] != undefined) {
+					arr.push(
+						<SubBox key={i}>
+							<SubTitle>{re['recordExercise'][i]['name']}</SubTitle>
+							<SubText>{re['recordExercise'][i]['count']}회</SubText>
+						</SubBox>
+					);
+				}
+			}
+
+			setExercise(arr);
 			setRecord(re);
+
 			const ro: RoutineDAO | null = await routineDTO.getRoutineById(Number(re['routineId']));
 			if (ro != null) {
 				setRoutine(ro);
@@ -124,19 +139,7 @@ function Record({ db } : PageProps) {
 			</div>
 		);
 	} else {
-		const arr = [];
-		for (let i = 0; record['recordExercise'].length; i++) {
-			console.log(record['recordExercise'][i]);
 
-			if (record['recordExercise'][i]['name'] && record['recordExercise'][i]['count']) {
-				arr.push(
-					<SubBox key={i}>
-						<SubTitle>{record['recordExercise'][i]['name']}</SubTitle>
-						<SubText>{record['recordExercise'][i]['count']}회</SubText>
-					</SubBox>
-				);
-			}
-		}
 
 		return (
 			<div>
@@ -149,7 +152,7 @@ function Record({ db } : PageProps) {
 				</Box>
 				<Title>진행한 운동</Title>
 				<Box width = { '920px' } height= { '50px' }>
-					{ arr }
+					{ exercise }
 				</Box>
 				<Button href={ '/records/1' } text = { '확인' } />
 			</div>
