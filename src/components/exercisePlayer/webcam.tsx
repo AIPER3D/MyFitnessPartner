@@ -126,8 +126,6 @@ function Webcam({ width, height, opacity, poseLabel, onLoaded }: Props) {
 		requestRef.current = requestAnimationFrame(capture);
 	}
 
-	let count = 0;
-
 	async function capture() {
 		try {
 			const webcam = webcamRef.current;
@@ -139,38 +137,32 @@ function Webcam({ width, height, opacity, poseLabel, onLoaded }: Props) {
 				return;
 			}
 
-			if (poseLabel == '') {
-				image.dispose();
-				cancelAnimationFrame(requestRef.current);
-				requestRef.current = requestAnimationFrame(capture);
-				return;
+			if (poseLabel != '') {
+				// 2. estimate pose
+				const {pose, posenetOutput} = await poseNets[poseLabel].estimatePose(image, true);
+
+				if (pose == null) {
+					requestRef.current = requestAnimationFrame(capture);
+					return;
+				}
+
+				// 3. pose classification
+				const result = await poseNets[poseLabel].predict(posenetOutput);
+
+				ipcRenderer.send('webcam-poses', pose);
+
+				pose.keypoints.map( (keypoint : any) => {
+					keypoint.position.x *= widthScaleRatio;
+					keypoint.position.y *= heightScaleRatio;
+				});
+
+				repetitionCounter.current[poseLabel].count(result);
+
+				// 4. set keypoints
+				setPoses([pose]);
 			}
-
-			// 2. estimate pose
-			const {pose, posenetOutput} = await poseNets[poseLabel].estimatePose(image, true);
-
-			if (pose == null) {
-				requestRef.current = requestAnimationFrame(capture);
-				return;
-			}
-
-			// 3. pose classification
-			const result = await poseNets[poseLabel].predict(posenetOutput);
-
-			ipcRenderer.send('webcam-poses', pose);
-
-			pose.keypoints.map( (keypoint : any) => {
-				keypoint.position.x *= widthScaleRatio;
-				keypoint.position.y *= heightScaleRatio;
-			});
-
-			repetitionCounter.current[poseLabel].count(result);
-
-			// 4. set keypoints
-			setPoses([pose]);
-
+			image.dispose();
 			await tf.nextFrame();
-			count++;
 		} catch (e) {
 			console.log(e);
 		}
