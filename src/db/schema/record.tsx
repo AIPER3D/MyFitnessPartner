@@ -8,10 +8,10 @@ const RecordSchema = {
 		'record_id': {
 			'type': 'number',
 		},
-		'record_time': {
+		'record_play_time': {
 			'type': 'number',
 		},
-		'record_start_time': {
+		'record_create_time': {
 			'type': 'number',
 		},
 		'routine_id': {

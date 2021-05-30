@@ -57,7 +57,7 @@ function Records({ db } : PageProps) {
 			arr.push({
 				id: record[i]['id'],
 				title: record[i]['routineName'],
-				desc: moment(record[i]['time']).format('YYYY-MM-DD HH:mm:ss'),
+				desc: moment(record[i]['playTime']).format('YYYY-MM-DD HH:mm:ss'),
 				thumbnail: thumbnail,
 				onClick: onClick,
 			});
