@@ -33,12 +33,20 @@ export const recordContext = createContext<RecordDAO>({
 	recordExercise: [],
 });
 
+export const playerContext = createContext({
+	poseLabel: '',
+	currentSeq: 0,
+	totalSeq: 0,
+});
+
 function Player({ routineDAO, videoDAO, onEnded }: Props) {
 	const { ipcRenderer } = window.require('electron');
 
 
 	// record 초기화
 	const recordDAO = useContext(recordContext);
+	const _playerContext = useContext(playerContext);
+	_playerContext.totalSeq = routineDAO['videos'].length;
 
 	const playTime = useRef(moment().unix());
 
@@ -53,8 +61,6 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 	const [webcamLoaded, setWebcamLoaded] = useState<boolean>(false);
 
 	const videoRef = useRef<HTMLVideoElement>(null);
-	// const [videoRef, setVideoRef] = useState<HTMLVideoElement | null>(null);
-	const [recordExcercise, setRecordExercise] = useState<RecordDAO['recordExercise']>([]);
 
 	const seqRef = useRef(0);
 	const [seq, setSeq] = useState<number>(seqRef.current);
@@ -108,6 +114,8 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 				poseNet.current.dispose();
 				console.log('dispose posenet');
 			}
+
+			ipcRenderer.removeAllListeners('pose-similarity');
 		};
 	}, []);
 
@@ -117,6 +125,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 		if (seq < routineDAO['videos'].length) {
 			load();
 		} else {
+			// playTime 기록
 			recordDAO.playTime = (moment().unix() - playTime.current) / 60; // minute
 			onEnded(recordDAO);
 		}
@@ -169,6 +178,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 							if (videoRef.current.currentTime >= start &&
 								videoRef.current.currentTime <= end) {
 								setPoseLabel(name);
+								_playerContext.poseLabel = name;
 								setPoseTime((videoRef.current.currentTime - start) / (end - start));
 							}
 						}
@@ -185,6 +195,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 				}
 
 				seqRef.current += 1;
+				_playerContext.currentSeq = seqRef.current;
 				setSeq(seqRef.current);
 			});
 
@@ -316,8 +327,6 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 			/>
 
 			<PIP
-				poseLabel={ poseLabel }
-				// setRecordExercise={ setRecordExercise }
 				onLoaded={ setWebcamLoaded }
 			/>
 
