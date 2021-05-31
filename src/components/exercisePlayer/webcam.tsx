@@ -12,16 +12,14 @@ import RepetitionCounter from '../../utils/RepetitionCounter';
 import * as tmPose from '@teachablemachine/pose';
 import { timer } from '../../utils/bench-util';
 import { RecordDAO } from '../../db/DAO';
-import { recordContext } from './player';
+import { recordContext, playerContext } from './player';
 import moment from 'moment';
 
 type Props = {
 	width: number;
 	height: number;
 	opacity: number;
-	poseLabel : string;
 	onLoaded: (val: boolean) => void;
-	// setRecordExercise : React.Dispatch<React.SetStateAction<RecordDAO['recordExercise']>>
 }
 
 interface RepetitionObject {
@@ -31,61 +29,66 @@ interface RepetitionObject {
 	[props:string] : any;
 }
 
-function Webcam({ width, height, opacity, poseLabel, onLoaded }: Props) {
+function Webcam({ width, height, opacity, onLoaded }: Props) {
 	const {ipcRenderer} = window.require('electron');
 
 	const recordDAO = useContext(recordContext);
+	const _playerContext = useContext(playerContext);
 
 	const videoRef = useRef<HTMLVideoElement>(null);
 	const webcamRef = useRef<any>(null);
-
 	const requestRef = useRef<number>(0);
 
-	// const [poseNets, setPoseNets] = useState<any>();
+	// posenet 모델과 운동 횟수 카운터
 	const poseNets = useRef<any>(null);
-
 	const repetitionCounter = useRef<RepetitionObject>({});
 
+	// 웹캠의 입력 해상도
 	const inputHeight = 224;
 	const inputWidth = 224;
 
 	const widthScaleRatio = width / inputWidth;
 	const heightScaleRatio = height / inputHeight;
 
-	const [poses, setPoses] = useState<any>(null);
-	// const [recordExcercise, _] = useState<RecordDAO['recordExercise']>([]);
+	// const [poses, setPoses] = useState<any>(null);
+	const poses = useRef<any>(null);
 
 	useEffect(() => {
 		const startTime = moment().unix();
 
+		const previousPoseLabel = _playerContext.poseLabel;
+
 		return () => {
-			// if (webcamRef.current) {
-			// 	webcamRef.current.stop();
-			// }
+			const endTime = moment().unix();
 
-			// if (requestRef.current) {
-			// 	cancelAnimationFrame(requestRef.current);
-			// }
+			// 처음 시작하면 기록 안함
+			if (previousPoseLabel == '') return;
 
-			if (poseLabel != '') {
-				const endTime = moment().unix();
+			const record : {
+				name: string;
+				startTime: number;
+				endTime: number;
+				count: number;
+			} = {
+				name: previousPoseLabel,
+				startTime,
+				endTime,
+				count: repetitionCounter.current[previousPoseLabel].nRepeats,
+			};
 
-				const record : {
-					name: string;
-					startTime: number;
-					endTime: number;
-					count: number;
-				} = {
-					name: poseLabel,
-					startTime,
-					endTime,
-					count: repetitionCounter.current[poseLabel].nRepeats,
-				};
-
+			// poseLabel이 바뀌면  운동 기록 저장
+			if (_playerContext.poseLabel != previousPoseLabel) {
 				recordDAO.recordExercise.push(record);
+				console.log(record);
+			}
+
+			// 마지막 poseLabel이면 운동 기록 저장
+			if (_playerContext.totalSeq == _playerContext.currentSeq) {
+				recordDAO.recordExercise.push(record);
+				console.log(record);
 			}
 		};
-	}, [poseLabel]);
+	}, [_playerContext.poseLabel]);
 
 	useEffect( () => {
 		load()
@@ -102,6 +105,14 @@ function Webcam({ width, height, opacity, poseLabel, onLoaded }: Props) {
 
 			if (requestRef.current) {
 				cancelAnimationFrame(requestRef.current);
+				console.log('canceled');
+				return;
+			}
+
+			if (poseNets.current) {
+				Object.keys(poseNets.current).forEach((key) => {
+					poseNets.current[key].dispose();
+				});
 			}
 		};
 	}, []);
@@ -111,7 +122,7 @@ function Webcam({ width, height, opacity, poseLabel, onLoaded }: Props) {
 		const poseLunge = await loadTMPose('files/models/exercise_classifier/Lunge/model.json');
 		const poseJump = await loadTMPose('files/models/exercise_classifier/Jump/model.json');
 
-		webcamRef.current = {
+		poseNets.current = {
 			Squat: poseSquat,
 			Lunge: poseLunge,
 			Jump: poseJump,
@@ -128,9 +139,8 @@ function Webcam({ width, height, opacity, poseLabel, onLoaded }: Props) {
 
 	async function run() {
 		if (videoRef.current == null) return;
-		const element = videoRef.current;
 
-		webcamRef.current = await tf.data.webcam(element, {
+		webcamRef.current = await tf.data.webcam(videoRef.current, {
 			resizeHeight: inputHeight,
 			resizeWidth: inputWidth,
 			centerCrop: false,
@@ -146,30 +156,33 @@ function Webcam({ width, height, opacity, poseLabel, onLoaded }: Props) {
 			// 1. caputer iamge
 			const image = await webcam.capture();
 
-			if (poseLabel != '') {
+			if (image == null) return;
+
+			const label = _playerContext.poseLabel;
+
+			if (label != '') {
 				// 2. estimate pose
-				const {pose, posenetOutput} = await poseNets.current[poseLabel].estimatePose(image, true);
+				const {pose, posenetOutput} = await poseNets.current[label].estimatePose(image, true);
 
-				if (pose == null) {
-					requestRef.current = requestAnimationFrame(capture);
-					return;
+				if (pose != null) {
+					// 3. pose classification
+					const result = await poseNets.current[label].predict(posenetOutput);
+
+					ipcRenderer.send('webcam-poses', pose);
+
+					pose.keypoints.map( (keypoint : any) => {
+						keypoint.position.x *= widthScaleRatio;
+						keypoint.position.y *= heightScaleRatio;
+					});
+
+					repetitionCounter.current[label].count(result);
+
+					// 4. set keypoints
+					// setPoses([pose]);
+					poses.current = [pose];
 				}
-
-				// 3. pose classification
-				const result = await poseNets.current[poseLabel].predict(posenetOutput);
-
-				ipcRenderer.send('webcam-poses', pose);
-
-				pose.keypoints.map( (keypoint : any) => {
-					keypoint.position.x *= widthScaleRatio;
-					keypoint.position.y *= heightScaleRatio;
-				});
-
-				repetitionCounter.current[poseLabel].count(result);
-
-				// 4. set keypoints
-				setPoses([pose]);
 			}
+
 			image.dispose();
 			await tf.nextFrame();
 		} catch (e) {
@@ -182,15 +195,15 @@ function Webcam({ width, height, opacity, poseLabel, onLoaded }: Props) {
 	const draw = React.useCallback( (graphics) => {
 		graphics.clear();
 
-		if (poses == null) return;
+		if (poses.current == null) return;
 
-		poses.forEach(({ score, keypoints }: { score: number, keypoints: [] }) => {
+		poses.current.forEach(({ score, keypoints }: { score: number, keypoints: [] }) => {
 			if (score >= 0.1) {
 				drawKeypoints(graphics, keypoints, 0.5);
 				drawSkeleton(graphics, keypoints, 0.5);
 			}
 		});
-	}, [poses]);
+	}, [poses.current]);
 
 	const stageProps = {
 		width: width,
