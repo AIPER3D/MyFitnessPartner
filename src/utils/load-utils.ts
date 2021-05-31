@@ -11,7 +11,7 @@ export async function loadTMPose(modelPath: string) : Promise<tmPose.CustomPoseN
 	const weights = loadFile(path.join(basePath, 'weights.bin'), 'weights.bin');
 	const metadata = loadFile(path.join(basePath, 'metadata.json'), 'metadata.json');
 
-	const model : any = await tmPose.loadFromFiles(modelData, weights, metadata);
+	const model : tmPose.CustomPoseNet = await tmPose.loadFromFiles(modelData, weights, metadata);
 
 	return model;
 }
