@@ -8,14 +8,18 @@ import { VideoDAO, RoutineDAO, RecordDAO } from '../../db/DAO';
 import * as posenet from '@tensorflow-models/posenet';
 import * as tf from '@tensorflow/tfjs';
 
-import { Stage, Graphics } from '@inlet/react-pixi';
-import { drawKeypoints, drawSkeleton, getSquareBound } from '../../utils/posenet-utils';
+import * as PIXI from 'pixi.js';
+
+import { Stage, Graphics, useApp, AppConsumer } from '@inlet/react-pixi';
+import { drawKeypoints, drawKeypoints2, drawSkeleton, drawSkeleton2, getSquareBound } from '../../utils/posenet-utils';
 
 import { css } from '@emotion/react';
 import PuffLoader from 'react-spinners/PuffLoader';
-import { tensorToImage } from '../../utils/video-util';
+import { imageFromVideo, tensorToImage } from '../../utils/video-util';
 import moment from 'moment';
 import { RecordDTO } from '../../db/DTO';
+import { timer } from '../../utils/bench-util';
+import { _collectionNamePrimary } from 'rxdb';
 
 type Props = {
 	routineDAO: RoutineDAO;
@@ -42,17 +46,20 @@ export const playerContext = createContext({
 function Player({ routineDAO, videoDAO, onEnded }: Props) {
 	const { ipcRenderer } = window.require('electron');
 
-
 	// record 초기화
 	const recordDAO = useContext(recordContext);
-	const _playerContext = useContext(playerContext);
-	_playerContext.totalSeq = routineDAO['videos'].length;
-
-	const playTime = useRef(moment().unix());
 
 	recordDAO.createTime = Number(moment().format('YYYYMMDD'));
 	recordDAO.routineId = routineDAO['id'];
 	recordDAO.routineName = routineDAO['name'];
+
+	// player context 초기화
+	const _playerContext = useContext(playerContext);
+	_playerContext.totalSeq = routineDAO['videos'].length;
+
+	// 총 운동 시간
+	const playTime = useRef(moment().unix());
+
 
 	const requestRef = useRef<number>();
 
@@ -61,6 +68,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 	const [webcamLoaded, setWebcamLoaded] = useState<boolean>(false);
 
 	const videoRef = useRef<HTMLVideoElement>(null);
+	const canvasRef = useRef<HTMLCanvasElement>(null);
 
 	const seqRef = useRef(0);
 	const [seq, setSeq] = useState<number>(seqRef.current);
@@ -70,19 +78,13 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 	const [poseSimilarity, setPoseSimilarity] = useState<any>(0);
 
-	const inputWidth = 224;
-	const inputHeight = 224;
+	const inputWidth = 257;
+	const inputHeight = 257;
 
-	const widthScaleRatio = window.innerWidth / inputWidth;
-	const heightScaleRatio = (window.innerHeight - 100) / inputHeight;
-
-	const [poses, setPoses] = useState<any>(null);
-
-	// const [poseNet, setPoseNet] = useState<any>(null);
-
+	const poses = useRef<any>(null);
 	const poseNet = useRef<any>();
 
-	// let poseNet: posenet.PoseNet;
+	const endRef = useRef<boolean>(false);
 
 	// 최초 모델 로딩
 	useEffect(() => {
@@ -107,6 +109,8 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 		return () => {
 			if (requestRef.current) {
+				console.log('cancel animation frame');
+				endRef.current = true;
 				cancelAnimationFrame(requestRef.current);
 			}
 
@@ -205,92 +209,147 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 		}
 	}
 
-	const capture = async () => {
+	function cropAndResizeFrame(img: tf.Tensor3D): tf.Tensor3D {
+		return tf.tidy(() => {
+			const boundingBox = getSquareBound(img.shape[1], img.shape[0]);
+			const expandedTensor : tf.Tensor4D = img.expandDims(0);
+			const resizedTensor = tf.image.cropAndResize(
+				expandedTensor,
+				[boundingBox],
+				[0], [inputHeight, inputWidth],
+				'nearest');
+
+			// return resizedTensor;
+			return resizedTensor.reshape(resizedTensor.shape.slice(1) as [number, number, number]);
+		});
+	}
+
+	const t = timer(true);
+
+	async function capture() {
 		try {
-			if (videoRef.current != null) {
-				// if (videoRef == null) return;
-			// 1. resize video element
-			// videoRef.width = inputWidth;
-			// videoRef.height = inputHeight;
+			if (endRef.current) return;
 
-				const resizedTensor = tf.tidy(() : tf.Tensor3D => {
-				// // 1. get tensor from video element
-					const tensor = tf.browser.fromPixels(videoRef.current as HTMLVideoElement);
+			if (!videoRef.current) throw new Error('videoRef is null');
 
-					// // 2. resize tensor
-					const boundingBox = getSquareBound(tensor.shape[1], tensor.shape[0]);
-					const expandedTensor : tf.Tensor4D = tensor.expandDims(0);
+			videoRef.current.width = videoRef.current.videoWidth / 2;
+			videoRef.current.height = videoRef.current.videoHeight / 2;
 
-					const resizedTensor = tf.image.cropAndResize(
-						expandedTensor,
-						[boundingBox],
-						[0], [inputHeight, inputWidth],
-						'nearest');
+			t.start('video frame to tensor');
 
-					// return resizedTensor;
-					return resizedTensor.reshape(resizedTensor.shape.slice(1) as [number, number, number]);
-				});
+			const tensor = tf.browser.fromPixels(videoRef.current);
 
-				// 2. inference iamge
-				const inferencedPoses = await poseNet.current.estimateMultiplePoses(resizedTensor, {
-					flipHorizontal: false,
-					maxDetections: 3,
-					scoreThreshold: 0.5,
-					nmsRadius: 20,
-				});
+			const resizedTensor = tf.tidy(() : tf.Tensor3D => {
+			// // 1. get tensor from video element
 
-				resizedTensor.dispose();
+				// // 2. resize tensor
+				const boundingBox = getSquareBound(tensor.shape[1], tensor.shape[0]);
+				const expandedTensor : tf.Tensor4D = tensor.expandDims(0);
 
-				// const width = tensor.shape[1];
-				// const height = tensor.shape[0];
-				const width = videoRef.current.videoWidth;
-				const height = videoRef.current.videoHeight;
-				const posSize = (width > height ? height : width);
-				const dx = (width - posSize) / 2;
+				const resizedTensor = tf.image.cropAndResize(
+					expandedTensor,
+					[boundingBox],
+					[0], [inputHeight, inputWidth],
+					'nearest');
 
-				// 3. upscale keypoints to webcam resolution
-				inferencedPoses.forEach((pose : any) => {
-					pose.keypoints.map((keypoint: any) => {
-						keypoint.position.x *= posSize / inputWidth;
-						keypoint.position.y *= posSize / inputHeight;
+				// return resizedTensor;
+				return resizedTensor.reshape(resizedTensor.shape.slice(1) as [number, number, number]);
+			});
 
-						keypoint.position.x += dx;
-					});
-				});
+			// 2. inference iamge
+			const inferencedPoses = await poseNet.current.estimateMultiplePoses(resizedTensor, {
+				flipHorizontal: false,
+				maxDetections: 3,
+				scoreThreshold: 0.5,
+				nmsRadius: 20,
+			});
 
-				if (inferencedPoses.length >= 1) {
-					ipcRenderer.send('video-poses', inferencedPoses);
-				}
+			resizedTensor.dispose();
+			tensor.dispose();
 
-				// 4. set keypoints and skelecton
-				setPoses(inferencedPoses);
+			if (inferencedPoses.length >= 1) {
+				ipcRenderer.send('video-poses', inferencedPoses);
 			}
+
+			const width = videoRef.current.videoWidth;
+			const height = videoRef.current.videoHeight;
+			const posSize = (width > height ? height : width);
+			const dx = (width - posSize) / 2;
+
+			// 3. upscale keypoints to webcam resolution
+			inferencedPoses.forEach((pose : any) => {
+				pose.keypoints.map((keypoint: any) => {
+					keypoint.position.x *= posSize / inputWidth;
+					keypoint.position.y *= posSize / inputHeight;
+
+					keypoint.position.x += dx;
+				});
+			});
+
+
+			// inferencedPoses.forEach((pose : any) => {
+			// 	pose.keypoints.map((keypoint: any) => {
+			// 		keypoint.position.x *= width / inputWidth;
+			// 		keypoint.position.y *= height / inputHeight;
+
+			// 		// keypoint.position.x += dx;
+			// 	});
+			// });
+
+			// 4. set keypoints and skelecton
+			// setPoses(inferencedPoses);
+			if (!canvasRef.current) throw new Error('canvasRef is null');
+
+			const ctx = canvasRef.current.getContext('2d');
+			if (!ctx) throw new Error('2d context');
+			ctx.canvas.width = videoRef.current.videoWidth;
+			ctx.canvas.height = videoRef.current.videoHeight;
+			ctx.scale(1, 1);
+
+			ctx.drawImage(videoRef.current, 0, 0);
+			poses.current = inferencedPoses;
+			draw(ctx);
+
+			t.stop();
 		} catch (e) {
-			// requestRef.current = requestAnimationFrame(capture);
 			console.log(e);
 		}
 
 		// 5. recursion capture()
 		requestRef.current = requestAnimationFrame(capture);
-	};
+	}
 
-	// draw keypoints of inferenced pose
-	const draw = React.useCallback((graphics) => {
-		graphics.clear();
-
-		if (poses == null) return;
+	function draw(ctx : CanvasRenderingContext2D) {
+		if (poses.current == null) return;
 
 		let i =0;
-		const len = poses.length;
+		const len = poses.current.length;
 		while ( i < len) {
-			if (poses[i].score >= 0.3) {
-				drawKeypoints(graphics, poses[i].keypoints, 0.5);
-				drawSkeleton(graphics, poses[i].keypoints, 0.5);
+			if (poses.current[i].score >= 0.3) {
+				drawKeypoints2(ctx, poses.current[i].keypoints, 0.5);
+				drawSkeleton2(ctx, poses.current[i].keypoints, 0.5);
 			}
-
 			i++;
 		}
-	}, [poses]);
+	}
+
+	// // draw keypoints of inferenced pose
+	// const draw = React.useCallback((graphics : PIXI.Graphics) => {
+	// 	graphics.clear();
+
+	// 	if (poses.current == null) return;
+
+	// 	let i =0;
+	// 	const len = poses.current.length;
+	// 	while ( i < len) {
+	// 		if (poses.current[i].score >= 0.3) {
+	// 			drawKeypoints(graphics, poses.current[i].keypoints, 0.5);
+	// 			drawSkeleton(graphics, poses.current[i].keypoints, 0.5);
+	// 		}
+
+	// 		i++;
+	// 	}
+	// }, [poses.current]);
 
 	const stageProps = {
 		width: window.innerWidth,
@@ -318,9 +377,9 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 				accuracy={poseSimilarity}
 			/>
 
-			<PixiStage {...stageProps}>
+			{/* <PixiStage {...stageProps}>
 				<Graphics draw={draw} />
-			</PixiStage>
+			</PixiStage> */}
 
 			<NavigatorBottom
 				videoRef={videoRef.current}
@@ -329,6 +388,10 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 			<PIP
 				onLoaded={ setWebcamLoaded }
 			/>
+
+			<Canvas ref = {canvasRef}>
+
+			</Canvas>
 
 			<Video ref={ videoRef } />
 
@@ -378,9 +441,21 @@ const Container = styled.div`
 	overflow:hidden;
 `;
 
-const Video = styled.video`
+const Canvas = styled.canvas`
 	position: absolute;
 	display: block;
+
+	top: 50px;
+	left: 0px;
+	width: calc(100vw);
+	height: calc(100vh - 100px);
+	margin: 0px;
+	padding: 0px;
+`;
+
+const Video = styled.video`
+	position: absolute;
+	display: none;
 	
 	top: 50px;
 	left: 0px;

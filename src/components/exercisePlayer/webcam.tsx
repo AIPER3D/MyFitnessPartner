@@ -99,19 +99,19 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 		console.log('webcam load model');
 
 		return () => {
-			if (webcamRef.current) {
-				webcamRef.current.stop();
-			}
-
 			if (requestRef.current) {
 				cancelAnimationFrame(requestRef.current);
-				console.log('canceled');
-				return;
+			}
+
+			if (webcamRef.current) {
+				webcamRef.current.stop();
 			}
 
 			if (poseNets.current) {
 				Object.keys(poseNets.current).forEach((key) => {
 					poseNets.current[key].dispose();
+
+					console.log('dispose ', key, ' model');
 				});
 			}
 		};
@@ -151,10 +151,8 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 
 	async function capture() {
 		try {
-			const webcam = webcamRef.current;
-
 			// 1. caputer iamge
-			const image = await webcam.capture();
+			const image = await webcamRef.current.capture();
 
 			if (image == null) return;
 
