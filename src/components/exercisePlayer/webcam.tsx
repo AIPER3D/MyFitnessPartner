@@ -65,8 +65,7 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 				const endTime = moment().unix();
 
 				// 처음 시작하면 기록 안함
-				if (previousPoseLabel == '' ||
-					previousPoseLabel == 'end') return;
+				if (previousPoseLabel == '') return;
 
 				const record : {
 					name: string;
