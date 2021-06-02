@@ -54,6 +54,8 @@ function Exercise2({ db } : PageProps) {
 
 		const id = await recordDTO.addRecord(record);
 		setRedirect(id);
+
+		console.log(await recordDTO.getRecordById(id));
 	}
 
 	if (redirect != 0) {

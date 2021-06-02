@@ -84,11 +84,10 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 	// 최초 모델 로딩
 	useEffect(() => {
 		// 최초 레코드 초기화
-		recordDAO.id = (new RecordDTO()).getNewId();
+		recordDAO.createTime = Number(moment().format('YYYYMMDD'));
+		recordDAO.routineId = routineDAO['id'];
+		recordDAO.routineName = routineDAO['name'];
 		recordDAO.playTime = 0;
-		recordDAO.createTime = 0;
-		recordDAO.routineId = 0;
-		recordDAO.routineName = '';
 		recordDAO.recordExercise = [];
 
 		_playerContext.totalSeq = routineDAO['videos'].length;
