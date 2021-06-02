@@ -80,18 +80,6 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 	const endRef = useRef<boolean>(false);
 
-	useEffect( () => {
-		recordDAO.createTime = Number(moment().format('YYYYMMDD'));
-		recordDAO.routineId = routineDAO['id'];
-		recordDAO.routineName = routineDAO['name'];
-		recordDAO.playTime = 0;
-		recordDAO.recordExercise = [];
-
-		_playerContext.totalSeq = routineDAO['videos'].length;
-		_playerContext.poseLabel = '';
-		_playerContext.currentSeq = 0;
-		_playerContext.recordEended = false;
-	}, []);
 
 	// 최초 모델 로딩
 	useEffect(() => {
@@ -102,6 +90,11 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 		recordDAO.routineId = 0;
 		recordDAO.routineName = '';
 		recordDAO.recordExercise = [];
+
+		_playerContext.totalSeq = routineDAO['videos'].length;
+		_playerContext.poseLabel = '';
+		_playerContext.currentSeq = 0;
+		_playerContext.recordEended = false;
 
 		(async () => {
 			setPlayerLoaded(false);
@@ -115,8 +108,6 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 				quantBytes: 2,
 			});
 
-			console.log('loading model');
-
 			setPlayerLoaded(true);
 		})().then( () => {
 			requestRef.current = requestAnimationFrame(capture);
@@ -124,14 +115,12 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 		return () => {
 			if (requestRef.current) {
-				console.log('cancel animation frame');
 				endRef.current = true;
 				cancelAnimationFrame(requestRef.current);
 			}
 
 			if (poseNet.current != null) {
 				poseNet.current.dispose();
-				console.log('dispose posenet');
 			}
 
 			ipcRenderer.removeAllListeners('pose-similarity');
@@ -144,10 +133,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 		if (seqRef.current < routineDAO['videos'].length) {
 			load();
 		} else {
-			// 1. record 추가?
 			_playerContext.poseLabel = 'end';
-
-			// onEnded(recordDAO);
 		}
 	}, [seq]);
 
@@ -238,21 +224,6 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 		}
 	}
 
-	function cropAndResizeFrame(img: tf.Tensor3D): tf.Tensor3D {
-		return tf.tidy(() => {
-			const boundingBox = getSquareBound(img.shape[1], img.shape[0]);
-			const expandedTensor : tf.Tensor4D = img.expandDims(0);
-			const resizedTensor = tf.image.cropAndResize(
-				expandedTensor,
-				[boundingBox],
-				[0], [inputHeight, inputWidth],
-				'nearest');
-
-			// return resizedTensor;
-			return resizedTensor.reshape(resizedTensor.shape.slice(1) as [number, number, number]);
-		});
-	}
-
 	async function capture() {
 		try {
 			if (endRef.current) return;
@@ -340,20 +311,6 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 		// 5. recursion capture()
 		requestRef.current = requestAnimationFrame(capture);
-	}
-
-	function draw2(ctx : CanvasRenderingContext2D) {
-		if (poses.current == null) return;
-
-		let i =0;
-		const len = poses.current.length;
-		while ( i < len) {
-			if (poses.current[i].score >= 0.2) {
-				drawKeypoints2(ctx, poses.current[i].keypoints, 0.3);
-				drawSkeleton2(ctx, poses.current[i].keypoints, 0.3);
-			}
-			i++;
-		}
 	}
 
 	// draw keypoints of inferenced pose

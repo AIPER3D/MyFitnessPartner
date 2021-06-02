@@ -91,10 +91,6 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 			} catch (e) {
 				//
 			}
-			// // 마지막 poseLabel이면 운동 기록 저장
-			// if (_playerContext.totalSeq == _playerContext.currentSeq) {
-			// 	recordDAO.recordExercise.push(record);
-			// }
 		};
 	}, [_playerContext.poseLabel]);
 
@@ -103,8 +99,6 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 			.then(async () => {
 				await run();
 			});
-
-		console.log('webcam load model');
 
 		return () => {
 			endRef.current = true;
@@ -120,8 +114,6 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 			if (poseNets.current) {
 				Object.keys(poseNets.current).forEach((key) => {
 					poseNets.current[key].dispose();
-
-					console.log('dispose ', key, ' model');
 				});
 			}
 		};
@@ -168,33 +160,32 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 
 			const label = _playerContext.poseLabel;
 
-			if (label != '') {
-				// 2. estimate pose
-				const {pose, posenetOutput} = await poseNets.current[label].estimatePose(image, true);
+			if (label == '') throw new Error('label is empty');
 
-				if (pose != null) {
-					// 3. pose classification
-					const result = await poseNets.current[label].predict(posenetOutput);
+			// 2. estimate pose
+			const {pose, posenetOutput} = await poseNets.current[label].estimatePose(image, true);
 
-					ipcRenderer.send('webcam-poses', pose);
+			if (pose == null) throw new Error('pose is null');
 
-					pose.keypoints.map( (keypoint : any) => {
-						keypoint.position.x *= widthScaleRatio;
-						keypoint.position.y *= heightScaleRatio;
-					});
+			// 3. pose classification
+			const result = await poseNets.current[label].predict(posenetOutput);
 
-					repetitionCounter.current[label].count(result);
+			ipcRenderer.send('webcam-poses', pose);
 
-					// 4. set keypoints
-					// setPoses([pose]);
-					poses.current = [pose];
-				}
-			}
+			pose.keypoints.map( (keypoint : any) => {
+				keypoint.position.x *= widthScaleRatio;
+				keypoint.position.y *= heightScaleRatio;
+			});
+
+			repetitionCounter.current[label].count(result);
+
+			// 4. set keypoints
+			poses.current = [pose];
 
 			image.dispose();
 			await tf.nextFrame();
 		} catch (e) {
-			console.log(e);
+			//
 		}
 		requestRef.current = requestAnimationFrame(capture);
 	}
