@@ -7,6 +7,7 @@ import { VideoDTO, RoutineDTO, RecordDTO } from '../db/DTO';
 import { VideoDAO, RoutineDAO, RecordDAO } from '../db/DAO';
 
 import { Player } from '../components/exercisePlayer';
+import { ContinuousSizeLegend } from 'react-vis';
 
 const Back = styled.div`
 	background-color: #000000;
@@ -52,7 +53,10 @@ function Exercise2({ db } : PageProps) {
 
 		const recordDTO = new RecordDTO();
 		recordDTO.setDB(db);
-		setRedirect(await recordDTO.addRecord(record));
+
+		const id = await recordDTO.addRecord(record);
+		setRedirect(id);
+		console.log(id);
 	}
 
 	if (redirect != 0) {

@@ -29,7 +29,7 @@ type Props = {
 
 
 export const recordContext = createContext<RecordDAO>({
-	id: (new RecordDTO()).getNewId(),
+	id: 0,
 	playTime: 0,
 	createTime: 0,
 	routineId: 0,
@@ -131,6 +131,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 		} else {
 			// playTime 기록
 			recordDAO.playTime = (moment().unix() - playTime.current) / 60; // minute
+			console.log('ended : ', recordDAO);
 			onEnded(recordDAO);
 		}
 	}, [seq]);
@@ -163,7 +164,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 		const url = URL.createObjectURL(blob);
 
 		// 2. settings
-		videoRef.current.controls = true;
+		videoRef.current.controls = false;
 		videoRef.current.playsInline = true;
 		videoRef.current.src = url;
 		videoRef.current.volume = 0.2;
@@ -298,17 +299,17 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 			// 4. set keypoints and skelecton
 			// setPoses(inferencedPoses);
-			if (!canvasRef.current) throw new Error('canvasRef is null');
+			// if (!canvasRef.current) throw new Error('canvasRef is null');
 
-			const ctx = canvasRef.current.getContext('2d');
-			if (!ctx) throw new Error('2d context');
-			ctx.canvas.width = videoRef.current.videoWidth;
-			ctx.canvas.height = videoRef.current.videoHeight;
-			ctx.scale(1, 1);
+			// const ctx = canvasRef.current.getContext('2d');
+			// if (!ctx) throw new Error('2d context');
+			// ctx.canvas.width = videoRef.current.videoWidth;
+			// ctx.canvas.height = videoRef.current.videoHeight;
+			// ctx.scale(1, 1);
 
-			ctx.drawImage(videoRef.current, 0, 0);
+			// ctx.drawImage(videoRef.current, 0, 0);
 			poses.current = inferencedPoses;
-			draw(ctx);
+			// draw2(ctx);
 
 			t.stop();
 		} catch (e) {
@@ -319,37 +320,37 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 		requestRef.current = requestAnimationFrame(capture);
 	}
 
-	function draw(ctx : CanvasRenderingContext2D) {
+	function draw2(ctx : CanvasRenderingContext2D) {
+		if (poses.current == null) return;
+
+		let i =0;
+		const len = poses.current.length;
+		while ( i < len) {
+			if (poses.current[i].score >= 0.2) {
+				drawKeypoints2(ctx, poses.current[i].keypoints, 0.3);
+				drawSkeleton2(ctx, poses.current[i].keypoints, 0.3);
+			}
+			i++;
+		}
+	}
+
+	// draw keypoints of inferenced pose
+	const draw = React.useCallback((graphics : PIXI.Graphics) => {
+		graphics.clear();
+
 		if (poses.current == null) return;
 
 		let i =0;
 		const len = poses.current.length;
 		while ( i < len) {
 			if (poses.current[i].score >= 0.3) {
-				drawKeypoints2(ctx, poses.current[i].keypoints, 0.5);
-				drawSkeleton2(ctx, poses.current[i].keypoints, 0.5);
+				drawKeypoints(graphics, poses.current[i].keypoints, 0.5);
+				drawSkeleton(graphics, poses.current[i].keypoints, 0.5);
 			}
+
 			i++;
 		}
-	}
-
-	// // draw keypoints of inferenced pose
-	// const draw = React.useCallback((graphics : PIXI.Graphics) => {
-	// 	graphics.clear();
-
-	// 	if (poses.current == null) return;
-
-	// 	let i =0;
-	// 	const len = poses.current.length;
-	// 	while ( i < len) {
-	// 		if (poses.current[i].score >= 0.3) {
-	// 			drawKeypoints(graphics, poses.current[i].keypoints, 0.5);
-	// 			drawSkeleton(graphics, poses.current[i].keypoints, 0.5);
-	// 		}
-
-	// 		i++;
-	// 	}
-	// }, [poses.current]);
+	}, [poses.current]);
 
 	const stageProps = {
 		width: window.innerWidth,
@@ -377,9 +378,9 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 				accuracy={poseSimilarity}
 			/>
 
-			{/* <PixiStage {...stageProps}>
+			<PixiStage {...stageProps}>
 				<Graphics draw={draw} />
-			</PixiStage> */}
+			</PixiStage>
 
 			<NavigatorBottom
 				videoRef={videoRef.current}
@@ -389,9 +390,9 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 				onLoaded={ setWebcamLoaded }
 			/>
 
-			<Canvas ref = {canvasRef}>
+			{/* <Canvas ref = {canvasRef}>
 
-			</Canvas>
+			</Canvas> */}
 
 			<Video ref={ videoRef } />
 
@@ -455,7 +456,7 @@ const Canvas = styled.canvas`
 
 const Video = styled.video`
 	position: absolute;
-	display: none;
+	display: block;
 	
 	top: 50px;
 	left: 0px;

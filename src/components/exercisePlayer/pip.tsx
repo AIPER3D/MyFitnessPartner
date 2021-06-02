@@ -30,7 +30,7 @@ function PIP({onLoaded } : Props) {
 	const [y, setY] = useState<number>(0);
 
 	const [width, setWidth] = useState<number>(640);
-	const [height, setHeight] = useState<number>(320);
+	const [height, setHeight] = useState<number>(360);
 
 	function dragMouseDown(e : React.MouseEvent<HTMLDivElement>) {
 		e.preventDefault();
