@@ -7,6 +7,7 @@ import { Header } from '../components/common';
 import { Board, Content } from '../components/board';
 import { RoutineDTO } from '../db/DTO';
 import { RoutineDAO } from '../db/DAO';
+import moment from 'moment';
 
 const Btn = styled.div`
 	padding: 0px 0px 0px 0px;
@@ -58,7 +59,7 @@ function ExerciseReady({ db } : PageProps) {
 			arr.push({
 				id: routine[i]['id'],
 				title: routine[i]['name'],
-				desc: 'id : ' + routine[i]['id'],
+				desc: '등록일: ' + moment(routine[i]['id']).format('YYYY-MM-DD HH:mm:ss'),
 				thumbnail: thumbnail,
 				onClick: onClick,
 			});
