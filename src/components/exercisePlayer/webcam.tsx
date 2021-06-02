@@ -61,34 +61,40 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 		const previousPoseLabel = _playerContext.poseLabel;
 
 		return () => {
-			const endTime = moment().unix();
+			try {
+				const endTime = moment().unix();
 
-			// 처음 시작하면 기록 안함
-			if (previousPoseLabel == '') return;
+				// 처음 시작하면 기록 안함
+				if (previousPoseLabel == '' ||
+					previousPoseLabel == 'end') return;
 
-			const record : {
-				name: string;
-				startTime: number;
-				endTime: number;
-				count: number;
-			} = {
-				name: previousPoseLabel,
-				startTime,
-				endTime,
-				count: repetitionCounter.current[previousPoseLabel].nRepeats,
-			};
+				const record : {
+					name: string;
+					startTime: number;
+					endTime: number;
+					count: number;
+				} = {
+					name: previousPoseLabel,
+					startTime,
+					endTime,
+					count: repetitionCounter.current[previousPoseLabel].nRepeats,
+				};
 
-			// poseLabel이 바뀌면  운동 기록 저장
-			if (_playerContext.poseLabel != previousPoseLabel) {
-				recordDAO.recordExercise.push(record);
-				console.log(record);
+				// poseLabel이 바뀌면  운동 기록 저장
+				if (_playerContext.poseLabel != previousPoseLabel) {
+					recordDAO.recordExercise.push(record);
+				}
+
+				if (_playerContext.totalSeq == _playerContext.currentSeq) {
+					_playerContext.recordEended = true;
+				}
+			} catch (e) {
+				//
 			}
-
-			// 마지막 poseLabel이면 운동 기록 저장
-			if (_playerContext.totalSeq == _playerContext.currentSeq) {
-				recordDAO.recordExercise.push(record);
-				console.log(record);
-			}
+			// // 마지막 poseLabel이면 운동 기록 저장
+			// if (_playerContext.totalSeq == _playerContext.currentSeq) {
+			// 	recordDAO.recordExercise.push(record);
+			// }
 		};
 	}, [_playerContext.poseLabel]);
 

@@ -1,5 +1,5 @@
 const fs = window.require('fs');
-import React, { useState, useRef, useEffect, createContext, useContext } from 'react';
+import React, { useState, useRef, useEffect, createContext, useContext, useCallback } from 'react';
 import styled from 'styled-components';
 
 import { NavigatorTop, NavigatorMeter, NavigatorBottom, PIP } from './';
@@ -41,6 +41,7 @@ export const playerContext = createContext({
 	poseLabel: '',
 	currentSeq: 0,
 	totalSeq: 0,
+	recordEended: false,
 });
 
 function Player({ routineDAO, videoDAO, onEnded }: Props) {
@@ -49,17 +50,11 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 	// record 초기화
 	const recordDAO = useContext(recordContext);
 
-	recordDAO.createTime = Number(moment().format('YYYYMMDD'));
-	recordDAO.routineId = routineDAO['id'];
-	recordDAO.routineName = routineDAO['name'];
-
 	// player context 초기화
 	const _playerContext = useContext(playerContext);
-	_playerContext.totalSeq = routineDAO['videos'].length;
 
 	// 총 운동 시간
 	const playTime = useRef(moment().unix());
-
 
 	const requestRef = useRef<number>();
 
@@ -85,6 +80,19 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 	const poseNet = useRef<any>();
 
 	const endRef = useRef<boolean>(false);
+
+	useEffect( () => {
+		recordDAO.createTime = Number(moment().format('YYYYMMDD'));
+		recordDAO.routineId = routineDAO['id'];
+		recordDAO.routineName = routineDAO['name'];
+		recordDAO.playTime = 0;
+		recordDAO.recordExercise = [];
+
+		_playerContext.totalSeq = routineDAO['videos'].length;
+		_playerContext.poseLabel = '';
+		_playerContext.currentSeq = 0;
+		_playerContext.recordEended = false;
+	}, []);
 
 	// 최초 모델 로딩
 	useEffect(() => {
@@ -126,15 +134,22 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 	// 비디오 로딩
 	useEffect(() => {
 		setVideoLoaded(false);
-		if (seq < routineDAO['videos'].length) {
+		if (seqRef.current < routineDAO['videos'].length) {
 			load();
 		} else {
-			// playTime 기록
-			recordDAO.playTime = (moment().unix() - playTime.current) / 60; // minute
-			console.log('ended : ', recordDAO);
-			onEnded(recordDAO);
+			// 1. record 추가?
+			_playerContext.poseLabel = 'end';
+
+			// onEnded(recordDAO);
 		}
 	}, [seq]);
+
+	useEffect( () => {
+		if (_playerContext.recordEended) {
+			recordDAO.playTime = (moment().unix() - playTime.current) / 60; // minute
+			onEnded(recordDAO);
+		}
+	}, [_playerContext.recordEended]);
 
 	// 로딩 완료 체크
 	useEffect(() => {
@@ -144,7 +159,13 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 		(async () => {
 			if (videoRef.current == null) return;
-			await videoRef.current.play();
+
+			if (playerLoaded &&
+				videoLoaded &&
+				webcamLoaded &&
+				seqRef.current < routineDAO['videos'].length) {
+				await videoRef.current.play();
+			}
 		})();
 	}, [seq, playerLoaded, videoLoaded, webcamLoaded]);
 
@@ -225,8 +246,6 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 		});
 	}
 
-	const t = timer(true);
-
 	async function capture() {
 		try {
 			if (endRef.current) return;
@@ -235,8 +254,6 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 			videoRef.current.width = videoRef.current.videoWidth / 2;
 			videoRef.current.height = videoRef.current.videoHeight / 2;
-
-			t.start('video frame to tensor');
 
 			const tensor = tf.browser.fromPixels(videoRef.current);
 
@@ -272,8 +289,8 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 				ipcRenderer.send('video-poses', inferencedPoses);
 			}
 
-			const width = videoRef.current.videoWidth;
-			const height = videoRef.current.videoHeight;
+			const width = window.innerWidth;
+			const height = window.innerHeight - 100;
 			const posSize = (width > height ? height : width);
 			const dx = (width - posSize) / 2;
 
@@ -310,8 +327,6 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 			// ctx.drawImage(videoRef.current, 0, 0);
 			poses.current = inferencedPoses;
 			// draw2(ctx);
-
-			t.stop();
 		} catch (e) {
 			console.log(e);
 		}
