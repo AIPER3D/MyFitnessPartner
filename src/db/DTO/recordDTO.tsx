@@ -167,6 +167,31 @@ class RecordDTO {
 
     	return result.length;
     }
+
+    async getExerciseDayRecord(date: number) {
+    	if (!this.db) return [];
+    	if (!this.db.collections.records) return [];
+
+    	const doc = await this.db.collections.records
+    		.find()
+    		.where('record_create_time')
+    		.eq(date)
+    		.exec();
+
+    	const result : RecordDAO[] = [];
+    	for (let i = 0; i < doc.length; i++) {
+    		result.push({
+    			id: doc[i].get('record_id'),
+    			playTime: doc[i].get('record_play_time'),
+    			createTime: doc[i].get('record_create_time'),
+    			routineId: doc[i].get('routine_id'),
+    			routineName: doc[i].get('routine_name'),
+    			recordExercise: doc[i].get('record_exercises'),
+    		});
+    	}
+
+    	return result;
+    }
 }
 
 export { RecordDTO };

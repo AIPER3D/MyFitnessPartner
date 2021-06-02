@@ -5,6 +5,8 @@ import moment, { Moment, Moment as MomentTypes } from 'moment';
 import CalendarModal from './CalendarModal';
 import { RxDatabase } from 'rxdb';
 import { MemoDTO } from '../../db/DTO/memoDTO';
+import { RecordDTO } from '../../db/DTO/recordDTO';
+import { RecordDAO } from '../../db/DAO/recordDAO';
 
 type CalendarProps = {
 	db : RxDatabase;
@@ -15,12 +17,21 @@ function Calendar({db} : CalendarProps) {
 	const [modalOpen, setModalOpen] = useState(false);
 	const [present, setPresent] = useState<Moment>(moment());
 	const [memoDTO, setMemoDTO] = useState<MemoDTO>(new MemoDTO());
+	const recordDTO = new RecordDTO();
+	const [records, setRecords] = useState<RecordDAO[] | null>(null);
 	useEffect(()=>{
 		memoDTO.setDB(db);
+		recordDTO.setDB(db);
 	}, [db]);
+	useEffect(()=> {
+		(async ()=>{
+			setRecords(await recordDTO.getExerciseDayRecord(Number(present.format('YYYYMMDD'))));
+		})();
+	}, [present]);
 	const openModal= (day:Moment)=>{
 		setModalOpen(true);
 		setPresent(day);
+		console.log(records);
 	};
 	const closeModal= ()=> {
 		setModalOpen(false);
@@ -30,6 +41,27 @@ function Calendar({db} : CalendarProps) {
 	}
 	function handleMonthDec() {
 		setDate(date.clone().subtract(1, 'month'));
+	}
+	function generateRecord() {
+		const list = [];
+
+		if (records) {
+			list.push(
+				<div className='modal_record'>
+					{
+						Array(records.length).map((n, i) => {
+							return (
+								<span className='record' key={i} >
+									{records[n+i].routineName}, {records[n+i].playTime}
+								</span>
+							);
+						})
+					}
+				</div>
+			);
+		}
+
+		return list;
 	}
 
 	function generate() {
@@ -72,20 +104,6 @@ function Calendar({db} : CalendarProps) {
 		return calendar;
 	}
 
-	async function memoCheck(day: string) {
-		if (await memoDTO.isMemohere(day) > 0) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-	async function caloryCheck(day: string) {
-		if (await memoDTO.isCaloryhere(day) > 0) {
-			return true;
-		} else {
-			return false;
-		}
-	}
 	return (
 		<div className="Calendar">
 			<div className="head">
@@ -122,10 +140,10 @@ function Calendar({db} : CalendarProps) {
 					</div>
 				</div>
 				{generate()}
-				<div>
+				<div className='modal_div'>
 					<CalendarModal open={ modalOpen } close={ closeModal }
 						header={ present } db={db}>
-						abcd
+						{generateRecord()}
 					</CalendarModal>
 				</div>
 			</div>

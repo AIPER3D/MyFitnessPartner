@@ -50,6 +50,8 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 	const widthScaleRatio = width / inputWidth;
 	const heightScaleRatio = height / inputHeight;
 
+	const endRef = useRef<boolean>(false);
+
 	// const [poses, setPoses] = useState<any>(null);
 	const poses = useRef<any>(null);
 
@@ -99,6 +101,8 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 		console.log('webcam load model');
 
 		return () => {
+			endRef.current = true;
+
 			if (requestRef.current) {
 				cancelAnimationFrame(requestRef.current);
 			}
@@ -151,10 +155,10 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 
 	async function capture() {
 		try {
+			if (endRef.current) return;
+
 			// 1. caputer iamge
 			const image = await webcamRef.current.capture();
-
-			if (image == null) return;
 
 			const label = _playerContext.poseLabel;
 
