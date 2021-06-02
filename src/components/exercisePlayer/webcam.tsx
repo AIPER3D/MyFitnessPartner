@@ -234,6 +234,8 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 
 const Wrapper = styled.div`
 	opacity: 0.8;
+	width: 640px;
+	height: 320px;
 `;
 const Video = styled.video`
 	transform: rotateY(180deg);

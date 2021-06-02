@@ -11,10 +11,10 @@ const Wrapper = styled.div`
 	top: 0px;
 	left: 0px;
 	width: 640px;
-	height: 360px;
+	height: 320px;
 	
 	/* background-color: #2C363F; */
-	z-index: 1005;
+	z-index: 1000100;
 	
 `;
 
@@ -24,7 +24,7 @@ type Props = {
 	onLoaded: (val: boolean) => void;
 };
 
-function PIP({onLoaded } : Props) {
+function PIP({ onLoaded } : Props) {
 	const [down, setDown] = useState<boolean>(false);
 	const [x, setX] = useState<number>(0);
 	const [y, setY] = useState<number>(0);
@@ -56,15 +56,15 @@ function PIP({onLoaded } : Props) {
 		let toX = (e.clientX - x);
 		if (toX < 0) {
 			toX = 0;
-		} else if (toX > (window.innerWidth - width)) {
-			toX = (window.innerWidth - width);
+		} else if (toX >= (window.innerWidth - width)) {
+			toX = (window.innerWidth - width - 1);
 		}
 
 		let toY = (e.clientY - y);
 		if (toY < 0) {
 			toY = 0;
 		} else if (toY >= (window.innerHeight - height)) {
-			toY = (window.innerHeight - height);
+			toY = (window.innerHeight - height - 1);
 		}
 
 		e.currentTarget.style.left = toX + 'px';
