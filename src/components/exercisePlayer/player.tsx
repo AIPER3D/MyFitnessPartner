@@ -55,7 +55,6 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 	// 총 운동 시간
 	const playTime = useRef(moment().unix());
-
 	const requestRef = useRef<number>();
 
 	const [playerLoaded, setPlayerLoaded] = useState<boolean>(false);
@@ -96,6 +95,14 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 	// 최초 모델 로딩
 	useEffect(() => {
+		// 최초 레코드 초기화
+		recordDAO.id = (new RecordDTO()).getNewId();
+		recordDAO.playTime = 0;
+		recordDAO.createTime = 0;
+		recordDAO.routineId = 0;
+		recordDAO.routineName = '';
+		recordDAO.recordExercise = [];
+
 		(async () => {
 			setPlayerLoaded(false);
 
