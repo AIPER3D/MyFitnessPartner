@@ -144,9 +144,7 @@ function Record({ db } : PageProps) {
 					<Text weight = {'bold'}> { routine['name'] } </Text>
 				</Box>
 				<Box width = { '210px' } height = { '23px' }>
-					<Text> { record['recordExercise'].length >= 1 ?
-						moment(record['recordExercise'][0]['startTime'] * 1000).format('YYYY-MM-DD HH:mm:ss') :
-						moment(record['createTime'], 'YYYYMMDD').format('YYYY-MM-DD') } </Text>
+					<Text> { moment(record['id']).format('YYYY-MM-DD HH:mm:ss') } </Text>
 				</Box>
 				<Title>진행한 운동</Title>
 				<Box width = { '920px' } height= { '50px' }>

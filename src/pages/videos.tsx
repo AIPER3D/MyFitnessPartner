@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {Redirect, useParams} from 'react-router-dom';
 import styled from 'styled-components';
+import moment from 'moment';
 
 import { RxDatabase } from 'rxdb';
 import { Board, Content } from '../components/board';
@@ -53,7 +54,7 @@ function Videos({ db } : PageProps) {
 			arr.push({
 				id: video[i]['id'],
 				title: video[i]['name'],
-				desc: 'id: ' + video[i]['id'],
+				desc: '등록일: ' + moment(video[i]['id']).format('YYYY-MM-DD HH:mm:ss'),
 				thumbnail: './files/thumbnails/' + video[i]['id'] + '.im',
 				onClick: onClick,
 			});

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import moment from 'moment';
 
 import { RxDatabase } from 'rxdb';
 import { Button, Header } from '../components/common';
@@ -57,7 +58,7 @@ function Routines({ db } : PageProps) {
 			arr.push({
 				id: routine[i]['id'],
 				title: routine[i]['name'],
-				desc: 'id : ' + routine[i]['id'],
+				desc: '등록일: ' + moment(routine[i]['id']).format('YYYY-MM-DD HH:mm:ss'),
 				thumbnail: thumbnail,
 				onClick: onClick,
 			});
