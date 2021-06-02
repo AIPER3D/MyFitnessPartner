@@ -25,6 +25,7 @@ export function tensorToImage(tensor : tf.Tensor3D | tf.Tensor4D) {
 			i+=3;
 		}
 	}
+
 	// set the buffer to the image data
 	imageData.data.set(buffer);
 
@@ -48,6 +49,8 @@ const imageFromVideo = (video : HTMLVideoElement) => {
 		0,
 		canvas.width,
 		canvas.height);
+
+	if (!image) throw new Error('image is undefined');
 
 	return image;
 };

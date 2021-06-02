@@ -8,14 +8,18 @@ import { VideoDAO, RoutineDAO, RecordDAO } from '../../db/DAO';
 import * as posenet from '@tensorflow-models/posenet';
 import * as tf from '@tensorflow/tfjs';
 
-import { Stage, Graphics } from '@inlet/react-pixi';
-import { drawKeypoints, drawSkeleton, getSquareBound } from '../../utils/posenet-utils';
+import * as PIXI from 'pixi.js';
+
+import { Stage, Graphics, useApp, AppConsumer } from '@inlet/react-pixi';
+import { drawKeypoints, drawKeypoints2, drawSkeleton, drawSkeleton2, getSquareBound } from '../../utils/posenet-utils';
 
 import { css } from '@emotion/react';
 import PuffLoader from 'react-spinners/PuffLoader';
-import { tensorToImage } from '../../utils/video-util';
+import { imageFromVideo, tensorToImage } from '../../utils/video-util';
 import moment from 'moment';
 import { RecordDTO } from '../../db/DTO';
+import { timer } from '../../utils/bench-util';
+import { _collectionNamePrimary } from 'rxdb';
 
 type Props = {
 	routineDAO: RoutineDAO;
@@ -33,18 +37,29 @@ export const recordContext = createContext<RecordDAO>({
 	recordExercise: [],
 });
 
+export const playerContext = createContext({
+	poseLabel: '',
+	currentSeq: 0,
+	totalSeq: 0,
+});
+
 function Player({ routineDAO, videoDAO, onEnded }: Props) {
 	const { ipcRenderer } = window.require('electron');
-
 
 	// record 초기화
 	const recordDAO = useContext(recordContext);
 
-	const playTime = useRef(moment().unix());
-
 	recordDAO.createTime = Number(moment().format('YYYYMMDD'));
 	recordDAO.routineId = routineDAO['id'];
 	recordDAO.routineName = routineDAO['name'];
+
+	// player context 초기화
+	const _playerContext = useContext(playerContext);
+	_playerContext.totalSeq = routineDAO['videos'].length;
+
+	// 총 운동 시간
+	const playTime = useRef(moment().unix());
+
 
 	const requestRef = useRef<number>();
 
@@ -52,8 +67,8 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 	const [videoLoaded, setVideoLoaded] = useState<boolean>(false);
 	const [webcamLoaded, setWebcamLoaded] = useState<boolean>(false);
 
-	const [videoRef, setVideoRef] = useState<HTMLVideoElement | null>(null);
-	const [recordExcercise, setRecordExercise] = useState<RecordDAO['recordExercise']>([]);
+	const videoRef = useRef<HTMLVideoElement>(null);
+	const canvasRef = useRef<HTMLCanvasElement>(null);
 
 	const seqRef = useRef(0);
 	const [seq, setSeq] = useState<number>(seqRef.current);
@@ -63,22 +78,21 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 	const [poseSimilarity, setPoseSimilarity] = useState<any>(0);
 
-	const inputWidth = 224;
-	const inputHeight = 224;
+	const inputWidth = 257;
+	const inputHeight = 257;
 
-	const widthScaleRatio = window.innerWidth / inputWidth;
-	const heightScaleRatio = (window.innerHeight - 100) / inputHeight;
+	const poses = useRef<any>(null);
+	const poseNet = useRef<any>();
 
-	const [poses, setPoses] = useState<any>(null);
-
-	let poseNet: posenet.PoseNet;
+	const endRef = useRef<boolean>(false);
 
 	// 최초 모델 로딩
 	useEffect(() => {
 		(async () => {
 			setPlayerLoaded(false);
 
-			poseNet = await posenet.load({
+			// setPoseNet();
+			poseNet.current = await posenet.load({
 				architecture: 'MobileNetV1',
 				outputStride: 16,
 				inputResolution: { width: inputWidth, height: inputHeight },
@@ -86,40 +100,52 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 				quantBytes: 2,
 			});
 
-			requestRef.current = requestAnimationFrame(capture);
+			console.log('loading model');
 
 			setPlayerLoaded(true);
-		})();
+		})().then( () => {
+			requestRef.current = requestAnimationFrame(capture);
+		});
 
 		return () => {
 			if (requestRef.current) {
+				console.log('cancel animation frame');
+				endRef.current = true;
 				cancelAnimationFrame(requestRef.current);
 			}
+
+			if (poseNet.current != null) {
+				poseNet.current.dispose();
+				console.log('dispose posenet');
+			}
+
+			ipcRenderer.removeAllListeners('pose-similarity');
 		};
-	}, [videoRef]);
+	}, []);
 
 	// 비디오 로딩
 	useEffect(() => {
-		if (videoRef == null) return;
-
 		setVideoLoaded(false);
 		if (seq < routineDAO['videos'].length) {
 			load();
 		} else {
+			// playTime 기록
 			recordDAO.playTime = (moment().unix() - playTime.current) / 60; // minute
 			onEnded(recordDAO);
 		}
-	}, [videoRef, seq]);
+	}, [seq]);
 
 	// 로딩 완료 체크
 	useEffect(() => {
 		console.log(playerLoaded + '/' + videoLoaded + '/' + webcamLoaded);
-		if (videoRef == null) return;
+
 		if (!playerLoaded || !videoLoaded || !webcamLoaded) return;
+
 		(async () => {
-			await videoRef.play();
+			if (videoRef.current == null) return;
+			await videoRef.current.play();
 		})();
-	}, [videoRef, seq, playerLoaded, videoLoaded, webcamLoaded]);
+	}, [seq, playerLoaded, videoLoaded, webcamLoaded]);
 
 	ipcRenderer.on('pose-similarity', (event: any, args: any) => {
 		setPoseSimilarity(Math.abs(args));
@@ -127,7 +153,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 	// Video Load and Play
 	async function load() {
-		if (videoRef == null) return;
+		if (videoRef.current == null) return;
 
 		// 1. file loading
 		const file = fs.readFileSync('./files/videos/' + videoDAO[routineDAO['videos'][seqRef.current]]['id'] + '.vd');
@@ -137,13 +163,13 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 		const url = URL.createObjectURL(blob);
 
 		// 2. settings
-		videoRef.controls = true;
-		videoRef.playsInline = true;
-		videoRef.src = url;
-		videoRef.volume = 0.2;
+		videoRef.current.controls = true;
+		videoRef.current.playsInline = true;
+		videoRef.current.src = url;
+		videoRef.current.volume = 0.2;
 
 		if (seq == 0) {
-			videoRef.addEventListener('timeupdate', () => {
+			videoRef.current.addEventListener('timeupdate', () => {
 				try {
 					if (seqRef.current >= routineDAO['videos'].length) return;
 
@@ -152,10 +178,13 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 						const start = videoDAO[routineDAO['videos'][seqRef.current]]['timeline'][i]['start'];
 						const end = videoDAO[routineDAO['videos'][seqRef.current]]['timeline'][i]['end'];
 
-						if (videoRef.currentTime >= start &&
-							videoRef.currentTime <= end) {
-							setPoseLabel(name);
-							setPoseTime((videoRef.currentTime - start) / (end - start));
+						if (videoRef.current != null) {
+							if (videoRef.current.currentTime >= start &&
+								videoRef.current.currentTime <= end) {
+								setPoseLabel(name);
+								_playerContext.poseLabel = name;
+								setPoseTime((videoRef.current.currentTime - start) / (end - start));
+							}
 						}
 					}
 				} catch (e : any) {
@@ -164,29 +193,54 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 			});
 
 			// 5. when video ended play next video
-			videoRef.addEventListener('ended', () => {
-				videoRef.pause();
+			videoRef.current.addEventListener('ended', () => {
+				if (videoRef.current != null) {
+					videoRef.current.pause();
+				}
 
 				seqRef.current += 1;
+				_playerContext.currentSeq = seqRef.current;
 				setSeq(seqRef.current);
 			});
 
-			videoRef.addEventListener('loadeddata', () => {
+			videoRef.current.addEventListener('loadeddata', () => {
 				setVideoLoaded(true);
 			});
 		}
 	}
 
-	const capture = async () => {
+	function cropAndResizeFrame(img: tf.Tensor3D): tf.Tensor3D {
+		return tf.tidy(() => {
+			const boundingBox = getSquareBound(img.shape[1], img.shape[0]);
+			const expandedTensor : tf.Tensor4D = img.expandDims(0);
+			const resizedTensor = tf.image.cropAndResize(
+				expandedTensor,
+				[boundingBox],
+				[0], [inputHeight, inputWidth],
+				'nearest');
+
+			// return resizedTensor;
+			return resizedTensor.reshape(resizedTensor.shape.slice(1) as [number, number, number]);
+		});
+	}
+
+	const t = timer(true);
+
+	async function capture() {
 		try {
-			if (videoRef == null) return;
-			// 1. resize video element
-			// videoRef.width = inputWidth;
-			// videoRef.height = inputHeight;
+			if (endRef.current) return;
+
+			if (!videoRef.current) throw new Error('videoRef is null');
+
+			videoRef.current.width = videoRef.current.videoWidth / 2;
+			videoRef.current.height = videoRef.current.videoHeight / 2;
+
+			t.start('video frame to tensor');
+
+			const tensor = tf.browser.fromPixels(videoRef.current);
 
 			const resizedTensor = tf.tidy(() : tf.Tensor3D => {
-				// // 1. get tensor from video element
-				const tensor = tf.browser.fromPixels(videoRef);
+			// // 1. get tensor from video element
 
 				// // 2. resize tensor
 				const boundingBox = getSquareBound(tensor.shape[1], tensor.shape[0]);
@@ -203,7 +257,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 			});
 
 			// 2. inference iamge
-			const inferencedPoses = await poseNet.estimateMultiplePoses(resizedTensor, {
+			const inferencedPoses = await poseNet.current.estimateMultiplePoses(resizedTensor, {
 				flipHorizontal: false,
 				maxDetections: 3,
 				scoreThreshold: 0.5,
@@ -211,16 +265,19 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 			});
 
 			resizedTensor.dispose();
+			tensor.dispose();
 
-			// const width = tensor.shape[1];
-			// const height = tensor.shape[0];
-			const width = videoRef.videoWidth;
-			const height = videoRef.videoHeight;
+			if (inferencedPoses.length >= 1) {
+				ipcRenderer.send('video-poses', inferencedPoses);
+			}
+
+			const width = videoRef.current.videoWidth;
+			const height = videoRef.current.videoHeight;
 			const posSize = (width > height ? height : width);
 			const dx = (width - posSize) / 2;
 
 			// 3. upscale keypoints to webcam resolution
-			inferencedPoses.forEach((pose) => {
+			inferencedPoses.forEach((pose : any) => {
 				pose.keypoints.map((keypoint: any) => {
 					keypoint.position.x *= posSize / inputWidth;
 					keypoint.position.y *= posSize / inputHeight;
@@ -229,37 +286,70 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 				});
 			});
 
-			if (inferencedPoses.length >= 1) {
-				ipcRenderer.send('video-poses', inferencedPoses);
-			}
+
+			// inferencedPoses.forEach((pose : any) => {
+			// 	pose.keypoints.map((keypoint: any) => {
+			// 		keypoint.position.x *= width / inputWidth;
+			// 		keypoint.position.y *= height / inputHeight;
+
+			// 		// keypoint.position.x += dx;
+			// 	});
+			// });
 
 			// 4. set keypoints and skelecton
-			setPoses(inferencedPoses);
+			// setPoses(inferencedPoses);
+			if (!canvasRef.current) throw new Error('canvasRef is null');
+
+			const ctx = canvasRef.current.getContext('2d');
+			if (!ctx) throw new Error('2d context');
+			ctx.canvas.width = videoRef.current.videoWidth;
+			ctx.canvas.height = videoRef.current.videoHeight;
+			ctx.scale(1, 1);
+
+			ctx.drawImage(videoRef.current, 0, 0);
+			poses.current = inferencedPoses;
+			draw(ctx);
+
+			t.stop();
 		} catch (e) {
-			// requestRef.current = requestAnimationFrame(capture);
+			console.log(e);
 		}
 
 		// 5. recursion capture()
 		requestRef.current = requestAnimationFrame(capture);
-	};
+	}
 
-	// draw keypoints of inferenced pose
-	const draw = React.useCallback((graphics) => {
-		graphics.clear();
-
-		if (poses == null) return;
+	function draw(ctx : CanvasRenderingContext2D) {
+		if (poses.current == null) return;
 
 		let i =0;
-		const len = poses.length;
+		const len = poses.current.length;
 		while ( i < len) {
-			if (poses[i].score >= 0.3) {
-				drawKeypoints(graphics, poses[i].keypoints, 0.5);
-				drawSkeleton(graphics, poses[i].keypoints, 0.5);
+			if (poses.current[i].score >= 0.3) {
+				drawKeypoints2(ctx, poses.current[i].keypoints, 0.5);
+				drawSkeleton2(ctx, poses.current[i].keypoints, 0.5);
 			}
-
 			i++;
 		}
-	}, [poses]);
+	}
+
+	// // draw keypoints of inferenced pose
+	// const draw = React.useCallback((graphics : PIXI.Graphics) => {
+	// 	graphics.clear();
+
+	// 	if (poses.current == null) return;
+
+	// 	let i =0;
+	// 	const len = poses.current.length;
+	// 	while ( i < len) {
+	// 		if (poses.current[i].score >= 0.3) {
+	// 			drawKeypoints(graphics, poses.current[i].keypoints, 0.5);
+	// 			drawSkeleton(graphics, poses.current[i].keypoints, 0.5);
+	// 		}
+
+	// 		i++;
+	// 	}
+	// }, [poses.current]);
 
 	const stageProps = {
 		width: window.innerWidth,
@@ -287,21 +377,23 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 				accuracy={poseSimilarity}
 			/>
 
-			<PixiStage {...stageProps}>
+			{/* <PixiStage {...stageProps}>
 				<Graphics draw={draw} />
-			</PixiStage>
+			</PixiStage> */}
 
 			<NavigatorBottom
-				videoRef={videoRef}
+				videoRef={videoRef.current}
 			/>
 
 			<PIP
-				poseLabel={ poseLabel }
-				// setRecordExercise={ setRecordExercise }
 				onLoaded={ setWebcamLoaded }
 			/>
 
-			<Video ref={ setVideoRef } />
+			<Canvas ref = {canvasRef}>
+
+			</Canvas>
+
+			<Video ref={ videoRef } />
 
 		</Container>
 	);
@@ -349,9 +441,21 @@ const Container = styled.div`
 	overflow:hidden;
 `;
 
-const Video = styled.video`
+const Canvas = styled.canvas`
 	position: absolute;
 	display: block;
+
+	top: 50px;
+	left: 0px;
+	width: calc(100vw);
+	height: calc(100vh - 100px);
+	margin: 0px;
+	padding: 0px;
+`;
+
+const Video = styled.video`
+	position: absolute;
+	display: none;
 	
 	top: 50px;
 	left: 0px;
