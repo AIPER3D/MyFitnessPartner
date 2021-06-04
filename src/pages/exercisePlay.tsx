@@ -49,14 +49,13 @@ function Exercise2({ db } : PageProps) {
 	}
 
 	async function onEnded(record: RecordDAO) {
-		console.log(record);
-
 		const recordDTO = new RecordDTO();
 		recordDTO.setDB(db);
 
 		const id = await recordDTO.addRecord(record);
 		setRedirect(id);
-		console.log(id);
+
+		console.log(await recordDTO.getRecordById(id));
 	}
 
 	if (redirect != 0) {
