@@ -69,17 +69,21 @@ ipcMain.handle('ping', (event, arg) => {
 let videoPose;
 let webcamPose;
 
-let sim;
+let sim = 0;
 
 ipcMain.on('video-poses', (event, poses) => {
 	videoPose = poses.reduce((previous, current) => {
-		return previous > current ? previous : current;
+		return previous.score > current.score ? previous : current;
 	});
 
 	videoPose.keypoints = videoPose.keypoints.slice(5);
 
 	sim = compareKeypoints();
 	event.sender.send('pose-similarity', sim);
+
+	// sim = compareKeypoints2();
+	// event.sender.send('pose-similarity', sim);
+
 
 	videoPose = null;
 	webcamPose = null;
@@ -93,8 +97,18 @@ ipcMain.on('video-poses', (event, poses) => {
 
 ipcMain.on('webcam-poses', (event, pose) => {
 	webcamPose = pose;
-	webcamPose.keypoints.slice(5);
+	webcamPose.keypoints = webcamPose.keypoints.slice(5);
 });
+
+// function compareKeypoints2() {
+// 	if (videoPose != null &&
+// 		webcamPose != null &&
+// 		videoPose.keypoints.length === webcamPose.keypoints.length) {
+// 		return poseSimilarity(webcamPose, videoPose, { strategy: 'weightedDistance' });
+// 	}
+
+// 	return sim;
+// }
 
 function compareKeypoints() {
 	if (videoPose != null &&
@@ -124,7 +138,7 @@ function compareKeypoints() {
 		return keypointsSimilarity;
 	}
 
-	return lerp(sim, 0, 0.01);
+	return lerp(sim, 0, 0.1);
 }
 
 function lerp(start, end, amount) {

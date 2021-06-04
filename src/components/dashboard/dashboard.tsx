@@ -15,6 +15,7 @@ function Dashboard({db}: DashBoardProps) {
 	const [recordDTO, setRecordDTO] = useState<RecordDTO>(new RecordDTO());
 	const [records, setRecords] = useState<RecordDAO[] | null>(null);
 	const userDTO = new UserDTO();
+	const [elist, setElist] = useState<any>(null);
 	const [user, setUser] = useState<UserDAO | null>(null);
 	const [time, setTime] = useState(1);
 	const [day, setDay] = useState(0);
@@ -26,6 +27,7 @@ function Dashboard({db}: DashBoardProps) {
 		(async ()=>{
 			setTime(await getExerciseTime());
 			setDay(await yourExerciseDay());
+			setElist(await yourExerciseRecord());
 		})();
 	}, [db]);
 
@@ -54,16 +56,22 @@ function Dashboard({db}: DashBoardProps) {
 		return await recordDTO.getExerciseDay();
 	}
 
+	async function yourExerciseRecord() {
+		return await recordDTO.getExerciseRecord();
+	}
+
 	function mostExercise() {
 		const cards = [];
-
-		for (let i =1; i < 5; i++) {
-			cards.push(
-				<div className={`card${i}`}>
-					<h1>exercise{i}</h1>
-					<p>{i}</p>
-				</div>
-			);
+		if (elist) {
+			const list = Object.keys(elist);
+			for (let i =1; i < 4; i++) {
+				cards.push(
+					<div className={`card${i}`}>
+						<h1>{list[i-1]}</h1>
+						<p>{elist[list[i-1]]} 회</p>
+					</div>
+				);
+			}
 		}
 		return cards;
 	}
@@ -71,12 +79,15 @@ function Dashboard({db}: DashBoardProps) {
 
 	function generateLegend() {
 		const legend = [];
-		const persent = [54.5, 27.2, 18.1];
+		const total = elist.Squat + elist.Jump + elist.Lunge;
+		const persent = [(elist.Squat/total*100).toFixed(1),
+			(elist.Jump/total*100).toFixed(1), (elist.Lunge/total*100).toFixed(1)];
+		const list = Object.keys(elist);
 		for (let i =1; i < persent.length+1; i++) {
 			legend.push(
 				<div className={`legend${i}`}>
 					<span className="legend_color"> </span>
-					<span>{i} : {persent[i-1]}%</span>
+					<span>{list[i-1]} : {persent[i-1]}%</span>
 				</div>
 			);
 		}
@@ -143,7 +154,7 @@ function Dashboard({db}: DashBoardProps) {
 								{generateLegend()}
 							</div>
 						</div>
-						<DoughnutChart />
+						<DoughnutChart list={elist}/>
 					</div>
 				</div>
 			</div>
