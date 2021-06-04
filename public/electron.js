@@ -5,8 +5,6 @@ const isDev = require('electron-is-dev');
 const fs = require('fs');
 const tf = require('@tensorflow/tfjs');
 
-const {poseSimilarity} = require('posenet-similarity');
-
 let win;
 let exerciseClassificationModel;
 
@@ -102,15 +100,15 @@ ipcMain.on('webcam-poses', (event, pose) => {
 	webcamPose.keypoints = webcamPose.keypoints.slice(5);
 });
 
-function compareKeypoints2() {
-	if (videoPose != null &&
-		webcamPose != null &&
-		videoPose.keypoints.length === webcamPose.keypoints.length) {
-		return poseSimilarity(webcamPose, videoPose, { strategy: 'weightedDistance' });
-	}
+// function compareKeypoints2() {
+// 	if (videoPose != null &&
+// 		webcamPose != null &&
+// 		videoPose.keypoints.length === webcamPose.keypoints.length) {
+// 		return poseSimilarity(webcamPose, videoPose, { strategy: 'weightedDistance' });
+// 	}
 
-	return sim;
-}
+// 	return sim;
+// }
 
 function compareKeypoints() {
 	if (videoPose != null &&
