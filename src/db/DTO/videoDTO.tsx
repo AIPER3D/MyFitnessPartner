@@ -97,6 +97,7 @@ class VideoDTO {
 			.find()
 			.skip(offset)
 			.limit(limit)
+			.sort({ video_id: 'desc' })
 			.exec();
 
 		const result : VideoDAO[] = [];
@@ -107,10 +108,6 @@ class VideoDTO {
 				timeline: doc[i].get('video_timeline'),
 			});
 		}
-
-		result.sort(function(a, b) {
-			return b.id - a.id;
-		});
 
 		return result;
 	}

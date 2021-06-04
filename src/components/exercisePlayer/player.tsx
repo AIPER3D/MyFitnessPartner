@@ -27,7 +27,6 @@ type Props = {
 	onEnded: (record: RecordDAO) => void;
 };
 
-
 export const recordContext = createContext<RecordDAO>({
 	id: 0,
 	playTime: 0,
@@ -42,6 +41,7 @@ export const playerContext = createContext({
 	currentSeq: 0,
 	totalSeq: 0,
 	recordEended: false,
+	currentCount: 0,
 });
 
 function Player({ routineDAO, videoDAO, onEnded }: Props) {
@@ -69,6 +69,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 	const [poseLabel, setPoseLabel] = useState<string>('');
 	const [poseTime, setPoseTime] = useState<number>(0);
+	const [poseCount, setPoseCount] = useState<number>(0);
 
 	const [poseSimilarity, setPoseSimilarity] = useState<any>(0);
 
@@ -94,6 +95,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 		_playerContext.poseLabel = '';
 		_playerContext.currentSeq = 0;
 		_playerContext.recordEended = false;
+		_playerContext.currentCount = 0;
 
 		ipcRenderer.on('pose-similarity', (event: any, args: any) => {
 			setPoseSimilarity(Math.abs(args));
@@ -196,6 +198,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 							if (videoRef.current.currentTime >= start &&
 								videoRef.current.currentTime <= end) {
 								setPoseLabel(name);
+								setPoseCount(_playerContext.currentCount);
 								_playerContext.poseLabel = name;
 								setPoseTime((videoRef.current.currentTime - start) / (end - start));
 							}
@@ -367,6 +370,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 				exercise={poseLabel}
 				time={poseTime}
 				accuracy={poseSimilarity}
+				count={poseCount}
 			/>
 
 			<PixiStage {...stageProps}>

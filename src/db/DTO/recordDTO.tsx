@@ -84,6 +84,7 @@ class RecordDTO {
     		.find()
     		.skip(offset)
     		.limit(limit)
+    		.sort({ record_id: 'desc' })
     		.exec();
 
     	const result : RecordDAO[] = [];
@@ -97,10 +98,6 @@ class RecordDTO {
     			recordExercise: doc[i].get('record_exercises'),
     		});
     	}
-
-    	result.sort(function(a, b) {
-    		return b.id - a.id;
-    	});
 
     	return result;
     }
