@@ -26,8 +26,6 @@ function Calendar({db} : CalendarProps) {
 	useEffect(()=> {
 		(async ()=>{
 			setRecords(await recordDTO.getExerciseDayRecord(Number(present.format('YYYYMMDD'))));
-			console.log(Number(present.format('YYYYMMDD')));
-			console.log(await recordDTO.getExerciseDayRecord(Number(present.format('YYYYMMDD'))));
 		})();
 	}, [present]);
 	const openModal= (day:Moment)=>{
@@ -50,7 +48,7 @@ function Calendar({db} : CalendarProps) {
 		if (records) {
 			for (let i=0; i< records.length; i++) {
 				list.push(
-					<div className='modal_record'>
+					<div className='modal_record' key={i}>
 						{
 							<span className='record' key={records[i].id} >
 								{records[i].routineName}, {records[i].playTime.toFixed(2)} 분

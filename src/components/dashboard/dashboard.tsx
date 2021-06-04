@@ -66,7 +66,7 @@ function Dashboard({db}: DashBoardProps) {
 			const list = Object.keys(elist);
 			for (let i =1; i < 4; i++) {
 				cards.push(
-					<div className={`card${i}`}>
+					<div className={`card${i}`} key={i}>
 						<h1>{list[i-1]}</h1>
 						<p>{elist[list[i-1]]} 회</p>
 					</div>
@@ -87,7 +87,7 @@ function Dashboard({db}: DashBoardProps) {
 				const list = Object.keys(elist);
 				for (let i =1; i < persent.length+1; i++) {
 					legend.push(
-						<div className={`legend${i}`}>
+						<div className={`legend${i}`} key={i}>
 							<span className="legend_color"> </span>
 							<span>{list[i-1]} : {persent[i-1]}%</span>
 						</div>
