@@ -154,7 +154,7 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 		try {
 			if (endRef.current) return;
 
-			// 1. caputer iamge
+			// 1. caputer iamges
 			const image = await webcamRef.current.capture();
 
 			const label = _playerContext.poseLabel;
@@ -165,18 +165,18 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 			const {pose, posenetOutput} = await poseNets.current[label].estimatePose(image, true);
 
 			if (pose == null) throw new Error('pose is null');
+			ipcRenderer.send('webcam-poses', pose);
 
 			// 3. pose classification
 			const result = await poseNets.current[label].predict(posenetOutput);
-
-			ipcRenderer.send('webcam-poses', pose);
+			repetitionCounter.current[label].count(result);
 
 			pose.keypoints.map( (keypoint : any) => {
 				keypoint.position.x *= widthScaleRatio;
 				keypoint.position.y *= heightScaleRatio;
 			});
 
-			repetitionCounter.current[label].count(result);
+			_playerContext.currentCount = repetitionCounter.current[label].count(result);
 
 			// 4. set keypoints
 			poses.current = [pose];
@@ -184,7 +184,7 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 			image.dispose();
 			await tf.nextFrame();
 		} catch (e) {
-			//
+			console.log(e);
 		}
 		requestRef.current = requestAnimationFrame(capture);
 	}

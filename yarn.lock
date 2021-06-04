@@ -10821,6 +10821,11 @@ portfinder@^1.0.26:
     debug "^3.1.1"
     mkdirp "^0.5.5"
 
+posenet-similarity@^0.4.8:
+  version "0.4.8"
+  resolved "https://registry.yarnpkg.com/posenet-similarity/-/posenet-similarity-0.4.8.tgz#750e60f36a38d38dc8d818fe52e6476dcec96764"
+  integrity sha512-gr82uIrGoOrJadzgAnAWBvlTr0pNLydhLif7GDMYiv+p38/BcNzt/ouvuH0OdZNFa5wmEeEeuMIq7ZFzxtn5Lw==
+
 posix-character-classes@^0.1.0:
   version "0.1.1"
   resolved "https://registry.npmjs.org/posix-character-classes/-/posix-character-classes-0.1.1.tgz"

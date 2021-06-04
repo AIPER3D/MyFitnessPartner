@@ -84,6 +84,7 @@ class RecordDTO {
     		.find()
     		.skip(offset)
     		.limit(limit)
+    		.sort({ record_id: 'desc' })
     		.exec();
 
     	const result : RecordDAO[] = [];

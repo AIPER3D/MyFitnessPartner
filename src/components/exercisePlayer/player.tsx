@@ -27,7 +27,6 @@ type Props = {
 	onEnded: (record: RecordDAO) => void;
 };
 
-
 export const recordContext = createContext<RecordDAO>({
 	id: 0,
 	playTime: 0,
@@ -42,6 +41,7 @@ export const playerContext = createContext({
 	currentSeq: 0,
 	totalSeq: 0,
 	recordEended: false,
+	currentCount: 0,
 });
 
 function Player({ routineDAO, videoDAO, onEnded }: Props) {
@@ -69,11 +69,12 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 	const [poseLabel, setPoseLabel] = useState<string>('');
 	const [poseTime, setPoseTime] = useState<number>(0);
+	const [poseCount, setPoseCount] = useState<number>(0);
 
 	const [poseSimilarity, setPoseSimilarity] = useState<any>(0);
 
-	const inputWidth = 257;
-	const inputHeight = 257;
+	const inputWidth = 224;
+	const inputHeight = 224;
 
 	const poses = useRef<any>(null);
 	const poseNet = useRef<any>();
@@ -94,6 +95,11 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 		_playerContext.poseLabel = '';
 		_playerContext.currentSeq = 0;
 		_playerContext.recordEended = false;
+		_playerContext.currentCount = 0;
+
+		ipcRenderer.on('pose-similarity', (event: any, args: any) => {
+			setPoseSimilarity(Math.abs(args));
+		});
 
 		(async () => {
 			setPlayerLoaded(false);
@@ -161,10 +167,6 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 		})();
 	}, [seq, playerLoaded, videoLoaded, webcamLoaded]);
 
-	ipcRenderer.on('pose-similarity', (event: any, args: any) => {
-		setPoseSimilarity(Math.abs(args));
-	});
-
 	// Video Load and Play
 	async function load() {
 		if (videoRef.current == null) return;
@@ -196,6 +198,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 							if (videoRef.current.currentTime >= start &&
 								videoRef.current.currentTime <= end) {
 								setPoseLabel(name);
+								setPoseCount(_playerContext.currentCount);
 								_playerContext.poseLabel = name;
 								setPoseTime((videoRef.current.currentTime - start) / (end - start));
 							}
@@ -223,33 +226,42 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 		}
 	}
 
+	const t = timer(true);
+
 	async function capture() {
 		try {
 			if (endRef.current) return;
 
 			if (!videoRef.current) throw new Error('videoRef is null');
 
-			videoRef.current.width = videoRef.current.videoWidth / 2;
-			videoRef.current.height = videoRef.current.videoHeight / 2;
+			// videoRef.current.width = inputWidth;
+			// videoRef.current.height = inputHeight;
 
 			const tensor = tf.browser.fromPixels(videoRef.current);
-
-			const resizedTensor = tf.tidy(() : tf.Tensor3D => {
-			// // 1. get tensor from video element
-
-				// // 2. resize tensor
-				const boundingBox = getSquareBound(tensor.shape[1], tensor.shape[0]);
-				const expandedTensor : tf.Tensor4D = tensor.expandDims(0);
-
-				const resizedTensor = tf.image.cropAndResize(
-					expandedTensor,
-					[boundingBox],
-					[0], [inputHeight, inputWidth],
-					'nearest');
-
-				// return resizedTensor;
-				return resizedTensor.reshape(resizedTensor.shape.slice(1) as [number, number, number]);
+			const resizedTensor = tf.tidy( () : tf.Tensor3D => {
+				return tf.image.resizeBilinear(tensor, [inputWidth, inputHeight]);
 			});
+
+			// const tensor = tf.browser.fromPixels(videoRef.current);
+
+			// const resize = tf.image.resizeBilinear(tensor, [inputWidth, inputHeight]);
+
+			// const resizedTensor = tf.tidy(() : tf.Tensor3D => {
+			// // // 1. get tensor from video element
+
+			// 	// // 2. resize tensor
+			// 	const boundingBox = getSquareBound(tensor.shape[1], tensor.shape[0]);
+			// 	const expandedTensor : tf.Tensor4D = tensor.expandDims(0);
+
+			// 	const resizedTensor = tf.image.cropAndResize(
+			// 		expandedTensor,
+			// 		[boundingBox],
+			// 		[0], [inputHeight, inputWidth],
+			// 		'bilinear');
+
+			// 	// return resizedTensor;
+			// 	return resizedTensor.reshape(resizedTensor.shape.slice(1) as [number, number, number]);
+			// });
 
 			// 2. inference iamge
 			const inferencedPoses = await poseNet.current.estimateMultiplePoses(resizedTensor, {
@@ -259,37 +271,41 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 				nmsRadius: 20,
 			});
 
-			resizedTensor.dispose();
+			// resizedTensor.dispose();
 			tensor.dispose();
 
 			if (inferencedPoses.length >= 1) {
+				// const pose = inferencedPoses.reduce((previous : any, current : any) => {
+				// 	return previous.score > current.score ? previous : current;
+				// });
+
 				ipcRenderer.send('video-poses', inferencedPoses);
 			}
 
 			const width = window.innerWidth;
 			const height = window.innerHeight - 100;
-			const posSize = (width > height ? height : width);
-			const dx = (width - posSize) / 2;
+			// const posSize = (width > height ? height : width);
+			// const dx = (width - posSize) / 2;
 
-			// 3. upscale keypoints to webcam resolution
-			inferencedPoses.forEach((pose : any) => {
-				pose.keypoints.map((keypoint: any) => {
-					keypoint.position.x *= posSize / inputWidth;
-					keypoint.position.y *= posSize / inputHeight;
-
-					keypoint.position.x += dx;
-				});
-			});
-
-
+			// // 3. upscale keypoints to webcam resolution
 			// inferencedPoses.forEach((pose : any) => {
 			// 	pose.keypoints.map((keypoint: any) => {
-			// 		keypoint.position.x *= width / inputWidth;
-			// 		keypoint.position.y *= height / inputHeight;
+			// 		keypoint.position.x *= posSize / inputWidth;
+			// 		keypoint.position.y *= posSize / inputHeight;
 
-			// 		// keypoint.position.x += dx;
+			// 		keypoint.position.x += dx;
 			// 	});
 			// });
+
+
+			inferencedPoses.forEach((pose : any) => {
+				pose.keypoints.map((keypoint: any) => {
+					keypoint.position.x *= width / inputWidth;
+					keypoint.position.y *= height / inputHeight;
+
+					// keypoint.position.x += dx;
+				});
+			});
 
 			// 4. set keypoints and skelecton
 			// setPoses(inferencedPoses);
@@ -354,6 +370,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 				exercise={poseLabel}
 				time={poseTime}
 				accuracy={poseSimilarity}
+				count={poseCount}
 			/>
 
 			<PixiStage {...stageProps}>
