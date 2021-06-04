@@ -235,31 +235,30 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 			// videoRef.current.width = inputWidth;
 			// videoRef.current.height = inputHeight;
 
-			const tensor = tf.browser.fromPixels(videoRef.current);
-			const resizedTensor = tf.tidy( () : tf.Tensor3D => {
-				return tf.image.resizeBilinear(tensor, [inputWidth, inputHeight]);
-			});
-
 			// const tensor = tf.browser.fromPixels(videoRef.current);
+			// const resizedTensor = tf.tidy( () : tf.Tensor3D => {
+			// 	return tf.image.resizeBilinear(tensor, [inputWidth, inputHeight]);
+			// });
 
+			const tensor = tf.browser.fromPixels(videoRef.current);
 			// const resize = tf.image.resizeBilinear(tensor, [inputWidth, inputHeight]);
 
-			// const resizedTensor = tf.tidy(() : tf.Tensor3D => {
-			// // // 1. get tensor from video element
+			const resizedTensor = tf.tidy(() : tf.Tensor3D => {
+			// // 1. get tensor from video element
 
-			// 	// // 2. resize tensor
-			// 	const boundingBox = getSquareBound(tensor.shape[1], tensor.shape[0]);
-			// 	const expandedTensor : tf.Tensor4D = tensor.expandDims(0);
+				// // 2. resize tensor
+				const boundingBox = getSquareBound(tensor.shape[1], tensor.shape[0]);
+				const expandedTensor : tf.Tensor4D = tensor.expandDims(0);
 
-			// 	const resizedTensor = tf.image.cropAndResize(
-			// 		expandedTensor,
-			// 		[boundingBox],
-			// 		[0], [inputHeight, inputWidth],
-			// 		'bilinear');
+				const resizedTensor = tf.image.cropAndResize(
+					expandedTensor,
+					[boundingBox],
+					[0], [inputHeight, inputWidth],
+					'bilinear');
 
-			// 	// return resizedTensor;
-			// 	return resizedTensor.reshape(resizedTensor.shape.slice(1) as [number, number, number]);
-			// });
+				// return resizedTensor;
+				return resizedTensor.reshape(resizedTensor.shape.slice(1) as [number, number, number]);
+			});
 
 			// 2. inference iamge
 			const inferencedPoses = await poseNet.current.estimateMultiplePoses(resizedTensor, {
@@ -269,7 +268,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 				nmsRadius: 20,
 			});
 
-			// resizedTensor.dispose();
+			resizedTensor.dispose();
 			tensor.dispose();
 
 			if (inferencedPoses.length >= 1) {
