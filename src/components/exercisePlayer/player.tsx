@@ -281,28 +281,28 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 			const width = window.innerWidth;
 			const height = window.innerHeight - 100;
-			// const posSize = (width > height ? height : width);
-			// const dx = (width - posSize) / 2;
+			const posSize = (width > height ? height : width);
+			const dx = (width - posSize) / 2;
 
-			// // 3. upscale keypoints to webcam resolution
-			// inferencedPoses.forEach((pose : any) => {
-			// 	pose.keypoints.map((keypoint: any) => {
-			// 		keypoint.position.x *= posSize / inputWidth;
-			// 		keypoint.position.y *= posSize / inputHeight;
-
-			// 		keypoint.position.x += dx;
-			// 	});
-			// });
-
-
+			// 3. upscale keypoints to webcam resolution
 			inferencedPoses.forEach((pose : any) => {
 				pose.keypoints.map((keypoint: any) => {
-					keypoint.position.x *= width / inputWidth;
-					keypoint.position.y *= height / inputHeight;
+					keypoint.position.x *= posSize / inputWidth;
+					keypoint.position.y *= posSize / inputHeight;
 
-					// keypoint.position.x += dx;
+					keypoint.position.x += dx;
 				});
 			});
+
+
+			// inferencedPoses.forEach((pose : any) => {
+			// 	pose.keypoints.map((keypoint: any) => {
+			// 		keypoint.position.x *= width / inputWidth;
+			// 		keypoint.position.y *= height / inputHeight;
+
+			// 		// keypoint.position.x += dx;
+			// 	});
+			// });
 
 			// 4. set keypoints and skelecton
 			// setPoses(inferencedPoses);
