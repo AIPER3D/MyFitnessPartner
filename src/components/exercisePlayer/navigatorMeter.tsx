@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, {useContext, useState} from 'react';
 import styled, { css } from 'styled-components';
+import {playerContext} from './player';
 
 type Props = {
     exercise: string;
     time: number;
     accuracy: number;
-    count: number;
 };
 
 type NeedleProps = {
@@ -13,6 +13,8 @@ type NeedleProps = {
 };
 
 function NavigatorMeter({ exercise, accuracy, time } : Props) {
+	const _playerContext = useContext(playerContext);
+
 	return (
 		<Meter>
 			<Speedo>
@@ -24,7 +26,7 @@ function NavigatorMeter({ exercise, accuracy, time } : Props) {
 			<Time value={ (time * 160).toFixed(0) + 'px' }></Time>
 			<Name>{ exercise }</Name>
 			<Acc>{ accuracy ? (accuracy * 100).toFixed(0) : '?' }</Acc>
-			<Count>00</Count>
+			<Count>{ _playerContext.currentCount }</Count>
 		</Meter>
 	);
 }

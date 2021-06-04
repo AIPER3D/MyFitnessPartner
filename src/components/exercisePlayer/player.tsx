@@ -69,7 +69,6 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 	const [poseLabel, setPoseLabel] = useState<string>('');
 	const [poseTime, setPoseTime] = useState<number>(0);
-	const [poseCount, setPoseCount] = useState<number>(0);
 
 	const [poseSimilarity, setPoseSimilarity] = useState<any>(0);
 
@@ -198,7 +197,6 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 							if (videoRef.current.currentTime >= start &&
 								videoRef.current.currentTime <= end) {
 								setPoseLabel(name);
-								setPoseCount(_playerContext.currentCount);
 								_playerContext.poseLabel = name;
 								setPoseTime((videoRef.current.currentTime - start) / (end - start));
 							}
@@ -370,7 +368,6 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 				exercise={poseLabel}
 				time={poseTime}
 				accuracy={poseSimilarity}
-				count={poseCount}
 			/>
 
 			<PixiStage {...stageProps}>
