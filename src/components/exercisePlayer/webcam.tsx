@@ -169,7 +169,6 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 
 			// 3. pose classification
 			const result = await poseNets.current[label].predict(posenetOutput);
-			repetitionCounter.current[label].count(result);
 
 			pose.keypoints.map( (keypoint : any) => {
 				keypoint.position.x *= widthScaleRatio;
