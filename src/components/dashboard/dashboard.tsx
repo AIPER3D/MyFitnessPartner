@@ -81,16 +81,18 @@ function Dashboard({db}: DashBoardProps) {
 		const legend = [];
 		if (elist) {
 			const total = elist.Squat + elist.Jump + elist.Lunge;
-			const persent = [(elist.Squat/total*100).toFixed(1),
-				(elist.Jump/total*100).toFixed(1), (elist.Lunge/total*100).toFixed(1)];
-			const list = Object.keys(elist);
-			for (let i =1; i < persent.length+1; i++) {
-				legend.push(
-					<div className={`legend${i}`}>
-						<span className="legend_color"> </span>
-						<span>{list[i-1]} : {persent[i-1]}%</span>
-					</div>
-				);
+			if (total !== 0) {
+				const persent = [(elist.Squat/total*100).toFixed(1),
+					(elist.Jump/total*100).toFixed(1), (elist.Lunge/total*100).toFixed(1)];
+				const list = Object.keys(elist);
+				for (let i =1; i < persent.length+1; i++) {
+					legend.push(
+						<div className={`legend${i}`}>
+							<span className="legend_color"> </span>
+							<span>{list[i-1]} : {persent[i-1]}%</span>
+						</div>
+					);
+				}
 			}
 		}
 		return legend;
