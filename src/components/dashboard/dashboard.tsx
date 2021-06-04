@@ -12,7 +12,7 @@ type DashBoardProps = {
 	db : RxDatabase;
 }
 function Dashboard({db}: DashBoardProps) {
-	const recordDTO = new RecordDTO();
+	const [recordDTO, setRecordDTO] = useState<RecordDTO>(new RecordDTO());
 	const [records, setRecords] = useState<RecordDAO[] | null>(null);
 	const userDTO = new UserDTO();
 	const [user, setUser] = useState<UserDAO | null>(null);
