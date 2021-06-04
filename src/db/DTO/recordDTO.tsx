@@ -98,10 +98,6 @@ class RecordDTO {
     		});
     	}
 
-    	result.sort(function(a, b) {
-    		return b.id - a.id;
-    	});
-
     	return result;
     }
 
@@ -192,6 +188,35 @@ class RecordDTO {
     			routineName: doc[i].get('routine_name'),
     			recordExercise: doc[i].get('record_exercises'),
     		});
+    	}
+
+    	return result;
+    }
+
+    async getExerciseRecord() {
+    	if (!this.db) return [];
+    	if (!this.db.collections.records) return [];
+
+    	const doc = await this.db.collections.records
+    		.find()
+    		.exec();
+
+    	const result = {
+    		Squat: 0,
+    		Jump: 0,
+    		Lunge: 0,
+    	};
+
+    	for (let i = 0; i < doc.length; i++) {
+    		for (let j = 0; j < doc[i].get('record_exercises').length; j++) {
+    			if (doc[i].get('record_exercises')[j]['name'] === 'Squat') {
+    				result.Squat += doc[i].get('record_exercises')[j]['count'];
+    			} else if (doc[i].get('record_exercises')[j]['name'] === 'Jump') {
+    				result.Jump += doc[i].get('record_exercises')[j]['count'];
+    			} else if (doc[i].get('record_exercises')[j]['name'] === 'Lunge') {
+    				result.Lunge += doc[i].get('record_exercises')[j]['count'];
+    			}
+    		}
     	}
 
     	return result;
