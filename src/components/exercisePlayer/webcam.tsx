@@ -176,7 +176,7 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 				keypoint.position.y *= heightScaleRatio;
 			});
 
-			repetitionCounter.current[label].count(result);
+			_playerContext.currentCount = repetitionCounter.current[label].count(result);
 
 			// 4. set keypoints
 			poses.current = [pose];
