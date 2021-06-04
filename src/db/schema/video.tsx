@@ -32,6 +32,7 @@ const VideoSchema = {
 			},
 		},
 	},
+	'indexes': ['video_id'],
 };
 
 /* eslint-disable camelcase */
