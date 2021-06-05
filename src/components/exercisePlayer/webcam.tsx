@@ -6,7 +6,7 @@ import * as tf from '@tensorflow/tfjs';
 import * as posenet from '@tensorflow-models/posenet';
 import { Stage, Sprite, Graphics } from '@inlet/react-pixi';
 import { useState } from 'react';
-import { drawKeypoints, drawSkeleton } from '../../utils/posenet-utils';
+import { drawKeypoints, drawSkeleton, getSquareBound } from '../../utils/posenet-utils';
 import { loadModel, loadTMPose } from '../../utils/load-utils';
 import RepetitionCounter from '../../utils/RepetitionCounter';
 import * as tmPose from '@teachablemachine/pose';
@@ -14,6 +14,12 @@ import { timer } from '../../utils/bench-util';
 import { RecordDAO } from '../../db/DAO';
 import { recordContext, playerContext } from './player';
 import moment from 'moment';
+import { Padding, PosenetInput } from '@tensorflow-models/posenet/dist/types';
+import { decodeMultiplePoses, MultiPersonInferenceConfig } from '@tensorflow-models/posenet';
+import {
+	getInputTensorDimensions,
+	padAndResizeTo, scaleAndFlipPoses, toTensorBuffers3D,
+} from '@tensorflow-models/posenet/dist/util';
 
 type Props = {
 	width: number;
@@ -26,11 +32,11 @@ interface RepetitionObject {
 	Squat?: any;
 	Lunge?: any;
 	Jump?: any;
-	[props:string] : any;
+	[props: string]: any;
 }
 
 function Webcam({ width, height, opacity, onLoaded }: Props) {
-	const {ipcRenderer} = window.require('electron');
+	const { ipcRenderer } = window.require('electron');
 
 	const recordDAO = useContext(recordContext);
 	const _playerContext = useContext(playerContext);
@@ -41,14 +47,15 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 
 	// posenet 모델과 운동 횟수 카운터
 	const poseNets = useRef<any>(null);
+
+	const poseNet = useRef<posenet.PoseNet>();
 	const repetitionCounter = useRef<RepetitionObject>({});
 
 	// 웹캠의 입력 해상도
-	const inputHeight = 224;
-	const inputWidth = 224;
+	const inputResolution = 257;
 
-	const widthScaleRatio = width / inputWidth;
-	const heightScaleRatio = height / inputHeight;
+	const widthScaleRatio = width / inputResolution;
+	const heightScaleRatio = height / inputResolution;
 
 	const endRef = useRef<boolean>(false);
 
@@ -67,7 +74,7 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 				// 처음 시작하면 기록 안함
 				if (previousPoseLabel == '') return;
 
-				const record : {
+				const record: {
 					name: string;
 					startTime: number;
 					endTime: number;
@@ -93,10 +100,11 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 		};
 	}, [_playerContext.poseLabel]);
 
-	useEffect( () => {
+	useEffect(() => {
 		load()
 			.then(async () => {
 				await run();
+				onLoaded(true);
 			});
 
 		return () => {
@@ -119,6 +127,14 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 	}, []);
 
 	async function load() {
+		poseNet.current = await posenet.load({
+			architecture: 'ResNet50',
+			outputStride: 32,
+			inputResolution: { width: inputResolution, height: inputResolution },
+			multiplier: 1,
+			quantBytes: 2,
+		});
+
 		const poseSquat = await loadTMPose('files/models/exercise_classifier/Squat/model.json');
 		const poseLunge = await loadTMPose('files/models/exercise_classifier/Lunge/model.json');
 		const poseJump = await loadTMPose('files/models/exercise_classifier/Jump/model.json');
@@ -134,21 +150,21 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 			Lunge: new RepetitionCounter(poseLunge.getMetadata().labels[0], 0.8, 0.2),
 			Jump: new RepetitionCounter(poseJump.getMetadata().labels[0], 0.8, 0.2),
 		};
-
-		onLoaded(true);
 	}
 
 	async function run() {
 		if (videoRef.current == null) return;
 
 		webcamRef.current = await tf.data.webcam(videoRef.current, {
-			resizeHeight: inputHeight,
-			resizeWidth: inputWidth,
-			centerCrop: false,
+			// resizeHeight: width > height ? height : width,
+			// resizeWidth: width > height ? height : width,
+			// centerCrop: true,
 		});
 
 		requestRef.current = requestAnimationFrame(capture);
 	}
+
+	const t = timer(true);
 
 	async function capture() {
 		try {
@@ -157,29 +173,78 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 			// 1. caputer iamges
 			const image = await webcamRef.current.capture();
 
+			const resizedTensor = tf.tidy(() : tf.Tensor3D => {
+			// // 1. get tensor from video element
+
+				// // 2. resize tensor
+				const boundingBox = getSquareBound(image.shape[1], image.shape[0]);
+				const expandedTensor : tf.Tensor4D = image.expandDims(0);
+
+				const resizedTensor = tf.image.cropAndResize(
+					expandedTensor,
+					[boundingBox],
+					[0], [inputResolution, inputResolution],
+					'bilinear');
+
+				// return resizedTensor;
+				return resizedTensor.reshape(resizedTensor.shape.slice(1) as [number, number, number]);
+			});
+
+			console.log(resizedTensor.shape);
+
 			const label = _playerContext.poseLabel;
 
 			if (label == '') throw new Error('label is empty');
 
 			// 2. estimate pose
-			const {pose, posenetOutput} = await poseNets.current[label].estimatePose(image, true);
+			// const {pose, posenetOutput} = await poseNets.current[label].estimatePose(image, true);
+			const {pose, posenetOutput} = await estimatePose(resizedTensor, true);
 
 			if (pose == null) throw new Error('pose is null');
 			ipcRenderer.send('webcam-poses', pose);
 
-			// 3. pose classification
-			const result = await poseNets.current[label].predict(posenetOutput);
+			console.log(posenetOutput);
 
-			pose.keypoints.map( (keypoint : any) => {
-				keypoint.position.x *= widthScaleRatio;
-				keypoint.position.y *= heightScaleRatio;
+			// 3. pose classification
+			// const result = await poseNets.current[label].predict(posenetOutput);
+
+			const inputwidth = image.shape[1];
+			const inputheight = image.shape[0];
+			const posSize = (inputwidth > inputheight ? inputheight : inputwidth);
+			const dx = (inputwidth - posSize) / 2;
+
+			pose.keypoints.map((keypoint: any) => {
+				keypoint.position.x *= posSize / inputResolution;
+				keypoint.position.y *= posSize / inputResolution;
+
+				keypoint.position.x += dx;
 			});
 
-			_playerContext.currentCount = repetitionCounter.current[label].count(result);
+			// if (!poseNet.current) throw new Error('posenet not loaded');
+
+			// t.start('estimate pose');
+			// const estimatePoses = await poseNet.current.estimateMultiplePoses(image, {
+			// 	flipHorizontal: true,
+			// 	maxDetections: 3,
+			// 	scoreThreshold: 0.5,
+			// 	nmsRadius: 20,
+			// });
+			// t.stop();
+
+			// estimatePoses.forEach((pose: any) => {
+			// 	pose.keypoints.map((keypoint: any) => {
+			// 		keypoint.position.x *= widthScaleRatio;
+			// 		keypoint.position.y *= heightScaleRatio;
+			// 	});
+			// });
+
+			// _playerContext.currentCount = 0;
+			// _playerContext.currentCount = repetitionCounter.current[label].count(result);
 
 			// 4. set keypoints
 			poses.current = [pose];
 
+			resizedTensor.dispose();
 			image.dispose();
 			await tf.nextFrame();
 		} catch (e) {
@@ -189,15 +254,15 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 	}
 
 
-	const draw = React.useCallback( (graphics) => {
+	const draw = React.useCallback((graphics) => {
 		graphics.clear();
 
 		if (poses.current == null) return;
 
 		poses.current.forEach(({ score, keypoints }: { score: number, keypoints: [] }) => {
 			if (score >= 0.1) {
-				drawKeypoints(graphics, keypoints, 0.5);
-				drawSkeleton(graphics, keypoints, 0.5);
+				drawKeypoints(graphics, keypoints, 0.2);
+				drawSkeleton(graphics, keypoints, 0.2);
 			}
 		});
 	}, [poses.current]);
@@ -212,6 +277,100 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 		},
 	};
 
+	async function estimatePose(sample: PosenetInput, flipHorizontal = false) {
+		const {
+			heatmapScores,
+			offsets,
+			displacementFwd,
+			displacementBwd,
+			padding,
+		} = await estimatePoseOutputs(sample);
+
+		const posenetOutput = poseOutputsToAray(
+			heatmapScores,
+			offsets,
+			displacementFwd,
+			displacementBwd
+		);
+
+		const pose = await poseOutputsToKeypoints(
+			sample,
+			heatmapScores,
+			offsets,
+			displacementFwd,
+			displacementBwd,
+			padding,
+			flipHorizontal
+		);
+
+		return { pose, posenetOutput };
+	}
+
+	function poseOutputsToAray(
+		heatmapScores: tf.Tensor3D,
+		offsets: tf.Tensor3D,
+		displacementFwd: tf.Tensor3D,
+		displacementBwd: tf.Tensor3D
+	) {
+		const axis = 2;
+		const concat = tf.concat([heatmapScores, offsets], axis);
+		const concatArray = concat.dataSync() as Float32Array;
+
+		concat.dispose();
+
+		return concatArray;
+	}
+
+	async function poseOutputsToKeypoints(
+		input: PosenetInput,
+		heatmapScores: tf.Tensor3D,
+		offsets: tf.Tensor3D,
+		displacementFwd: tf.Tensor3D,
+		displacementBwd: tf.Tensor3D,
+		padding: Padding,
+		flipHorizontal = false
+	) {
+		const config = {
+			maxDetections: 3,
+			scoreThreshold: 0.5,
+			nmsRadius: 20,
+		};
+
+		const [height, width] = getInputTensorDimensions(input);
+
+		const outputStride = poseNet.current!.baseModel.outputStride;
+		const inputResolution = poseNet.current!.inputResolution;
+
+		const [scoresBuffer, offsetsBuffer, displacementsFwdBuffer, displacementsBwdBuffer] =
+			await toTensorBuffers3D([heatmapScores, offsets, displacementFwd, displacementBwd]);
+
+		const poses = await decodeMultiplePoses(scoresBuffer, offsetsBuffer, displacementsFwdBuffer,
+			displacementsBwdBuffer, outputStride, config.maxDetections, config.scoreThreshold, config.nmsRadius);
+
+		const resultPoses = scaleAndFlipPoses(poses, [height, width], inputResolution,
+			padding, flipHorizontal);
+
+		heatmapScores.dispose();
+		offsets.dispose();
+		displacementFwd.dispose();
+		displacementBwd.dispose();
+
+		return resultPoses[0];
+	}
+
+	async function estimatePoseOutputs(sample: PosenetInput) {
+		const inputResolution = poseNet.current!.inputResolution;
+
+		const { resized, padding } = padAndResizeTo(sample, inputResolution);
+
+		const { heatmapScores, offsets, displacementFwd, displacementBwd } =
+			await poseNet.current!.baseModel.predict(resized);
+
+		resized.dispose();
+
+		return { heatmapScores, offsets, displacementFwd, displacementBwd, padding };
+	}
+
 	return (
 		<Wrapper>
 			<Video
@@ -223,7 +382,7 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 			/>
 
 			<PixiStage {...stageProps}>
-				<Graphics draw={draw}/>
+				<Graphics draw={draw} />
 			</PixiStage>
 
 		</Wrapper>
