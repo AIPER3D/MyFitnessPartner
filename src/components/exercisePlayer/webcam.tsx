@@ -46,7 +46,7 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 	const requestRef = useRef<number>(0);
 
 	// posenet 모델과 운동 횟수 카운터
-	const poseNets = useRef<any>(null);
+	const poseClassification = useRef<any>(null);
 
 	const poseNet = useRef<posenet.PoseNet>();
 	const repetitionCounter = useRef<RepetitionObject>({});
@@ -118,9 +118,9 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 				webcamRef.current.stop();
 			}
 
-			if (poseNets.current) {
-				Object.keys(poseNets.current).forEach((key) => {
-					poseNets.current[key].dispose();
+			if (poseClassification.current) {
+				Object.keys(poseClassification.current).forEach((key) => {
+					poseClassification.current[key].model.dispose();
 				});
 			}
 		};
@@ -135,20 +135,37 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 			quantBytes: 2,
 		});
 
-		const poseSquat = await loadTMPose('files/models/exercise_classifier/Squat/model.json');
-		const poseLunge = await loadTMPose('files/models/exercise_classifier/Lunge/model.json');
-		const poseJump = await loadTMPose('files/models/exercise_classifier/Jump/model.json');
+		// const poseSquat = await loadTMPose('files/models/exercise_classifier/Squat/model.json');
+		// const poseLunge = await loadTMPose('files/models/exercise_classifier/Lunge/model.json');
+		// const poseJump = await loadTMPose('files/models/exercise_classifier/Jump/model.json');
 
-		poseNets.current = {
-			Squat: poseSquat,
-			Lunge: poseLunge,
-			Jump: poseJump,
+		const poseSquat = await loadModel('files/models/Squat/model.json' );
+		const poseLunge = await loadModel('files/models/Lunge/model.json', );
+		const poseJump = await loadModel('files/models/Jump/model.json');
+
+		const poseSqautMetadata = {labels: ['Up', 'Down']};
+		const poseLungeMetadata = {labels: ['Up', 'Down']};
+		const poseJumpMetadata = {labels: ['Down', 'Up']};
+
+		poseClassification.current = {
+			Squat: {
+				model: poseSquat,
+				metadata: poseSqautMetadata,
+			},
+			Lunge: {
+				model: poseLunge,
+				metadata: poseSqautMetadata,
+			},
+			Jump: {
+				model: poseJump,
+				metadata: poseJumpMetadata,
+			},
 		};
 
 		repetitionCounter.current = {
-			Squat: new RepetitionCounter(poseSquat.getMetadata().labels[0], 0.7, 0.2),
-			Lunge: new RepetitionCounter(poseLunge.getMetadata().labels[0], 0.8, 0.2),
-			Jump: new RepetitionCounter(poseJump.getMetadata().labels[0], 0.8, 0.2),
+			Squat: new RepetitionCounter(poseSqautMetadata.labels[0], 0.7, 0.2),
+			Lunge: new RepetitionCounter(poseLungeMetadata.labels[0], 0.8, 0.2),
+			Jump: new RepetitionCounter(poseJumpMetadata.labels[0], 0.8, 0.2),
 		};
 	}
 
@@ -190,8 +207,6 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 				return resizedTensor.reshape(resizedTensor.shape.slice(1) as [number, number, number]);
 			});
 
-			console.log(resizedTensor.shape);
-
 			const label = _playerContext.poseLabel;
 
 			if (label == '') throw new Error('label is empty');
@@ -202,8 +217,6 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 
 			if (pose == null) throw new Error('pose is null');
 			ipcRenderer.send('webcam-poses', pose);
-
-			console.log(posenetOutput);
 
 			// 3. pose classification
 			// const result = await poseNets.current[label].predict(posenetOutput);
@@ -220,26 +233,9 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 				keypoint.position.x += dx;
 			});
 
-			// if (!poseNet.current) throw new Error('posenet not loaded');
+			const result = await predict(posenetOutput, label);
 
-			// t.start('estimate pose');
-			// const estimatePoses = await poseNet.current.estimateMultiplePoses(image, {
-			// 	flipHorizontal: true,
-			// 	maxDetections: 3,
-			// 	scoreThreshold: 0.5,
-			// 	nmsRadius: 20,
-			// });
-			// t.stop();
-
-			// estimatePoses.forEach((pose: any) => {
-			// 	pose.keypoints.map((keypoint: any) => {
-			// 		keypoint.position.x *= widthScaleRatio;
-			// 		keypoint.position.y *= heightScaleRatio;
-			// 	});
-			// });
-
-			// _playerContext.currentCount = 0;
-			// _playerContext.currentCount = repetitionCounter.current[label].count(result);
+			_playerContext.currentCount = repetitionCounter.current[label].count(result);
 
 			// 4. set keypoints
 			poses.current = [pose];
@@ -276,6 +272,26 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 			backgroundColor: 0x000000,
 		},
 	};
+
+	async function predict(posenetOutput : Float32Array, label : string) {
+		const embeddings = tf.tensor([posenetOutput]);
+		const logits = poseClassification.current[label].model.predict(embeddings) as tf.Tensor;
+
+		const values = await (logits as tf.Tensor<tf.Rank>).data();
+
+		const classes = [];
+		for (let i = 0; i < values.length; i++) {
+			classes.push({
+				className: poseClassification.current[label].metadata.labels[i],
+				probability: values[i],
+			});
+		}
+
+		embeddings.dispose();
+		logits.dispose();
+
+		return classes;
+	}
 
 	async function estimatePose(sample: PosenetInput, flipHorizontal = false) {
 		const {
