@@ -1,7 +1,8 @@
-import React from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
 import { removeRxDatabase, RxDatabase } from 'rxdb';
 import { Button } from '../components/common';
+import {Redirect} from "react-router-dom";
 
 const Body = styled.div`
     position: absolute;
@@ -62,21 +63,28 @@ function Reset({ db } : PageProps) {
 
 		window.location.replace('./');
 	}
+	const [redirect, setRedirect] = useState<number>(0);
 
-	return (
-		<Body>
-			<Button href = { '/' } text = { '돌아가기' } width = { '100px' } />
-			<Form onSubmit = { onSubmit }>
-				<Name>데이터 초기화</Name>
-				<Box>
-					<p>사용자, 영상, 루틴, 기록 데이터를 초기화합니다. <br />데이터가 삭제된 후 복구할 수 없습니다.</p>
-					<p>(기본 영상, 루틴은 삭제되지 않습니다.)</p>
-				</Box>
-				<Button text = { '초기화' } width = { '100% - 40px' } color = { 'pink' } />
-			</Form>
+	if (redirect != 0) {
+		return (
+			<Redirect to={'/'}/>
+		);
+	} else {
+		return (
+			<Body>
+				<Button href={'/'} text={'돌아가기'} width={'100px'}/>
+				<Form onSubmit={onSubmit}>
+					<Name>데이터 초기화</Name>
+					<Box>
+						<p>사용자, 영상, 루틴, 기록 데이터를 초기화합니다. <br/>데이터가 삭제된 후 복구할 수 없습니다.</p>
+						<p>(기본 영상, 루틴은 삭제되지 않습니다.)</p>
+					</Box>
+					<Button text={'초기화'} width={'100% - 40px'} color={'pink'}/>
+				</Form>
 
-		</Body>
-	);
+			</Body>
+		);
+	}
 }
 
 export default Reset;
