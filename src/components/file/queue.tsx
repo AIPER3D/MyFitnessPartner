@@ -54,7 +54,8 @@ function Queue({ db, data } : QueueProps) {
 	useEffect(() => {
 		(async () => {
 			// setExerciseModel(await loadModel('files/models/exercise_classifier/tm-my-image-model/model.json'));
-			setExerciseModel(await loadTMPose('files/models/poseClassification-posenet-epoch10/model.json'));
+			setExerciseModel(
+				await loadTMPose('files/models/teachable-machine/poseClassification-posenet-epoch10/model.json'));
 		})();
 	}, []);
 
