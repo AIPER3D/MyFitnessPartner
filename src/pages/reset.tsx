@@ -67,7 +67,7 @@ function Reset({ db } : PageProps) {
 
 	if (redirect != 0) {
 		return (
-			<Redirect to={'/'}/>
+			<Redirect to={'/userNew'}/>
 		);
 	} else {
 		return (

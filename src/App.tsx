@@ -153,6 +153,11 @@ function App() {
 							</ContainerWithoutMenu>
 						</Route>
 					) : (<Route path="/new"></Route>)}
+					<Route path="/userNew">
+						<ContainerWithoutMenu>
+							<UserNew db = { db } />
+						</ContainerWithoutMenu>
+					</Route>
 					<Route path="/userModify">
 						<ContainerWithoutMenu>
 							<UserModify db={ db }/>
