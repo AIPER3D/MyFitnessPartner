@@ -71,6 +71,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 	const [poseTime, setPoseTime] = useState<number>(0);
 
 	const [poseSimilarity, setPoseSimilarity] = useState<any>(0);
+	const poseSimilarityRef = useRef<number>(0);
 
 	const inputWidth = 257;
 	const inputHeight = 257;
@@ -97,8 +98,13 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 		_playerContext.currentCount = 0;
 
 		ipcRenderer.on('pose-similarity', (event: any, args: any) => {
-			setPoseSimilarity(Math.abs(args));
+			poseSimilarityRef.current = lerp(Math.abs(args), poseSimilarityRef.current, 0.1);
+			setPoseSimilarity(poseSimilarityRef.current);
 		});
+
+		function lerp(start: number, end: number, amount: number) {
+			return (1-amount)*start+amount*end;
+		}
 
 		(async () => {
 			setPlayerLoaded(false);
@@ -234,6 +240,8 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 	const t = timer(true);
 
+	const count = useRef<number>(0);
+
 	async function capture() {
 		try {
 			if (endRef.current) return;
@@ -280,11 +288,9 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 			tensor.dispose();
 
 			if (inferencedPoses.length >= 1) {
-				// const pose = inferencedPoses.reduce((previous : any, current : any) => {
-				// 	return previous.score > current.score ? previous : current;
-				// });
-
-				ipcRenderer.send('video-poses', inferencedPoses);
+				if (!(count.current % 5)) {
+					ipcRenderer.send('video-poses', inferencedPoses);
+				}
 			}
 
 			const width = window.innerWidth;
@@ -324,6 +330,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 			// ctx.drawImage(videoRef.current, 0, 0);
 			poses.current = inferencedPoses;
+			count.current += 1;
 			// draw2(ctx);
 		} catch (e) {
 			console.log(e);

@@ -168,9 +168,6 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 			Jump,
 		};
 
-		console.log(Squat.getClassLabels());
-		console.log(Jump.getClassLabels());
-
 		repetitionCounter.current = {
 			Squat: new RepetitionCounter(Squat.getClassLabels()[1], 0.9, 0.9),
 			Lunge: new RepetitionCounter(Lunge.getClassLabels()[0], 0.9, 0.9),
@@ -189,6 +186,8 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 
 		requestRef.current = requestAnimationFrame(capture);
 	}
+
+	const count = useRef<number>(0);
 
 	async function capture() {
 		try {
@@ -223,7 +222,9 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 
 			// 4. ipc 전송
 			if (pose == null) throw new Error('pose is null');
-			ipcRenderer.send('webcam-poses', pose);
+			if (!(count.current % 5)) {
+				ipcRenderer.send('webcam-poses', pose);
+			}
 
 			// 5. 추정된 자세를 화면 크기에 맞게 업스케일
 			const inputwidth = image.shape[1];
@@ -254,6 +255,7 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 			// 8 pose 업데이트
 			poses.current = [pose];
 
+			count.current += 1;
 			resizedTensor.dispose();
 			image.dispose();
 			await tf.nextFrame();
