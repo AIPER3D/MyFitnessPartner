@@ -37,7 +37,7 @@ const Name = styled.p`
 `;
 
 const Box = styled.div`
-    width: 500px
+    width: 500px;
     height: 50px;
     
     padding: 0px 50px 0px 20px;
@@ -49,7 +49,8 @@ const Box = styled.div`
     font-size: 15px;
     
     &:focus {
-    border: 1px solid #48ACF0;
+    	border: 1px solid #48ACF0;
+	}
 `;
 
 type PageProps = {

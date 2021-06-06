@@ -28,6 +28,7 @@ function createWindow() {
 
 	win.maximize();
 	win.show();
+	win.focus();
 
 	// win.loadURL(require('url').format({
 	// 	protocol: 'file',

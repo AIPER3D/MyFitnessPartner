@@ -31,12 +31,22 @@ function Exercise2({ db } : PageProps) {
 	const [video, setVideo] = useState<any>(null);
 	const [redirect, setRedirect] = useState<number>(0);
 
+	const { ipcRenderer } = window.require('electron');
+
 	useEffect(() => {
 		routineDTO.setDB(db);
 		videoDTO.setDB(db);
 
 		select();
 	}, [db]);
+
+	useEffect(() => {
+		ipcRenderer.invoke('fullscreen', true);
+
+		return () => {
+			ipcRenderer.invoke('fullscreen', false);
+		};
+	}, []);
 
 	async function select() {
 		const routineData : RoutineDAO | null = await routineDTO.getRoutineById(Number(id));

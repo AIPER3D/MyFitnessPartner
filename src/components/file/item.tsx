@@ -2,7 +2,7 @@ const fs = window.require('fs');
 const tf = require('@tensorflow/tfjs');
 const { ipcRenderer } = window.require('electron');
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import styled from 'styled-components';
 
 import { RxDatabase } from 'rxdb';
@@ -15,7 +15,9 @@ import progress16 from './images/progress16.gif';
 import check16 from './images/check16.png';
 import Status from './status';
 import { getCount, getSquareBound } from '../../utils/posenet-utils';
-import { timer } from '../../utils/bench-util';
+import { css } from '@emotion/react';
+import MoonLoader from 'react-spinners/MoonLoader';
+import { themaColorContext } from '../../App';
 
 type ItemProps = {
 	db: RxDatabase;
@@ -23,69 +25,6 @@ type ItemProps = {
     onPredict: (tensorImage : any, end : boolean) => Promise<string>;
     predictable: boolean;
 };
-
-const Root = styled.div`
-	float: left;
-	
-	width: calc(100% - 10px);
-	height: 100px;
-	margin: 10px 5px 0px 5px;
-	
-	border: 1px solid #dddddd;
-	background: #eeeeee;	
-`;
-
-const Thumbnail = styled.img`
-	float: left;
-	width: 150px;
-	height: 100px;
-	
-	background-color: #000000;
-	object-fit: contain;
-`;
-
-const Title = styled.div`
-	float: left;
-	width: calc(100% - 200px);
-	height: 20px;
-	padding: 20px 0px 20px 20px;
-	margin: 0px 0px 0px 0px;
-	
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap; 
-	
-	color: #000000;
-	font-size: 11pt;
-	font-weight: bold;
-	text-align: left;
-`;
-
-const Line = styled.div`
-	float: left;
-	width: 200px;
-	height: 16px;
-	padding: 2px 0px 5px 20px;
-	margin: 0px 0px 0px 0px;
-	
-	color: #000000;
-	font-size: 10pt;
-	text-align: left;
-`;
-
-const Image = styled.img`
-	width: 16px;
-	height: 16px;
-	
-	padding: 2px 0px 0px 0px;
-`;
-
-const Text = styled.p`
-	display: inline;
-	margin: 0px 0px 0px 5px;
-	vertical-align: top;
-`;
-
 
 function Item({ db, data, onPredict, predictable } : ItemProps) {
 	const videoDTO = new VideoDTO();
@@ -402,20 +341,22 @@ function Item({ db, data, onPredict, predictable } : ItemProps) {
 	// 출력
 	const arr = [];
 
+	const themaColor = useContext(themaColorContext);
+
 	// 업로드
 	if (uploadStatus == Status.UPLOADING) {
 		arr.push(<Line key={ 0 }>
-			<Image src={ progress16 } />
+			<MoonLoader color={themaColor.color.pink} loading={true} css={override} size={14}/>
 			<Text>업로드 중 ({ Math.round(100 * current / total).toFixed(0) }%)</Text>
 		</Line>);
 	} else if (uploadStatus == Status.SAVING_THUMBNAIL) {
 		arr.push(<Line key={ 0 }>
-			<Image src={ progress16 } />
+			<MoonLoader color={themaColor.color.pink} loading={true} css={override} size={14}/>
 			<Text>썸네일 저장중</Text>
 		</Line>);
 	} else if (uploadStatus == Status.SAVING_VIDEO) {
 		arr.push(<Line key={ 0 }>
-			<Image src={ progress16 } />
+			<MoonLoader color={themaColor.color.pink} loading={true} css={override} size={14}/>
 			<Text>영상 저장중</Text>
 		</Line>);
 	} else if (uploadStatus == Status.UPLOADING_SUCCES) {
@@ -433,7 +374,8 @@ function Item({ db, data, onPredict, predictable } : ItemProps) {
 	// 분석
 	if (analysisStatus == Status.ANALYZING) {
 		arr.push(<Line key={ 1 }>
-			<Image src={ progress16 } />
+			{/* <Image src={ progress16 } /> */}
+			<MoonLoader color={themaColor.color.pink} loading={true} css={override} size={14}/>
 			<Text>분석 중 ({ analysisPer.toFixed(0) }%)</Text>
 		</Line>);
 	} else if (analysisStatus == Status.ANALYZING_SUCCES) {
@@ -451,7 +393,7 @@ function Item({ db, data, onPredict, predictable } : ItemProps) {
 	// 등록
 	if (submitStatus == Status.SUBMITTING) {
 		arr.push(<Line key={ 2 }>
-			<Image src={ progress16 } />
+			<MoonLoader color={themaColor.color.pink} loading={true} css={override} size={14}/>
 			<Text>등록 중</Text>
 		</Line>);
 	} else if (submitStatus == Status.SUBMITTING_SUCCESS) {
@@ -475,6 +417,73 @@ function Item({ db, data, onPredict, predictable } : ItemProps) {
 		</Root>
 	);
 }
+
+const override = css`
+	display: inline-block;
+	padding : 2px 0px 0px 0px;
+`;
+
+const Root = styled.div`
+	float: left;
+	
+	width: calc(100% - 10px);
+	height: 100px;
+	margin: 10px 5px 0px 5px;
+	
+	border: 1px solid #dddddd;
+	background: #eeeeee;	
+`;
+
+const Thumbnail = styled.img`
+	float: left;
+	width: 150px;
+	height: 100px;
+	
+	background-color: #000000;
+	object-fit: contain;
+`;
+
+const Title = styled.div`
+	float: left;
+	width: calc(100% - 200px);
+	height: 20px;
+	padding: 20px 0px 20px 20px;
+	margin: 0px 0px 0px 0px;
+	
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap; 
+	
+	color: #000000;
+	font-size: 11pt;
+	font-weight: bold;
+	text-align: left;
+`;
+
+const Line = styled.div`
+	float: left;
+	width: 200px;
+	height: 16px;
+	padding: 2px 0px 5px 20px;
+	margin: 0px 0px 0px 0px;
+	
+	color: #000000;
+	font-size: 10pt;
+	text-align: left;
+`;
+
+const Image = styled.img`
+	width: 16px;
+	height: 16px;
+	
+	padding: 2px 0px 0px 0px;
+`;
+
+const Text = styled.p`
+	display: inline;
+	margin: 0px 0px 0px 5px;
+	vertical-align: top;
+`;
 
 Item.defaultProps = {
 
