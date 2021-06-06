@@ -127,41 +127,52 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 	}, []);
 
 	async function load() {
-		poseNet.current = await posenet.load({
-			architecture: 'ResNet50',
-			outputStride: 32,
-			inputResolution: { width: inputResolution, height: inputResolution },
-			multiplier: 1,
-			quantBytes: 2,
-		});
+		// poseNet.current = await posenet.load({
+		// 	architecture: 'ResNet50',
+		// 	outputStride: 32,
+		// 	inputResolution: { width: inputResolution, height: inputResolution },
+		// 	multiplier: 1,
+		// 	quantBytes: 2,
+		// });
 
-		const poseSquat = await loadModel('files/models/Squat/model.json' );
-		const poseLunge = await loadModel('files/models/Lunge/model.json', );
-		const poseJump = await loadModel('files/models/Jump/model.json');
+		const Squat = await loadTMPose('files/models/teachable-machine/Suqat/model.json');
+		const Jump = await loadTMPose('files/models/teachable-machine/Jump/model.json');
+
+		// const poseSquat = await loadModel('files/models/Squat/model.json' );
+		// const poseLunge = await loadModel('files/models/Lunge/model.json', );
+		// const poseJump = await loadModel('files/models/Jump/model.json');
 
 		const poseSqautMetadata = {labels: ['Up', 'Down']};
 		const poseLungeMetadata = {labels: ['Stand', 'Lunge']};
 		const poseJumpMetadata = {labels: ['Down', 'Up']};
 
+		// poseClassification.current = {
+		// 	Squat: {
+		// 		model: poseSquat,
+		// 		metadata: poseSqautMetadata,
+		// 	},
+		// 	Lunge: {
+		// 		model: poseLunge,
+		// 		metadata: poseSqautMetadata,
+		// 	},
+		// 	Jump: {
+		// 		model: poseJump,
+		// 		metadata: poseJumpMetadata,
+		// 	},
+		// };
+
 		poseClassification.current = {
-			Squat: {
-				model: poseSquat,
-				metadata: poseSqautMetadata,
-			},
-			Lunge: {
-				model: poseLunge,
-				metadata: poseSqautMetadata,
-			},
-			Jump: {
-				model: poseJump,
-				metadata: poseJumpMetadata,
-			},
+			Squat,
+			Jump,
 		};
 
+		console.log(Squat.getClassLabels());
+		console.log(Jump.getClassLabels());
+
 		repetitionCounter.current = {
-			Squat: new RepetitionCounter(poseSqautMetadata.labels[1], 0.7, 0.2),
-			Lunge: new RepetitionCounter(poseLungeMetadata.labels[1], 0.8, 0.2),
-			Jump: new RepetitionCounter(poseJumpMetadata.labels[1], 0.8, 0.2),
+			Squat: new RepetitionCounter(Squat.getClassLabels()[0], 0.8, 0.8),
+			Lunge: new RepetitionCounter(poseLungeMetadata.labels[1], 0.8, 0.8),
+			Jump: new RepetitionCounter(Jump.getClassLabels()[0], 0.8, 0.8),
 		};
 	}
 
@@ -205,7 +216,8 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 			if (label == '') throw new Error('label is empty');
 
 			// 3. 자세 추정
-			const {pose, posenetOutput} = await estimatePose(resizedTensor, true);
+			// const {pose, posenetOutput} = await estimatePose(resizedTensor, true);
+			const {pose, posenetOutput} = await poseClassification.current[label].estimatePose(resizedTensor, true);
 
 			// 4. ipc 전송
 			if (pose == null) throw new Error('pose is null');
@@ -225,9 +237,10 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 			});
 
 			// 6. 추정된 자세로 운동의 상태 분류
-			const result = await predict(posenetOutput, label);
+			// const result = await predict(posenetOutput, label);
+			const result = await poseClassification.current[label].predict(posenetOutput);
 
-			result.forEach( (e) => {
+			result.forEach( (e : any) => {
 				console.log(e);
 			});
 
