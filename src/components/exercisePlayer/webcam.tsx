@@ -135,10 +135,6 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 			quantBytes: 2,
 		});
 
-		// const poseSquat = await loadTMPose('files/models/exercise_classifier/Squat/model.json');
-		// const poseLunge = await loadTMPose('files/models/exercise_classifier/Lunge/model.json');
-		// const poseJump = await loadTMPose('files/models/exercise_classifier/Jump/model.json');
-
 		const poseSquat = await loadModel('files/models/Squat/model.json' );
 		const poseLunge = await loadModel('files/models/Lunge/model.json', );
 		const poseJump = await loadModel('files/models/Jump/model.json');
@@ -181,29 +177,26 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 		requestRef.current = requestAnimationFrame(capture);
 	}
 
-	const t = timer(true);
-
 	async function capture() {
 		try {
 			if (endRef.current) return;
 
-			// 1. caputer iamges
+			// 1. 이미지 캡쳐
 			const image = await webcamRef.current.capture();
 
+			// 2. 이미지 크롭 및 리사이즈
 			const resizedTensor = tf.tidy(() : tf.Tensor3D => {
-			// // 1. get tensor from video element
-
-				// // 2. resize tensor
+				// 2.1 바운딩 박스
 				const boundingBox = getSquareBound(image.shape[1], image.shape[0]);
 				const expandedTensor : tf.Tensor4D = image.expandDims(0);
 
+				// 2.2 리사이즈
 				const resizedTensor = tf.image.cropAndResize(
 					expandedTensor,
 					[boundingBox],
 					[0], [inputResolution, inputResolution],
 					'bilinear');
 
-				// return resizedTensor;
 				return resizedTensor.reshape(resizedTensor.shape.slice(1) as [number, number, number]);
 			});
 
@@ -211,16 +204,14 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 
 			if (label == '') throw new Error('label is empty');
 
-			// 2. estimate pose
-			// const {pose, posenetOutput} = await poseNets.current[label].estimatePose(image, true);
+			// 3. 자세 추정
 			const {pose, posenetOutput} = await estimatePose(resizedTensor, true);
 
+			// 4. ipc 전송
 			if (pose == null) throw new Error('pose is null');
 			ipcRenderer.send('webcam-poses', pose);
 
-			// 3. pose classification
-			// const result = await poseNets.current[label].predict(posenetOutput);
-
+			// 5. 추정된 자세를 화면 크기에 맞게 업스케일
 			const inputwidth = image.shape[1];
 			const inputheight = image.shape[0];
 			const posSize = (inputwidth > inputheight ? inputheight : inputwidth);
@@ -233,11 +224,19 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 				keypoint.position.x += dx;
 			});
 
+			// 6. 추정된 자세로 운동의 상태 분류
 			const result = await predict(posenetOutput, label);
 
+			result.forEach( (e) => {
+				console.log(e);
+			});
+
+			console.log('----------------------');
+
+			// 7. 운동 횟수 카운팅
 			_playerContext.currentCount = repetitionCounter.current[label].count(result);
 
-			// 4. set keypoints
+			// 8 pose 업데이트
 			poses.current = [pose];
 
 			resizedTensor.dispose();
