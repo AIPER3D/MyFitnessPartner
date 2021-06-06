@@ -140,7 +140,7 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 		const poseJump = await loadModel('files/models/Jump/model.json');
 
 		const poseSqautMetadata = {labels: ['Up', 'Down']};
-		const poseLungeMetadata = {labels: ['Up', 'Down']};
+		const poseLungeMetadata = {labels: ['Stand', 'Lunge']};
 		const poseJumpMetadata = {labels: ['Down', 'Up']};
 
 		poseClassification.current = {
@@ -159,9 +159,9 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 		};
 
 		repetitionCounter.current = {
-			Squat: new RepetitionCounter(poseSqautMetadata.labels[0], 0.7, 0.2),
-			Lunge: new RepetitionCounter(poseLungeMetadata.labels[0], 0.8, 0.2),
-			Jump: new RepetitionCounter(poseJumpMetadata.labels[0], 0.8, 0.2),
+			Squat: new RepetitionCounter(poseSqautMetadata.labels[1], 0.7, 0.2),
+			Lunge: new RepetitionCounter(poseLungeMetadata.labels[1], 0.8, 0.2),
+			Jump: new RepetitionCounter(poseJumpMetadata.labels[1], 0.8, 0.2),
 		};
 	}
 
