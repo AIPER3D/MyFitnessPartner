@@ -104,21 +104,21 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 			setPlayerLoaded(false);
 
 			// setPoseNet();
-			// poseNet.current = await posenet.load({
-			// 	architecture: 'MobileNetV1',
-			// 	outputStride: 16,
-			// 	inputResolution: { width: inputWidth, height: inputHeight },
-			// 	multiplier: 1,
-			// 	quantBytes: 2,
-			// });
-
 			poseNet.current = await posenet.load({
-				architecture: 'ResNet50',
-				outputStride: 32,
+				architecture: 'MobileNetV1',
+				outputStride: 16,
 				inputResolution: { width: inputWidth, height: inputHeight },
 				multiplier: 1,
 				quantBytes: 2,
 			});
+
+			// poseNet.current = await posenet.load({
+			// 	architecture: 'ResNet50',
+			// 	outputStride: 32,
+			// 	inputResolution: { width: inputWidth, height: inputHeight },
+			// 	multiplier: 1,
+			// 	quantBytes: 2,
+			// });
 
 			setPlayerLoaded(true);
 		})().then( () => {
