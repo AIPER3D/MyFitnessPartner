@@ -61,7 +61,7 @@ function Reset({ db } : PageProps) {
 
 		await removeRxDatabase('data', 'idb');
 
-		window.location.replace('./');
+		setRedirect(1);
 	}
 	const [redirect, setRedirect] = useState<number>(0);
 
