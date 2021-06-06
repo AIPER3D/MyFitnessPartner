@@ -136,7 +136,7 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 		// });
 
 		const Squat = await loadTMPose('files/models/teachable-machine/Squat/model.json');
-		const Jump = await loadTMPose('files/models/teachable-machine/Jump/model.json');
+		const Jump = await loadTMPose('files/models/teachable-machine/JumpTest/model.json');
 		const Lunge = await loadTMPose('files/models/teachable-machine/Lunge/model.json');
 
 		// const poseSquat = await loadModel('files/models/Squat/model.json' );
