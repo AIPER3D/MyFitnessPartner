@@ -93,7 +93,7 @@ const Needle = styled.div.attrs((props : TimeProps) => ({
     top: -36px;
     transform-origin: bottom;
     
-    transition: all 0.2s;
+    transition: all 0.5s;
 `;
 
 const Name = styled.div`
