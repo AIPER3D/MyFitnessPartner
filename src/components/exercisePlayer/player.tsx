@@ -1,5 +1,5 @@
 const fs = window.require('fs');
-import React, { useState, useRef, useEffect, createContext, useContext, useCallback } from 'react';
+import React, { useState, useRef, useEffect, createContext, useContext } from 'react';
 import styled from 'styled-components';
 
 import { NavigatorTop, NavigatorMeter, NavigatorBottom, PIP } from './';
@@ -10,16 +10,13 @@ import * as tf from '@tensorflow/tfjs';
 
 import * as PIXI from 'pixi.js';
 
-import { Stage, Graphics, useApp, AppConsumer } from '@inlet/react-pixi';
-import { drawKeypoints, drawKeypoints2, drawSkeleton, drawSkeleton2, getSquareBound } from '../../utils/posenet-utils';
+import { Stage, Graphics} from '@inlet/react-pixi';
+import { drawKeypoints, drawSkeleton, getSquareBound } from '../../utils/posenet-utils';
 
 import { css } from '@emotion/react';
-import PuffLoader from 'react-spinners/PuffLoader';
-import { imageFromVideo, tensorToImage } from '../../utils/video-util';
+import { SyncLoader } from 'react-spinners';
 import moment from 'moment';
-import { RecordDTO } from '../../db/DTO';
-import { timer } from '../../utils/bench-util';
-import { _collectionNamePrimary } from 'rxdb';
+import { themaColorContext } from '../../App';
 
 type Props = {
 	routineDAO: RoutineDAO;
@@ -45,6 +42,8 @@ export const playerContext = createContext({
 });
 
 function Player({ routineDAO, videoDAO, onEnded }: Props) {
+	const themaColor = useContext(themaColorContext);
+
 	const { ipcRenderer } = window.require('electron');
 
 	// record 초기화
@@ -62,7 +61,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 	const [webcamLoaded, setWebcamLoaded] = useState<boolean>(false);
 
 	const videoRef = useRef<HTMLVideoElement>(null);
-	const canvasRef = useRef<HTMLCanvasElement>(null);
+	// const canvasRef = useRef<HTMLCanvasElement>(null);
 
 	const seqRef = useRef(0);
 	const [seq, setSeq] = useState<number>(seqRef.current);
@@ -238,8 +237,6 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 		}
 	}
 
-	const t = timer(true);
-
 	const count = useRef<number>(0);
 
 	async function capture() {
@@ -370,8 +367,16 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 	return (
 		<Container>
-			<PuffLoader css={Loader} color={'#E75A7C'} loading={ !(playerLoaded && webcamLoaded) } size={300} />
-			<BackPanel value = { (playerLoaded && webcamLoaded) ? 'none' : 'block' } />
+			<SyncLoader
+				css={Loader}
+				color={themaColor.color.white}
+				loading={ !(playerLoaded && webcamLoaded) }
+				size={50}
+			/>
+			<BackPanel
+				backgroundColor= {themaColor.color.blue}
+				value = { (playerLoaded && webcamLoaded) ? 'none' : 'block' }
+			/>
 
 			<NavigatorTop
 				routine={routineDAO}
@@ -475,11 +480,12 @@ const Video = styled.video`
 	background-color: #000000;
 `;
 
-const BackPanel = styled.div.attrs((props: { value: string }) => ({
+const BackPanel = styled.div.attrs((props: { value: string, backgroundColor: string}) => ({
 	style: {
 		display: props.value,
+		backgroundColor: props.backgroundColor,
 	},
-}))<{ value: string }>`
+}))<{ value: string, backgroundColor: string }>`
 	position: absolute;
 	top: 0px;
 	left: 0px;
@@ -487,7 +493,6 @@ const BackPanel = styled.div.attrs((props: { value: string }) => ({
 	height: 100vh;
 	
 	z-index: 1000010;
-	background-color: #000000;
 	
 	transition: 1s all;
 `;
