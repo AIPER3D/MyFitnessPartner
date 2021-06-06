@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import {createRxDatabase, removeRxDatabase, RxDatabase} from 'rxdb';
 import { Button } from '../components/common';
 import {Redirect} from 'react-router-dom';
-import {MemoSchema, RecordSchema, RoutineSchema, UserSchema, VideoSchema} from "../db/schema";
+import {MemoSchema, RecordSchema, RoutineSchema, UserSchema, VideoSchema} from '../db/schema';
 
 const Body = styled.div`
     position: absolute;
@@ -49,7 +49,8 @@ const Box = styled.div`
     font-size: 15px;
     
     &:focus {
-    border: 1px solid #48ACF0;
+    	border: 1px solid #48ACF0;
+	}
 `;
 
 type PageProps = {
@@ -57,7 +58,7 @@ type PageProps = {
 	setDB: any;
 };
 
-function Reset({ db , setDB } : PageProps) {
+function Reset({ db, setDB } : PageProps) {
 	async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
 
