@@ -229,7 +229,7 @@ function Video({ db } : PageProps) {
 			</div>
 		);
 	} else {
-		const metadata = loadJson('files/models/poseClassification-posenet-epoch10/metadata.json');
+		const metadata = loadJson('files/models/teachable-machine/poseClassification-posenet-epoch10/metadata.json');
 		const options = [];
 		for (let i = 0; i < metadata['labels'].length; i++) {
 			options.push(<option key={ i } value={ metadata['labels'][i] }> { metadata['labels'][i] } </option>);
