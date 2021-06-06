@@ -18,9 +18,9 @@ function NavigatorMeter({ exercise, accuracy, time } : Props) {
 	return (
 		<Meter>
 			<Speedo>
-				<Face value = { !accuracy ? '#FFFFFF' : accuracy > 0.8 ? '#32CD32' : accuracy > 0.6 ? '#FF8C01' :
+				<Face value = { !accuracy ? '#FFFFFF' : accuracy > 0.8 ? '#32CD32' : accuracy > 0.5 ? '#FF8C01' :
 					'#ED2938' }>
-					<Needle value = { !accuracy ? '0' : accuracy > 0.8 ? '0.8' : accuracy > 0.6 ? '0.4' : '0.1' } />
+					<Needle value = { !accuracy ? '0' : accuracy > 0.8 ? '0.8' : accuracy > 0.5 ? '0.4' : '0.1' } />
 				</Face>
 			</Speedo>
 			<TimeBack></TimeBack>
