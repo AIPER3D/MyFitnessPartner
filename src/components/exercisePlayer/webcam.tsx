@@ -135,7 +135,7 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 		// 	quantBytes: 2,
 		// });
 
-		const Squat = await loadTMPose('files/models/teachable-machine/Squatt/model.json');
+		const Squat = await loadTMPose('files/models/teachable-machine/Squat/model.json');
 		const Jump = await loadTMPose('files/models/teachable-machine/Jump/model.json');
 		const Lunge = await loadTMPose('files/models/teachable-machine/Lunge/model.json');
 
@@ -172,7 +172,7 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 		console.log(Jump.getClassLabels());
 
 		repetitionCounter.current = {
-			Squat: new RepetitionCounter(Squat.getClassLabels()[0], 0.8, 0.8),
+			Squat: new RepetitionCounter(Squat.getClassLabels()[0], 0.7, 0.7),
 			Lunge: new RepetitionCounter(Lunge.getClassLabels()[0], 0.8, 0.8),
 			Jump: new RepetitionCounter(Jump.getClassLabels()[0], 0.8, 0.8),
 		};
