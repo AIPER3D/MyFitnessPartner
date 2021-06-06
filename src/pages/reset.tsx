@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import styled from 'styled-components';
 import { removeRxDatabase, RxDatabase } from 'rxdb';
 import { Button } from '../components/common';
-import {Redirect} from "react-router-dom";
+import {Redirect} from 'react-router-dom';
 
 const Body = styled.div`
     position: absolute;
