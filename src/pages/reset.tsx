@@ -37,7 +37,7 @@ const Name = styled.p`
 `;
 
 const Box = styled.div`
-    width: 500px,
+    width: 500px;
     height: 50px;
     
     padding: 0px 50px 0px 20px;
