@@ -1,4 +1,4 @@
-const { BrowserView, BrowserWindow, app, ipcMain } = require('electron');
+const { BrowserView, BrowserWindow, app, ipcMain, screen} = require('electron');
 const path = require('path');
 const isDev = require('electron-is-dev');
 
@@ -9,11 +9,12 @@ let win;
 let exerciseClassificationModel;
 
 function createWindow() {
+	// const {width, height} = screen.getPrimaryDisplay().workAreaSize;
+
 	win = new BrowserWindow({
-		width: 1200,
-		height: 800,
 		backgroundColor: 'white',
 		center: true,
+		show: false,
 		// fullscreen: true,
 		webPreferences: {
 			nodeIntegration: true,
@@ -24,6 +25,10 @@ function createWindow() {
 			devTools: true,
 		},
 	});
+
+	win.maximize();
+	win.show();
+
 
 	// win.loadURL(require('url').format({
 	// 	protocol: 'file',
@@ -37,6 +42,7 @@ function createWindow() {
 	} else {
 		// 프로덕션 환경에서는 패키지 내부 리소스에 접근
 		win.loadFile(path.join(__dirname, '../build/index.html'));
+		win.setMenu(null);
 	}
 }
 
@@ -51,10 +57,6 @@ require('electron-reload')(__dirname, {
 
 app.whenReady().then(async () => {
 	createWindow();
-
-	// 모델 로드
-	// exerciseClassificationModel = loadModel('./files/models/exercise_classifier/firstChoose/model.json');
-	// console.log(exerciseClassificationModel);
 });
 
 app.on('window-all-closed', () => {
@@ -70,6 +72,10 @@ let videoPose;
 let webcamPose;
 
 let sim = 0;
+
+ipcMain.handle('fullscreen', (event, value) => {
+	win.setFullScreen(value);
+});
 
 ipcMain.on('video-poses', (event, poses) => {
 	videoPose = poses.reduce((previous, current) => {
