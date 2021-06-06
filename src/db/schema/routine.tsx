@@ -18,6 +18,7 @@ const RoutineSchema = {
 			},
 		},
 	},
+	'indexes': ['routine_id'],
 };
 
 /* eslint-disable camelcase */

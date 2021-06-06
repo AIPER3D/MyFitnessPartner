@@ -80,6 +80,7 @@ class RoutineDTO {
 			.find()
 			.skip(offset)
 			.limit(limit)
+			.sort({ routine_id: 'desc' })
 			.exec();
 
 		const result : RoutineDAO[] = [];
@@ -90,10 +91,6 @@ class RoutineDTO {
 				videos: doc[i].get('routine_videos'),
 			});
 		}
-
-		result.sort(function(a, b) {
-			return b.id - a.id;
-		});
 
 		return result;
 	}

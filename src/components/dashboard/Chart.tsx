@@ -56,8 +56,6 @@ function Chart({db}: Props) {
 				<XAxis tickFormat={(v) => Date1[v]} />
 				<YAxis title='운동시간 (분)'/>
 				<LineSeries data={Wdata} color='red'/>
-				<LineSeries data={Wdata} color="purple"/>
-				<LineSeries data={Wdata} color='yellow'/>
 			</XYPlot>
 		</div>
 	);

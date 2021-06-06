@@ -27,7 +27,6 @@ type Props = {
 	onEnded: (record: RecordDAO) => void;
 };
 
-
 export const recordContext = createContext<RecordDAO>({
 	id: 0,
 	playTime: 0,
@@ -42,6 +41,7 @@ export const playerContext = createContext({
 	currentSeq: 0,
 	totalSeq: 0,
 	recordEended: false,
+	currentCount: 0,
 });
 
 function Player({ routineDAO, videoDAO, onEnded }: Props) {
@@ -94,14 +94,27 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 		_playerContext.poseLabel = '';
 		_playerContext.currentSeq = 0;
 		_playerContext.recordEended = false;
+		_playerContext.currentCount = 0;
+
+		ipcRenderer.on('pose-similarity', (event: any, args: any) => {
+			setPoseSimilarity(Math.abs(args));
+		});
 
 		(async () => {
 			setPlayerLoaded(false);
 
 			// setPoseNet();
+			// poseNet.current = await posenet.load({
+			// 	architecture: 'MobileNetV1',
+			// 	outputStride: 16,
+			// 	inputResolution: { width: inputWidth, height: inputHeight },
+			// 	multiplier: 1,
+			// 	quantBytes: 2,
+			// });
+
 			poseNet.current = await posenet.load({
-				architecture: 'MobileNetV1',
-				outputStride: 16,
+				architecture: 'ResNet50',
+				outputStride: 32,
 				inputResolution: { width: inputWidth, height: inputHeight },
 				multiplier: 1,
 				quantBytes: 2,
@@ -161,10 +174,6 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 		})();
 	}, [seq, playerLoaded, videoLoaded, webcamLoaded]);
 
-	ipcRenderer.on('pose-similarity', (event: any, args: any) => {
-		setPoseSimilarity(Math.abs(args));
-	});
-
 	// Video Load and Play
 	async function load() {
 		if (videoRef.current == null) return;
@@ -223,16 +232,24 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 		}
 	}
 
+	const t = timer(true);
+
 	async function capture() {
 		try {
 			if (endRef.current) return;
 
 			if (!videoRef.current) throw new Error('videoRef is null');
 
-			videoRef.current.width = videoRef.current.videoWidth / 2;
-			videoRef.current.height = videoRef.current.videoHeight / 2;
+			// videoRef.current.width = inputWidth;
+			// videoRef.current.height = inputHeight;
+
+			// const tensor = tf.browser.fromPixels(videoRef.current);
+			// const resizedTensor = tf.tidy( () : tf.Tensor3D => {
+			// 	return tf.image.resizeBilinear(tensor, [inputWidth, inputHeight]);
+			// });
 
 			const tensor = tf.browser.fromPixels(videoRef.current);
+			// const resize = tf.image.resizeBilinear(tensor, [inputWidth, inputHeight]);
 
 			const resizedTensor = tf.tidy(() : tf.Tensor3D => {
 			// // 1. get tensor from video element
@@ -245,7 +262,7 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 					expandedTensor,
 					[boundingBox],
 					[0], [inputHeight, inputWidth],
-					'nearest');
+					'bilinear');
 
 				// return resizedTensor;
 				return resizedTensor.reshape(resizedTensor.shape.slice(1) as [number, number, number]);
@@ -263,6 +280,10 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 			tensor.dispose();
 
 			if (inferencedPoses.length >= 1) {
+				// const pose = inferencedPoses.reduce((previous : any, current : any) => {
+				// 	return previous.score > current.score ? previous : current;
+				// });
+
 				ipcRenderer.send('video-poses', inferencedPoses);
 			}
 
@@ -321,9 +342,9 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 		let i =0;
 		const len = poses.current.length;
 		while ( i < len) {
-			if (poses.current[i].score >= 0.3) {
-				drawKeypoints(graphics, poses.current[i].keypoints, 0.5);
-				drawSkeleton(graphics, poses.current[i].keypoints, 0.5);
+			if (poses.current[i].score >= 0.1) {
+				drawKeypoints(graphics, poses.current[i].keypoints, 0.2);
+				drawSkeleton(graphics, poses.current[i].keypoints, 0.2);
 			}
 
 			i++;

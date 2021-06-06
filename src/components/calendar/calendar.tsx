@@ -17,7 +17,7 @@ function Calendar({db} : CalendarProps) {
 	const [modalOpen, setModalOpen] = useState(false);
 	const [present, setPresent] = useState<Moment>(moment());
 	const [memoDTO, setMemoDTO] = useState<MemoDTO>(new MemoDTO());
-	const recordDTO = new RecordDTO();
+	const [recordDTO, setRecordDTO] = useState<RecordDTO>(new RecordDTO());
 	const [records, setRecords] = useState<RecordDAO[] | null>(null);
 	useEffect(()=>{
 		memoDTO.setDB(db);
@@ -31,7 +31,6 @@ function Calendar({db} : CalendarProps) {
 	const openModal= (day:Moment)=>{
 		setModalOpen(true);
 		setPresent(day);
-		console.log(records);
 	};
 	const closeModal= ()=> {
 		setModalOpen(false);
@@ -43,25 +42,28 @@ function Calendar({db} : CalendarProps) {
 		setDate(date.clone().subtract(1, 'month'));
 	}
 	function generateRecord() {
+		const body = [];
 		const list = [];
 
 		if (records) {
-			list.push(
-				<div className='modal_record'>
-					{
-						Array(records.length).map((n, i) => {
-							return (
-								<span className='record' key={i} >
-									{records[n+i].routineName}, {records[n+i].playTime}
-								</span>
-							);
-						})
-					}
-				</div>
-			);
+			for (let i=0; i< records.length; i++) {
+				list.push(
+					<div className='modal_record' key={i}>
+						{
+							<span className='record' key={records[i].id} >
+								{records[i].routineName}, {records[i].playTime.toFixed(2)} 분
+							</span>
+						}
+					</div>
+				);
+			}
 		}
-
-		return list;
+		body.push(
+			<div className='modal_record'>
+				{list}
+			</div>
+		);
+		return body;
 	}
 
 	function generate() {

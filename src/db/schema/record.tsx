@@ -41,6 +41,7 @@ const RecordSchema = {
 			},
 		},
 	},
+	'indexes': ['record_id'],
 };
 
 /* eslint-disable camelcase */
