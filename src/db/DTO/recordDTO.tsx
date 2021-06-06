@@ -166,7 +166,7 @@ class RecordDTO {
     		);
     	});
 
-    	return result.length;
+    	return result;
     }
 
     async getExerciseDayRecord(date: number) {
