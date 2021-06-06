@@ -59,6 +59,7 @@ function Reset({ db } : PageProps) {
 	async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
 
+		await db.destroy();
 		await removeRxDatabase('data', 'idb');
 
 		setRedirect(1);
