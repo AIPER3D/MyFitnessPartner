@@ -147,7 +147,7 @@ function App() {
 						</Route>
 					) : (<Route path="/dev"></Route>)}
 					{ newMode ? (
-						<Route path="/">
+						<Route path="">
 							<ContainerWithoutMenu>
 								<UserNew db = { db } />
 							</ContainerWithoutMenu>
@@ -200,7 +200,7 @@ function App() {
 									<Route path="/records/:page">
 										<Records db={ db } />
 									</Route>
-									<Route exact path="/">
+									<Route exact path="">
 										<Main db={ db } />
 									</Route>
 								</Switch>
@@ -214,7 +214,7 @@ function App() {
 							</Route>
 						</Switch>
 					</Route>
-					<Route path="/">
+					<Route path="">
 						<Menu db = { db } />
 						<ContainerWithMenu>
 							<Body>
@@ -230,12 +230,12 @@ function App() {
 			<Router>
 				<Switch>
 					{ devMode ? (
-						<Route path="/">
+						<Route path="">
 							<ContainerWithoutMenu>
 								<DevMain db = { db } />
 							</ContainerWithoutMenu>
 						</Route>
-					) : (<Route path="/"></Route>)}
+					) : (<Route path=""></Route>)}
 				</Switch>
 			</Router>
 		);

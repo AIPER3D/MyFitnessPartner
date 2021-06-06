@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "main": "public/electron.js",
+  "homepage":"./",
   "dependencies": {
     "@emotion/react": "^11.1.5",
     "@ffmpeg/ffmpeg": "^0.9.8",

@@ -104,27 +104,39 @@ main {
                     margin-top: 30px;
                     .card1 {
                         background: #d1ecf1;
-                        color: #35a4ba;
+                        color: #288294;
                         text-align: center;
+                        font-weight: bold;
                         padding: 25px;
                         border-radius: 5px;
-                        font-size: 14px;
+                        font-size: 16px;
+                        > h1 {
+                            font-size: 28px;
+                        }
                     }
                     .card2 {
                         background: #d2f9ee;
-                        color: #38e1b0;
+                        color: #279e7c;
                         text-align: center;
+                        font-weight: bold;
                         padding: 25px;
                         border-radius: 5px;
-                        font-size: 14px;
+                        font-size: 16px;
+                        > h1 {
+                            font-size: 28px;
+                        }
                     }
                     .card3 {
                         background: #d6d8d9;
-                        color: #3a3e41;
+                        color: #2f3235;
                         text-align: center;
+                        font-weight: bold;
                         padding: 25px;
                         border-radius: 5px;
-                        font-size: 14px;
+                        font-size: 16px;
+                        > h1 {
+                            font-size: 28px;
+                        }
                     }
                     .card4 {
                         background: #fddcdf;

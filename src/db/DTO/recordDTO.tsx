@@ -153,20 +153,16 @@ class RecordDTO {
     		.find()
     		.exec();
 
-    	const result: any[] = [];
+    	let result: any[] = [];
     	for (let i = 0; i < doc.length; i++) {
     		result.push(doc[i].get('record_create_time'));
     	}
 
-    	result.filter((item, i)=> {
-    		return (
-    			result.findIndex((item2, j) => {
-    				return item === item2;
-    			}) === i
-    		);
+    	result = result.filter((item, i)=> {
+    		return result.indexOf(item) === i;
     	});
 
-    	return result.length;
+    	return result;
     }
 
     async getExerciseDayRecord(date: number) {
