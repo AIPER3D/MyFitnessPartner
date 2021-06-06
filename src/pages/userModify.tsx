@@ -149,7 +149,7 @@ function UserModify({ db } : PageProps) {
 
 		await userDTO.updateUser(user);
 
-		window.location.replace('./');
+		setRedirect(1);
 	}
 
 	if (userDAO == null) {
