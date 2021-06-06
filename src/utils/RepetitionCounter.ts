@@ -34,8 +34,6 @@ export default class RepetitionCounter {
 			}
 		});
 
-		console.log(poseConfidence);
-
 		if (!this.poseEntered) {
 			this.poseEntered = poseConfidence > this.enterThreshold;
 			return this._nRepeats;
