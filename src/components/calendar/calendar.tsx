@@ -59,7 +59,7 @@ function Calendar({db} : CalendarProps) {
 			}
 		}
 		body.push(
-			<div className='modal_record'>
+			<div className='modal_record' key= {1}>
 				{list}
 			</div>
 		);
