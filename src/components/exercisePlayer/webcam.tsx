@@ -137,6 +137,7 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 
 		const Squat = await loadTMPose('files/models/teachable-machine/Suqat/model.json');
 		const Jump = await loadTMPose('files/models/teachable-machine/Jump/model.json');
+		const Lunge = await loadTMPose('files/models/teachable-machine/Lunge/model.json');
 
 		// const poseSquat = await loadModel('files/models/Squat/model.json' );
 		// const poseLunge = await loadModel('files/models/Lunge/model.json', );
@@ -163,6 +164,7 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 
 		poseClassification.current = {
 			Squat,
+			Lunge,
 			Jump,
 		};
 
@@ -171,7 +173,7 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 
 		repetitionCounter.current = {
 			Squat: new RepetitionCounter(Squat.getClassLabels()[0], 0.8, 0.8),
-			Lunge: new RepetitionCounter(poseLungeMetadata.labels[1], 0.8, 0.8),
+			Lunge: new RepetitionCounter(Lunge.getClassLabels()[0], 0.8, 0.8),
 			Jump: new RepetitionCounter(Jump.getClassLabels()[0], 0.8, 0.8),
 		};
 	}
@@ -240,11 +242,11 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 			// const result = await predict(posenetOutput, label);
 			const result = await poseClassification.current[label].predict(posenetOutput);
 
-			result.forEach( (e : any) => {
-				console.log(e);
-			});
+			// result.forEach( (e : any) => {
+			// 	console.log(e);
+			// });
 
-			console.log('----------------------');
+			// console.log('----------------------');
 
 			// 7. 운동 횟수 카운팅
 			_playerContext.currentCount = repetitionCounter.current[label].count(result);
