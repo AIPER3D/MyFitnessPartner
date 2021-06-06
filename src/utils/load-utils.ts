@@ -16,15 +16,18 @@ export async function loadTMPose(modelPath: string) : Promise<tmPose.CustomPoseN
 	return model;
 }
 
+type ModelMetaData = {
+	labels : string[],
+};
+
 export async function loadModel(modelPath : string) : Promise<tf.LayersModel> {
 	const basePath = path.dirname(modelPath);
 
 	const modelData = loadFile(modelPath, 'model.json');
 	const weights = loadFile(path.join(basePath, 'weights.bin'), 'weights.bin');
-	const metadata = loadJson(path.join(basePath, 'metadata.json'));
 
-	const model : any = await tf.loadLayersModel(tf.io.browserFiles([modelData, weights]));
-	model.metadata = metadata;
+
+	const model : tf.LayersModel = await tf.loadLayersModel(tf.io.browserFiles([modelData, weights]));
 
 	return model;
 }

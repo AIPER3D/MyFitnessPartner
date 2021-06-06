@@ -72,8 +72,8 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 
 	const [poseSimilarity, setPoseSimilarity] = useState<any>(0);
 
-	const inputWidth = 224;
-	const inputHeight = 224;
+	const inputWidth = 257;
+	const inputHeight = 257;
 
 	const poses = useRef<any>(null);
 	const poseNet = useRef<any>();
@@ -111,6 +111,14 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 				multiplier: 1,
 				quantBytes: 2,
 			});
+
+			// poseNet.current = await posenet.load({
+			// 	architecture: 'ResNet50',
+			// 	outputStride: 32,
+			// 	inputResolution: { width: inputWidth, height: inputHeight },
+			// 	multiplier: 1,
+			// 	quantBytes: 2,
+			// });
 
 			setPlayerLoaded(true);
 		})().then( () => {
@@ -334,9 +342,9 @@ function Player({ routineDAO, videoDAO, onEnded }: Props) {
 		let i =0;
 		const len = poses.current.length;
 		while ( i < len) {
-			if (poses.current[i].score >= 0.3) {
-				drawKeypoints(graphics, poses.current[i].keypoints, 0.5);
-				drawSkeleton(graphics, poses.current[i].keypoints, 0.5);
+			if (poses.current[i].score >= 0.1) {
+				drawKeypoints(graphics, poses.current[i].keypoints, 0.2);
+				drawSkeleton(graphics, poses.current[i].keypoints, 0.2);
 			}
 
 			i++;
