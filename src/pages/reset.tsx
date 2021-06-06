@@ -1,8 +1,9 @@
 import React, {useState} from 'react';
 import styled from 'styled-components';
-import { removeRxDatabase, RxDatabase } from 'rxdb';
+import {createRxDatabase, removeRxDatabase, RxDatabase} from 'rxdb';
 import { Button } from '../components/common';
 import {Redirect} from 'react-router-dom';
+import {MemoSchema, RecordSchema, RoutineSchema, UserSchema, VideoSchema} from "../db/schema";
 
 const Body = styled.div`
     position: absolute;
@@ -53,15 +54,47 @@ const Box = styled.div`
 
 type PageProps = {
 	db: RxDatabase;
+	setDB: any;
 };
 
-function Reset({ db } : PageProps) {
+function Reset({ db , setDB } : PageProps) {
 	async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
 
 		await db.destroy();
 		await removeRxDatabase('data', 'idb');
 
+		const tdb = await createRxDatabase({
+			name: 'data',
+			adapter: 'idb',
+		});
+
+		await tdb.collection({
+			name: 'users',
+			schema: UserSchema,
+		});
+
+		await tdb.collection({
+			name: 'memos',
+			schema: MemoSchema,
+		});
+
+		await tdb.collection({
+			name: 'routines',
+			schema: RoutineSchema,
+		});
+
+		await tdb.collection({
+			name: 'videos',
+			schema: VideoSchema,
+		});
+
+		await tdb.collection({
+			name: 'records',
+			schema: RecordSchema,
+		});
+
+		setDB(tdb);
 		setRedirect(1);
 	}
 	const [redirect, setRedirect] = useState<number>(0);
