@@ -172,7 +172,7 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 		console.log(Jump.getClassLabels());
 
 		repetitionCounter.current = {
-			Squat: new RepetitionCounter(Squat.getClassLabels()[0], 0.7, 0.7),
+			Squat: new RepetitionCounter(Squat.getClassLabels()[0], 0.8, 0.8),
 			Lunge: new RepetitionCounter(Lunge.getClassLabels()[0], 0.8, 0.8),
 			Jump: new RepetitionCounter(Jump.getClassLabels()[0], 0.8, 0.8),
 		};
@@ -242,11 +242,11 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 			// const result = await predict(posenetOutput, label);
 			const result = await poseClassification.current[label].predict(posenetOutput);
 
-			// result.forEach( (e : any) => {
-			// 	console.log(e);
-			// });
+			result.forEach( (e : any) => {
+				console.log(e);
+			});
 
-			// console.log('----------------------');
+			console.log('----------------------');
 
 			// 7. 운동 횟수 카운팅
 			_playerContext.currentCount = repetitionCounter.current[label].count(result);
