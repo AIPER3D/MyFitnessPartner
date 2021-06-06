@@ -243,11 +243,11 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 			// const result = await predict(posenetOutput, label);
 			const result = await poseClassification.current[label].predict(posenetOutput);
 
-			result.forEach( (e : any) => {
-				console.log(e);
-			});
+			// result.forEach( (e : any) => {
+			// 	console.log(e);
+			// });
 
-			console.log('----------------------');
+			// console.log('----------------------');
 
 			// 7. 운동 횟수 카운팅
 			_playerContext.currentCount = repetitionCounter.current[label].count(result);
@@ -258,11 +258,12 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 			count.current += 1;
 			resizedTensor.dispose();
 			image.dispose();
-			await tf.nextFrame();
 		} catch (e) {
-			console.log(e);
+			//
+		} finally {
+			await tf.nextFrame();
+			requestRef.current = requestAnimationFrame(capture);
 		}
-		requestRef.current = requestAnimationFrame(capture);
 	}
 
 
