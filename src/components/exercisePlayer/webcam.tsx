@@ -135,7 +135,7 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 		// 	quantBytes: 2,
 		// });
 
-		const Squat = await loadTMPose('files/models/teachable-machine/Suqat/model.json');
+		const Squat = await loadTMPose('files/models/teachable-machine/Squatt/model.json');
 		const Jump = await loadTMPose('files/models/teachable-machine/Jump/model.json');
 		const Lunge = await loadTMPose('files/models/teachable-machine/Lunge/model.json');
 
@@ -143,9 +143,9 @@ function Webcam({ width, height, opacity, onLoaded }: Props) {
 		// const poseLunge = await loadModel('files/models/Lunge/model.json', );
 		// const poseJump = await loadModel('files/models/Jump/model.json');
 
-		const poseSqautMetadata = {labels: ['Up', 'Down']};
-		const poseLungeMetadata = {labels: ['Stand', 'Lunge']};
-		const poseJumpMetadata = {labels: ['Down', 'Up']};
+		// const poseSqautMetadata = {labels: ['Up', 'Down']};
+		// const poseLungeMetadata = {labels: ['Stand', 'Lunge']};
+		// const poseJumpMetadata = {labels: ['Down', 'Up']};
 
 		// poseClassification.current = {
 		// 	Squat: {
