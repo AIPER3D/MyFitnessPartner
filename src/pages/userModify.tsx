@@ -1,7 +1,7 @@
 const fs = window.require('fs');
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
+import {Link, Redirect} from 'react-router-dom';
 
 import { RxDatabase } from 'rxdb';
 import { UserDTO } from '../db/DTO';
@@ -99,6 +99,7 @@ type PageProps = {
 function UserModify({ db } : PageProps) {
 	const userDTO = new UserDTO();
 	const [userDAO, setUserDAO] = useState<null | UserDAO>(null);
+	const [redirect, setRedirect] = useState<number>(0);
 
 	useEffect(() => {
 		(async () => {
@@ -157,65 +158,70 @@ function UserModify({ db } : PageProps) {
 			</Body>
 		);
 	}
+	if (redirect != 0) {
+		return (
+			<Redirect to={ '/' }/>
+		);
+	} else {
+		return (
+			<Body>
+				<Form onSubmit={onSubmit}>
+					<Item>
+						<Name>이름</Name>
+						<Input vwidth={'296px'} vmargin={'0px 20px 15px 20px'} defaultValue={userDAO.name}/>
+					</Item>
 
-	return (
-		<Body>
-			<Form onSubmit = { onSubmit }>
-				<Item>
-					<Name>이름</Name>
-					<Input vwidth = { '296px' } vmargin = { '0px 20px 15px 20px' } defaultValue={ userDAO.name } />
-				</Item>
+					<Item>
+						<Name>성별</Name>
+						<Select vwidth={'111px'} vmargin={'0px 20px 30px 10px'} defaultValue={userDAO.gender}>
+							<option value={''}>미선택</option>
+							<option value={'M'}>남자</option>
+							<option value={'F'}>여자</option>
+						</Select>
+					</Item>
 
-				<Item>
-					<Name>성별</Name>
-					<Select vwidth = { '111px' } vmargin = { '0px 20px 30px 10px' } defaultValue={ userDAO.gender } >
-						<option value={ '' }>미선택</option>
-						<option value={ 'M' }>남자</option>
-						<option value={ 'F' }>여자</option>
-					</Select>
-				</Item>
+					<Item>
+						<Name>나이</Name>
+						<Input
+							type={'number'}
+							required={true}
+							min={1}
+							vwidth={'111px'}
+							vmargin={'0px 20px 30px 20px'}
+							defaultValue={userDAO.age}
+						/>
+					</Item>
 
-				<Item>
-					<Name>나이</Name>
-					<Input
-						type={ 'number' }
-						required={ true }
-						min={ 1 }
-						vwidth={ '111px' }
-						vmargin={ '0px 20px 30px 20px' }
-						defaultValue={ userDAO.age }
-					/>
-				</Item>
+					<Item>
+						<Name>키</Name>
+						<Input
+							type={'number'}
+							required={true}
+							min={1}
+							step={'0.1'}
+							vwidth={'111px'}
+							vmargin={'0px 20px 30px 10px'}
+							defaultValue={userDAO.height}
+						/>
+					</Item>
 
-				<Item>
-					<Name>키</Name>
-					<Input
-						type={ 'number' }
-						required={ true }
-						min={ 1 }
-						step={ '0.1' }
-						vwidth={ '111px' }
-						vmargin = { '0px 20px 30px 10px' }
-						defaultValue={ userDAO.height }
-					/>
-				</Item>
-
-				<Item>
-					<Name>몸무게</Name>
-					<Input
-						type={ 'number' }
-						required={ true }
-						min={ 1 }
-						step={ '0.1' }
-						vwidth={ '111px' }
-						vmargin={ '0px 20px 30px 10px' }
-						defaultValue={ userDAO.weight }
-					/>
-				</Item>
-				<Button text = { '수정' } width = { '100% - 40px' } />
-			</Form>
-		</Body>
-	);
+					<Item>
+						<Name>몸무게</Name>
+						<Input
+							type={'number'}
+							required={true}
+							min={1}
+							step={'0.1'}
+							vwidth={'111px'}
+							vmargin={'0px 20px 30px 10px'}
+							defaultValue={userDAO.weight}
+						/>
+					</Item>
+					<Button text={'수정'} width={'100% - 40px'}/>
+				</Form>
+			</Body>
+		);
+	}
 }
 
 export default UserModify;
