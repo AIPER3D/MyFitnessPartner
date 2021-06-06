@@ -18,8 +18,9 @@ function NavigatorMeter({ exercise, accuracy, time } : Props) {
 	return (
 		<Meter>
 			<Speedo>
-				<Face>
-					<Needle value = { accuracy ? ((accuracy * 180) - 90) + 'deg' : '-90deg' } />
+				<Face value = { !accuracy ? '#FFFFFF' : accuracy > 0.85 ? '#006B3E' : accuracy > 0.60 ? '#FF8C01' :
+					'#ED2938' }>
+					<Needle value = { !accuracy ? '0' : accuracy > 0.85 ? '0.9' : accuracy > 0.60 ? '0.6' : '0.3' } />
 				</Face>
 			</Speedo>
 			<TimeBack></TimeBack>
@@ -61,10 +62,13 @@ const Speedo = styled.div`
     overflow: hidden;
 `;
 
-const Face = styled.div`
-    width: 80px;
+const Face = styled.div.attrs((props : TimeProps) => ({
+	style: {
+		border: `solid 40px ` + props.value,
+	},
+}))<TimeProps>`
+	width: 80px;
     height: 80px;
-    border: solid 40px #fff;
     border-radius: 50%;
 
     position: relative;
@@ -72,7 +76,7 @@ const Face = styled.div`
 
 const Needle = styled.div.attrs((props : TimeProps) => ({
 	style: {
-		transform: `rotate(` + props.value + `)`,
+		transform: `rotate(` + ((props.value * 180) - 90) + 'deg' + `)`,
 	},
 }))<TimeProps>`
     width: 4px;
@@ -89,7 +93,7 @@ const Needle = styled.div.attrs((props : TimeProps) => ({
     top: -36px;
     transform-origin: bottom;
     
-    transition: all 1s;
+    transition: all 0.2s;
 `;
 
 const Name = styled.div`
