@@ -20,7 +20,7 @@ function NavigatorMeter({ exercise, accuracy, time } : Props) {
 			<Speedo>
 				<Face value = { !accuracy ? '#FFFFFF' : accuracy > 0.8 ? '#32CD32' : accuracy > 0.5 ? '#FF8C01' :
 					'#d8464f' }>
-					<Needle value = { !accuracy ? '0' : accuracy > 0.8 ? '0.9' : accuracy > 0.5 ? '0.5' : '0.1' } />
+					<Needle value = { !accuracy ? '0' : accuracy > 0.8 ? '1' : accuracy > 0.5 ? '0.5' : '0' } />
 				</Face>
 			</Speedo>
 			<TimeBack></TimeBack>
