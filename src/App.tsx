@@ -1,5 +1,5 @@
 import isElectron from 'is-electron';
-import React, {useEffect, useState} from 'react';
+import React, {createContext, useEffect, useState} from 'react';
 import styled, { css } from 'styled-components';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { createRxDatabase, addRxPlugin, RxDatabase } from 'rxdb';
@@ -74,6 +74,16 @@ const Body = styled.div`
 	margin: 0px auto 0px auto;
 	padding: 20px 0px 0px 0px;
 `;
+
+export const themaColorContext = createContext({
+	color: {
+		dark: '#2C363F',
+		pink: '#E75A7C',
+		white: '#F2F5EA',
+		blue: '#48ACF0',
+		gray: 'gray',
+	},
+});
 
 function App() {
 	const devMode = true;
