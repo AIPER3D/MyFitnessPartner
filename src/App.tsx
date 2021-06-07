@@ -179,7 +179,7 @@ function App() {
 					</Route>
 					<Route path="/reset">
 						<ContainerWithoutMenu>
-							<Reset db={ db } setDB = { setDB } />
+							<Reset db={ db } setDB = { setDB } setNewMode = { setNewMode } />
 						</ContainerWithoutMenu>
 					</Route>
 					<Route path="/:route">

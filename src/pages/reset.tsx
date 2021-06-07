@@ -37,8 +37,8 @@ const Name = styled.p`
 `;
 
 const Box = styled.div`
-    width: 500px;
-    height: 50px;
+    width: 390px;
+    height: 110px;
     
     padding: 0px 50px 0px 20px;
     margin: 0px 20px 0px 20px;
@@ -56,9 +56,10 @@ const Box = styled.div`
 type PageProps = {
 	db: RxDatabase;
 	setDB: any;
+	setNewMode: any;
 };
 
-function Reset({ db, setDB } : PageProps) {
+function Reset({ db, setDB, setNewMode } : PageProps) {
 	async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
 
@@ -96,13 +97,14 @@ function Reset({ db, setDB } : PageProps) {
 		});
 
 		setDB(tdb);
+		setNewMode(true);
 		setRedirect(1);
 	}
 	const [redirect, setRedirect] = useState<number>(0);
 
 	if (redirect != 0) {
 		return (
-			<Redirect to={'/userNew'}/>
+			<Redirect to={'/'}/>
 		);
 	} else {
 		return (
