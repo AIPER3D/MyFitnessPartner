@@ -162,7 +162,7 @@ class RecordDTO {
     		return result.indexOf(item) === i;
     	});
 
-    	return result;
+    	return result.length;
     }
 
     async getExerciseDayRecord(date: number) {
