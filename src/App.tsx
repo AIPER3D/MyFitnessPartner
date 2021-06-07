@@ -158,13 +158,13 @@ function App() {
 					{ newMode ? (
 						<Route path="">
 							<ContainerWithoutMenu>
-								<UserNew db = { db } />
+								<UserNew db = { db } setNewMode = { setNewMode } />
 							</ContainerWithoutMenu>
 						</Route>
 					) : (<Route path="/new"></Route>)}
 					<Route path="/userNew">
 						<ContainerWithoutMenu>
-							<UserNew db = { db } />
+							<UserNew db = { db } setNewMode = { setNewMode } />
 						</ContainerWithoutMenu>
 					</Route>
 					<Route path="/userModify">
