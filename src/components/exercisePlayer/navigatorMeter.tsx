@@ -79,7 +79,7 @@ const Needle = styled.div.attrs((props : TimeProps) => ({
 		transform: `rotate(` + ((props.value * 180) - 90) + 'deg' + `)`,
 	},
 }))<TimeProps>`
-    width: 4px;
+    width: 8px;
     height: 120px;
     background: #2C363F;
     border-color: #2C363F;
@@ -88,7 +88,7 @@ const Needle = styled.div.attrs((props : TimeProps) => ({
     border-top-left-radius: 100%;
     border-top-right-radius: 100%;
     display: inline-block;
-    left: 38px;
+    left: 70px;
     position: absolute;
     top: -36px;
     transform-origin: bottom;
