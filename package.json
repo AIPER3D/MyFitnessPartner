@@ -6,13 +6,11 @@
   "homepage": "./",
   "dependencies": {
     "@emotion/react": "^11.1.5",
-    "@ffmpeg/ffmpeg": "^0.9.8",
     "@fortawesome/fontawesome-svg-core": "^1.2.35",
     "@fortawesome/free-solid-svg-icons": "^5.15.3",
     "@fortawesome/react-fontawesome": "^0.1.14",
     "@inlet/react-pixi": "^6.5.2",
     "@teachablemachine/pose": "^0.8.6",
-    "@tensorflow-models/mobilenet": "^2.1.0",
     "@tensorflow-models/posenet": "^2.2.2",
     "@tensorflow/tfjs": "^3.4.0",
     "@testing-library/jest-dom": "^5.11.4",
@@ -31,7 +29,6 @@
     "is-electron": "^2.2.0",
     "level": "^6.0.1",
     "moment": "^2.24.0",
-    "onnxjs": "^0.1.8",
     "pixi.js": "^6.0.2",
     "pouchdb-adapter-idb": "^7.2.2",
     "process": "^0.11.10",
@@ -88,8 +85,6 @@
     "@babel/plugin-proposal-class-properties": "^7.13.0",
     "@babel/plugin-proposal-object-rest-spread": "^7.13.8",
     "@babel/preset-typescript": "^7.12.1",
-    "@types/ndarray": "^1.0.8",
-    "@types/ndarray-ops": "^1.2.0",
     "@types/react-vis": "^1.11.6",
     "@types/sortablejs": "^1.10.6",
     "@typescript-eslint/eslint-plugin": "^4.15.2",
@@ -100,7 +95,6 @@
     "dotenv": "^8.2.0",
     "electron": "11.4.4",
     "electron-builder": "^22.10.5",
-    "electron-reload": "^1.5.0",
     "eslint": "^7.20.0",
     "eslint-config-google": "^0.14.0",
     "eslint-plugin-import": "^2.22.1",
@@ -113,5 +107,25 @@
     "webpack": "^4.44.2",
     "webpack-cli": "^4.5.0",
     "worker-loader": "^3.0.8"
+  },
+  "build": {
+    "extraFiles": [
+      {
+        "from": "files/models/teachable-machine",
+        "to": "files/models/teachable-machine",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "files",
+        "to": "files",
+        "filter": [
+          "*.db",
+          "videos/0.vd",
+          "thumbnails/0.im"
+        ]
+      }
+    ]
   }
 }
