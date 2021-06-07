@@ -21,7 +21,6 @@ import {
 	ExercisePlay,
 
 	DevMain,
-	Test,
 
 	UserNew,
 	UserModify,
@@ -188,9 +187,6 @@ function App() {
 						<ContainerWithMenu>
 							<Body>
 								<Switch>
-									<Route path="/test">
-										<Test db={ db }/>
-									</Route>
 									<Route path="/exerciseReady/:page">
 										<ExerciseReady db={ db }/>
 									</Route>

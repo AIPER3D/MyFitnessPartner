@@ -13,7 +13,6 @@ import ExerciseReady from './exerciseReady';
 import ExercisePlay from './exercisePlay';
 
 import DevMain from './dev/main';
-import Test from './test';
 
 import UserNew from './userNew';
 import UserModify from './userModify';
@@ -35,7 +34,6 @@ export {
 	ExercisePlay,
 
 	DevMain,
-	Test,
 
 	UserNew,
 	UserModify,

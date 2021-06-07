@@ -13,7 +13,6 @@ import { UserDTO } from '../db/DTO';
 import { UserDAO } from '../db/DAO';
 import { Webcam } from '../components/exercisePlayer';
 import DetectRTC from 'detectrtc';
-import { div } from 'ndarray-ops';
 import { render } from '@testing-library/react';
 
 
