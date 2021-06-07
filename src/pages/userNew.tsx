@@ -94,9 +94,10 @@ const Select = styled.select`
 
 type PageProps = {
 	db: RxDatabase;
+	setNewMode: any;
 };
 
-function UserNew({ db } : PageProps) {
+function UserNew({ db, setNewMode } : PageProps) {
 	const userDTO = new UserDTO();
 	const [redirect, setRedirect] = useState<number>(0);
 
@@ -153,6 +154,7 @@ function UserNew({ db } : PageProps) {
 		};
 		await userDTO.addUser(user);
 
+		setNewMode(false);
 		setRedirect(1);
 	}
 
