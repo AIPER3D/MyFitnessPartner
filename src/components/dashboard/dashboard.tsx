@@ -39,11 +39,22 @@ function Dashboard({db}: DashBoardProps) {
 		setRecords(await recordDTO.getAllRecords());
 	}
 	function yourCalory() {
+		let kcal;
 		if (user) {
 			if (user.gender === 'M') {
-				return (66.47 + (13.75 * user.weight) + (5* user.height) - (6.76 * user.age)).toFixed(1);
+				kcal = (66.47 + (13.75 * user.weight) + (5* user.height) - (6.76 * user.age)).toFixed(1);
+				if (Number(kcal) > 1557 && Number(kcal) < 1558) {
+					return '국노야...';
+				} else {
+					return kcal;
+				}
 			} else if (user.gender === 'F') {
-				return (655 + (9.6 * user.weight) + (1.8* user.height) - (4.7 * user.age)).toFixed(1);
+				kcal = (655 + (9.6 * user.weight) + (1.8* user.height) - (4.7 * user.age)).toFixed(1);
+				if (Number(kcal) > 1557 && Number(kcal) < 1558) {
+					return '국노야...';
+				} else {
+					return kcal;
+				}
 			}
 		}
 	}
