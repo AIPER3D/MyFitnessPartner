@@ -22,7 +22,7 @@ function createWindow() {
 			enableRemoteModule: false,
 			worldSafeExecuteJavaScript: true,
 			contextIsolation: false,
-			devTools: true,
+			devTools: false,
 		},
 	});
 
@@ -44,7 +44,7 @@ function createWindow() {
 	} else {
 		// 프로덕션 환경에서는 패키지 내부 리소스에 접근
 		win.loadFile(path.join(__dirname, '../build/index.html'));
-		// win.setMenu(null);
+		win.setMenu(null);
 	}
 }
 
