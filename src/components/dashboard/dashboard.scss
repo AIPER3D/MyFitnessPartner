@@ -5,6 +5,7 @@ main {
     background: #f3f4f6;
     grid-area: main;
     overflow-y: auto;
+    height: 100%;
     .main_container{
         padding: 20px 35px;
         .main_title{
