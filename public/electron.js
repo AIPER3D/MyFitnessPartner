@@ -30,6 +30,8 @@ function createWindow() {
 	win.show();
 	win.focus();
 
+	win.webContents.session.clearCache();
+
 	// win.loadURL(require('url').format({
 	// 	protocol: 'file',
 	// 	slashes: true,
