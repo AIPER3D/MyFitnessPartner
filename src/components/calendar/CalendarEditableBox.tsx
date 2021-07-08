@@ -39,7 +39,7 @@ function CalendarEditableBox({ memo, onRefresh, db } : Props) {
 	const editSave = () => { // 변경한 텍스트를 저장하는 함수이다.
 		setEditable(false);
 
-		if (text === '') {
+		if (text === '') { // 아무 정보도 없이 저장할 경우 삭제 말고는 가능하지 않아 PlaceHolder를 넣었음.
 			setText('Memo');
 		}
 		onChangeValue();
