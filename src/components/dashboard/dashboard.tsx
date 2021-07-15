@@ -11,6 +11,13 @@ import moment from 'moment';
 type DashBoardProps = {
 	db : RxDatabase;
 }
+
+/* 구현자: 김인환
+운동 기록에 대한 정보를 사용자가 일목요연하게 확인할 수 있는 컴포넌트가 필요하다고 생각하였다.
+기능만 구현한다고 해서, 사용자 친화적이지 않다면 실효성이 없기 때문임. 그래서 대시보드같은 구성의 컴포넌트가 적절하다고 생각해서 구현을 하였다.
+처음의 카드들에는 사용자의 정보를 바탕으로 한 기초대사량, 오늘 운동시간, 총 운동일을 보였고
+그 다음부턴 일주일 단위로 운동 정보 그래프, 운동 비율 등을 보여준다.
+*/
 function Dashboard({db}: DashBoardProps) {
 	const [recordDTO, setRecordDTO] = useState<RecordDTO>(new RecordDTO());
 	const [records, setRecords] = useState<RecordDAO[] | null>(null);
@@ -31,13 +38,18 @@ function Dashboard({db}: DashBoardProps) {
 		})();
 	}, [db]);
 
+	// 유저 정보를 가져온다.
 	async function getUser() {
 		setUser(await userDTO.getUser());
 	}
 
+	// 현재 프로그램에 저장된 모든 운동기록을 불러온다.
 	async function getRecord() {
 		setRecords(await recordDTO.getAllRecords());
 	}
+
+
+	// 유저의 키, 몸무게, 나이 정보를 바탕으로 기초대사량을 계산하는 함수이다. 추가적으로 이스터에그도 집어넣어뒀다.
 	function yourCalory() {
 		let kcal;
 		if (user) {
@@ -59,18 +71,23 @@ function Dashboard({db}: DashBoardProps) {
 		}
 	}
 
+	// 오늘 운동한 시간을 불러온다.
 	async function getExerciseTime() {
 		return await recordDTO.getTimeByDay(Number(moment().format('YYYYMMDD')));
 	}
 
+	// 총 운동 일자를 가져온다.
 	async function yourExerciseDay() {
 		return await recordDTO.getExerciseDay();
 	}
 
+	// 운동 종류에 대한 횟수를 가져온다.
 	async function yourExerciseRecord() {
 		return await recordDTO.getExerciseRecord();
 	}
 
+
+	// yourExerciseRecord 함수를 통해 불러온 운동 횟수 데이터가 elist에 저장이 됨. 비동기로 가져오기에 먼저 존재유무를 예외처리 하고 그 다음에 화면을 구성함.
 	function mostExercise() {
 		const cards = [];
 		if (elist) {
@@ -87,7 +104,7 @@ function Dashboard({db}: DashBoardProps) {
 		return cards;
 	}
 
-
+	// 도넛모양 표를 만들기 위해 사용한 API에서 범례 옵션이 없어 직접 만든 범례 생성 함수이다.
 	function generateLegend() {
 		const legend = [];
 		if (elist) {
