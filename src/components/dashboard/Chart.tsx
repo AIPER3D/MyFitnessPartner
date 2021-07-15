@@ -7,6 +7,10 @@ import moment from 'moment';
 type Props = {
 	db: RxDatabase;
 }
+
+/* 구현자 : 김인환
+react-vis API를 활용한 꺾은선 그래프 컴포넌트이다. 일주일 단위의 사용자 운동량을 나타내기 위해 사용하였음.
+*/
 function Chart({db}: Props) {
 	const recordDTO = new RecordDTO();
 	const [records, setRecords] = useState<number[] | null>(null);
@@ -25,6 +29,7 @@ function Chart({db}: Props) {
 
 		return result;
 	}
+	// 비동기 이기 때문에 데이터가 없는 상황을 가정하여 초기화를 하였다.
 	let Wdata = [
 		{ x: 0, y: 0},
 		{ x: 1, y: 0},
