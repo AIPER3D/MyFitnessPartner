@@ -34,19 +34,9 @@
 
 ## Usage
 
-### `npm install`
+### `yarn install`
 
-### `npm run watch`
-
-run wepback auto updater
-
-### `npm start`
-
-run react web application
-
-### `npm run electron:start`
-
-run react & electron application
+### `yarn electron:start`
 
 ### `npm run lint`
 
